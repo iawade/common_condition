@@ -71,6 +71,8 @@ venv/
 *.xml
 *.xml.gz
 *.out
+*temp
+*tmp
 
 # Ignore output directories
 results/
@@ -118,6 +120,8 @@ google-cloud-sdk/
 *.loco
 *.step1
 *.step2
+test_spa_output # something with no extension 
+*.index
 
 # Ignore specific analysis tool outputs
 *_filtered
@@ -132,3 +136,7 @@ google-cloud-sdk/
 # Keep README and metadata
 !README.md
 !*.gitignore
+
+# Ignore files without extensions
+*
+!*./
