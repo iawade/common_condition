@@ -1,0 +1,134 @@
+# Ignore common system files
+.DS_Store
+Thumbs.db
+
+# Ignore logs and temporary files
+*.log
+*.tmp
+*.bak
+*.swp
+*.swo
+*.~*
+
+# Ignore compiled files and binaries
+*.o
+*.so
+*.dll
+*.a
+*.dylib
+*.exe
+
+# Ignore Python cache and virtual environments
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+venv/
+.env
+
+# Ignore R cache files
+.Rhistory
+.Rproj.user/
+*.RData
+*.rds
+
+# Ignore large genomics files
+*.vcf
+*.vcf.gz
+*.bcf
+*.bcf.csi
+*.tbi
+*.csi
+*.bai
+*.bam
+*.bam.bai
+*.sam
+*.cram
+*.crai
+*.fasta
+*.fasta.gz
+*.fai
+*.fastq
+*.fastq.gz
+*.bed
+*.bim
+*.fam
+*.ped
+*.map
+*.nosex
+*.hh
+*gz
+
+# Ignore intermediate analysis files
+*.tsv
+*.tsv.gz
+*.csv
+*.csv.gz
+*.txt
+*.txt.gz
+*.json
+*.json.gz
+*.xml
+*.xml.gz
+*.out
+
+# Ignore output directories
+results/
+output/
+logs/
+plots/
+tmp/
+scratch/
+
+# Ignore Snakemake and Nextflow cache
+*.snakemake/
+work/
+.nextflow/
+.nextflow.log
+.nextflow.cache/
+
+# Ignore Conda environments
+*.conda
+*.env
+envs/
+*sif
+
+# Ignore cloud workflow files
+.dsub/
+.cloud/
+google-cloud-sdk/
+
+# Ignore Plink and GWAS-related files
+*.assoc
+*.linear
+*.logistic
+*.glm
+*.mhc
+*.ld
+*.clumped
+*.hh
+*.pheno
+
+# Ignore SAIGE and BOLT-LMM output
+*.varianceRatio.txt
+*.mtx*
+*.rda
+*.rds
+*.regenie
+*.loco
+*.step1
+*.step2
+
+# Ignore specific analysis tool outputs
+*_filtered
+*_subset
+*_processed
+*_normalized
+*_annotated
+*_sorted
+*_recalibrated
+*_realigned
+
+# Keep README and metadata
+!README.md
+!*.gitignore
