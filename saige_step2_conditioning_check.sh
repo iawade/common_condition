@@ -7,15 +7,12 @@
 # TO DO - we're going to make some kind of wrapper that tests a given gene on a given trait (ideally looping over all) 
 # I think there's about 70?
 
-## vscode - how to view MD preview as write
-
 ## python script for regions
 ## pull out common variants to condition on script
 ## wrapper script that performs spa test
 ## check everything is ready script??
 ## script where you put in gene, pairs and vcf and get loopin
 
-## check bucket,. etc - use the JSON - also female/male only runs
 
 ## coding regions only - prev script
 
@@ -32,7 +29,7 @@
 
 # probably should be testing in UKB...
 
-# filoter group file on ENSG - means spa test will run quick asf
+# filter group file on ENSG - means spa test will run quick asf
 
 # Input and output variables
 VCF="${1}" 
@@ -43,7 +40,9 @@ MODELFILE="$5"
 VARIANCERATIO="$6"
 SPARSEGRM="$7"
 SPARSEGRMID="${SPARSEGRM}.sampleIDs.txt"
-SUBSAMPLES="$8"
+GROUPFILE="$8"
+ANNOTATIONS="$9"
+CONDITION=$(cat "${10}")
 
 step2_SPAtests.R \
         --vcfFile=${VCF} \
@@ -56,7 +55,6 @@ step2_SPAtests.R \
         --varianceRatioFile=${VARIANCERATIO} \
         --sparseGRMFile=${SPARSEGRM} \
         --sparseGRMSampleIDFile=${SPARSEGRMID} \
-        --SampleFile=${SUBSAMPLES} \
         --LOCO=FALSE \
         --is_Firth_beta=TRUE \
         --SPAcutoff=0.5 \
