@@ -1,36 +1,5 @@
 #!/bin/bash
 
-# # Activate conda environment
-# conda activate biallelic_effects
-# source /home/jupyter/anaconda3/etc/profile.d/conda.sh
-
-# TO DO - we're going to make some kind of wrapper that tests a given gene on a given trait (ideally looping over all) 
-# I think there's about 70?
-
-## python script for regions
-## pull out common variants to condition on script
-## wrapper script that performs spa test
-## check everything is ready script??
-## script where you put in gene, pairs and vcf and get loopin
-
-
-## coding regions only - prev script
-
-## Need some inputs to test script with 
-
-# needs to be able to work w/ one chromosome or all chrom file
-## needs to be able to say - the gene isn't in this file - keep going or move on
-
-## chr1 vs 1 functionality
-# check condition format chrom:pos:ref:atl , chr:pos_ref/alt??
-
-## MVP
-# think about minimal inputs for step2 
-
-# probably should be testing in UKB...
-
-# filter group file on ENSG - means spa test will run quick asf
-
 # Input and output variables
 VCF="${1}" 
 OUT="${2}"
@@ -42,12 +11,13 @@ SPARSEGRM="$7"
 SPARSEGRMID="${SPARSEGRM}.sampleIDs.txt"
 GROUPFILE="$8"
 ANNOTATIONS="$9"
-CONDITION=$(cat "${10}")
+CONDITION=$(cat "${10}") 
+# no error thrown if condition string is empty
 
 step2_SPAtests.R \
         --vcfFile=${VCF} \
         --vcfFileIndex="${VCF}.csi"\
-        --vcfField="DS" \
+        --vcfField="GT" \
         --chrom="$CHR" \
         --minMAF=0 \
         --minMAC=${MIN_MAC} \
@@ -69,4 +39,11 @@ step2_SPAtests.R \
         --maxMAF_in_groupTest=0.0001,0.001,0.01 \
         --condition="$CONDITION" \
         --maxMissing=1 \
-        --impute_method="mean"
+        #--impute_method="mean"
+
+# Check if output file is empty
+if [[ ! -s "${OUT}" ]]; then
+    echo "No variants found for the gene on chromosome ${CHR}. Exiting gracefully."
+    touch "${OUT}"  # Ensure the file exists to prevent Snakemake errors
+    exit 0
+fi

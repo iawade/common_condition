@@ -1,23 +1,16 @@
 #!/bin/bash
 
 # Input parameters
-## input VCF could actually be many VCF
 INPUT_VCF="$1" # QC'd, needs GT's; single ancestry-group
 ENSEMBL_ID="$2" # Prevents any potential issues with gene symbols
 BP_DISTANCE="$3" # TODO Error handling / kb vs just the number
 MAF_COMMON="$4" 
 
-#  TODO make dynamic
 # Output files
-VARIANTS_LIST="variants_list.txt"
-VARIANTS_COMMA="variants_comma.txt"
+VARIANTS_LIST="${ENSEMBL_ID}_variants_list_for_conditioning.txt"
+VARIANTS_COMMA="${ENSEMBL_ID}_variants_string_for_conditioning.txt"
 
-# bcftools get variants up and downstream of coords by x bp pre and after
-# Then filter MAF 
-
-# Expand the BED regions for query
-## should make the expanded bed similarly dynamically names
-## TODO - at this point make it so gene expanded bed is only in coding regions instead of doing a double filter on a potentially v chunky VCF
+# Expand the BED regions for query and filter to coding regions
 EXPANDED_BED="expanded_regions.bed"
 awk -v BP_DISTANCE="$BP_DISTANCE" 'BEGIN {OFS="\t"} {
     start = $2 - BP_DISTANCE;
@@ -30,12 +23,10 @@ awk -v BP_DISTANCE="$BP_DISTANCE" 'BEGIN {OFS="\t"} {
 
     print $1, start, $2;  # Upstream region
     print $1, $3, end;    # Downstream region
-}' "$ENSEMBL_ID.bed" > "$EXPANDED_BED"
+}' "$ENSEMBL_ID.bed" | bedtools intersect -a stdin -b protein_coding_regions_hg38_no_padding_no_UTR_v47.bed > "$EXPANDED_BED"
 
-# TODO add multithreadedness option
 # Use bcftools to filter VCF by the expanded BED regions and MAF threshold
 bcftools view -R "$EXPANDED_BED" "$INPUT_VCF" |
-  bcftools view -R "protein_coding_regions_hg38_no_padding_no_UTR_v47.bed" |
   bcftools filter -i "MAF>$MAF_COMMON" |
   bcftools query -f '%CHROM\t%POS\t%REF\t%ALT\n' > "$VARIANTS_LIST"
 # Output for debugging and sanity checking
@@ -47,6 +38,6 @@ awk 'BEGIN {OFS=":"} {print $1,$2,$3,$4}' "$VARIANTS_LIST" |
   tr '\n' ',' | sed 's/,$/\n/' > "$VARIANTS_COMMA"
 
 # Cleanup temporary file
-rm "$EXPANDED_BED" - uncomment again just testing
+rm "$EXPANDED_BED"
 
 echo "String for --condition flag for SAIGE step 2 written to $VARIANTS_COMMA"

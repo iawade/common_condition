@@ -1,5 +1,7 @@
 import argparse
 from bioservices import BioMart
+import requests
+import sys
 
 def get_gene_coordinates(ensembl_id, assembly='GRCh38'):
     server = BioMart()
@@ -19,7 +21,11 @@ def get_gene_coordinates(ensembl_id, assembly='GRCh38'):
 
     # Execute the query
     xml_query = server.get_xml()
-    result = server.query(xmlq=xml_query)
+    try:
+        result = server.query(xmlq=xml_query)
+    except requests.exceptions.RequestException as e:
+        print(f"Error: Unable to connect to BioMart. The server may be down. Details: {e}", file=sys.stderr)
+        sys.exit(1)
 
     # Dynamically create the output filename
     output_file = f"{ensembl_id}.bed"
