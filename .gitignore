@@ -133,6 +133,8 @@ test_spa_output # something with no extension
 *_recalibrated
 *_realigned
 
+test_files/
+
 # Keep README and metadata
 !README.md
 !*.gitignore

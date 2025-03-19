@@ -19,3 +19,19 @@
 - **SAIGE**
 - **bedtools**
 - **biomart for Python**
+
+### Conda Environment Setup
+
+To create the Conda environment from the `brava_hits_common_condition_check_conda_env.yaml` file, follow these steps:
+
+### **Create the Conda Environment:**
+   - Run the following command to install the environment in your desired location:
+     ```bash
+     conda env create --prefix /path/to/your/envs/brava_hits_common_condition_check -f brava_hits_common_condition_check_conda_env.yaml
+     ```
+
+### **Activate the Environment:**
+   - Once the environment is created, activate it using the following command:
+     ```bash
+     conda activate /path/to/your/envs/brava_hits_common_condition_check
+     ```
