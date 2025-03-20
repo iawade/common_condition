@@ -111,7 +111,7 @@ rule identify_gene_start_stop:
     output:
         "{gene}.bed"
     shell:
-        "python scripts/biomart_start_end_query.py --ensembl_id {wildcards.gene}"
+        "python scripts/biomart_start_end_query.py --ensembl_id "{wildcards.gene}""
 
 rule id_variants_for_conditioning:
     input:
