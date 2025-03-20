@@ -139,6 +139,3 @@ test_files/
 !README.md
 !*.gitignore
 
-# Ignore files without extensions
-*
-!*./
