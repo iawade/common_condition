@@ -64,6 +64,7 @@ venv/
 *.tsv.gz
 *.csv
 *.csv.gz
+!gene_trait_pairs_for_conditioning.csv
 *.txt
 *.txt.gz
 *.json.gz
