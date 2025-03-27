@@ -133,7 +133,7 @@ rule filter_group_file:
         "{gene}_group_file.txt",
     shell:
         """
-        grep {wildcards.gene} {input[0]} > {output}
+        grep {wildcards.gene} {input[0]} > {output} || touch {output}
         """
 
 rule spa_tests_conditional:

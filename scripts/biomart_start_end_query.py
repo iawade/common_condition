@@ -2,8 +2,14 @@ import argparse
 from bioservices import BioMart
 import requests
 import sys
+import time
+import logging
 
-def get_gene_coordinates(ensembl_id, assembly='GRCh38'):
+# Configure logging to capture warnings from bioservices
+logging.basicConfig(level=logging.WARNING)
+logger = logging.getLogger('bioservices')
+
+def get_gene_coordinates(ensembl_id, assembly='GRCh38',  max_retries=5, retry_delay=5):
     server = BioMart()
 
     # Set the dataset and attributes
@@ -19,13 +25,45 @@ def get_gene_coordinates(ensembl_id, assembly='GRCh38'):
     # Add filter for the Ensembl gene ID
     server.add_filter_to_xml("ensembl_gene_id", ensembl_id)
 
-    # Execute the query
-    xml_query = server.get_xml()
-    try:
-        result = server.query(xmlq=xml_query)
-    except requests.exceptions.RequestException as e:
-        print(f"Error: Unable to connect to BioMart. The server may be down. Details: {e}", file=sys.stderr)
-        sys.exit(1)
+# Retry logic for handling Internal Server Errors or other exceptions
+    attempt = 0
+    while attempt < max_retries:
+        try:
+            # Execute the query
+            xml_query = server.get_xml()
+            result = server.query(xmlq=xml_query)
+
+# If result contains warning or error, log and retry
+            if isinstance(result, str) and "Internal Server Error" in result:
+                logger.warning(f"Warning from BioMart: {result}")
+                attempt += 1
+                if attempt < max_retries:
+                    print(f"Retrying... ({attempt}/{max_retries})")
+                    time.sleep(retry_delay)  # Wait before retrying
+                else:
+                    print("Max retries reached. Exiting.", file=sys.stderr)
+                    sys.exit(1)
+
+            # If we get a valid result, break the loop
+            elif result:
+                break
+            else:
+                raise ValueError("Received empty result from BioMart")
+
+        except requests.exceptions.RequestException as e:
+            # Catch request exceptions like connection errors
+            print(f"Error: Unable to connect to BioMart. The server may be down. Details: {e}", file=sys.stderr)
+            attempt += 1
+            if attempt < max_retries:
+                print(f"Retrying... ({attempt}/{max_retries})")
+                time.sleep(retry_delay)  # Wait before retrying
+            else:
+                print("Max retries reached. Exiting.", file=sys.stderr)
+                sys.exit(1)
+        except Exception as e:
+            # Catch other exceptions
+            print(f"An unexpected error occurred: {e}", file=sys.stderr)
+            sys.exit(1)
 
     # Dynamically create the output filename
     output_file = f"{ensembl_id}.bed"

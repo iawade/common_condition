@@ -19,6 +19,7 @@
 - **SAIGE**
 - **bedtools**
 - **biomart for Python**
+- **bcftools**: Note - see below
 
 ### Conda Environment Setup
 
@@ -35,3 +36,32 @@ To create the Conda environment from the `brava_hits_common_condition_check_cond
      ```bash
      conda activate /path/to/your/envs/brava_hits_common_condition_check
      ```
+
+### **Note on bcftools and libcrypto:**
+  
+- **libcrypto Symlink for Compatibility**: If you're encountering issues with `libcrypto`, you can create a symlink to bypass package conflicts when using bcftools with conda. Here's how you can create the symlink:
+
+  1. Locate the `libcrypto` library in your Conda environment:
+     ```bash
+     find /path/to/your/envs/brava_hits_common_condition_check/ -name "*libcrypto*"
+     ```
+  2. You should see something like this:
+     ```
+     /path/to/your/envs/brava_hits_common_condition_check/lib/libcrypto.so
+     /path/to/your/envs/brava_hits_common_condition_check/lib/libcrypto.so.3
+     ```
+  3. Create a symlink from `libcrypto.so.1.0.0` to the version available in your environment:
+     ```bash
+     ln -s /path/to/your/envs/brava_hits_common_condition_check/lib/libcrypto.so.3 /path/to/your/envs/brava_hits_common_condition_check/lib/libcrypto.so.1.0.0
+     ```
+  4. Verify the symlink:
+     ```bash
+     ls -l /path/to/your/envs/brava_hits_common_condition_check/lib/libcrypto.so.1.0.0
+     ```
+
+  This step ensures that the required version of `libcrypto` is linked correctly and avoids issues with package compatibility.
+
+- **Alternative**: If you already have `bcftools` installed in your system, you can simply load it (for example with `module load BCFtools`) and run the pipeline, bypassing the need to create the symlink.
+
+### **Software Handling:**
+   - The Conda environment handles all required software for the common conditioning pipeline.
