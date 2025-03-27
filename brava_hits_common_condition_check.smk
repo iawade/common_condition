@@ -145,7 +145,7 @@ rule spa_tests_conditional:
         lambda wildcards: [vf for vf in variance_files if wildcards.trait in vf],
         sparse_matrix,
         "{gene}_group_file.txt",
-        lambda wildcards: f"{wildcards.gene}_{distance}_{maf}_string.txt"
+        lambda wildcards: f"{wildcards.gene}_{distance}_{wildcards.maf}_string.txt"
     output:
         "{gene}_{trait}_{chrom}_saige_results_{maf}.txt"
     params:

@@ -8,7 +8,7 @@ MAF_COMMON="$4"
 THREADS="$5"
 
 # Output files
-VARIANTS_LIST="${ENSEMBL_ID}_${BP_DISTANCE}_${MAF_COMMON}_list.txt",
+VARIANTS_LIST="${ENSEMBL_ID}_${BP_DISTANCE}_${MAF_COMMON}_list.txt"
 VARIANTS_COMMA="${ENSEMBL_ID}_${BP_DISTANCE}_${MAF_COMMON}_string.txt"
 
 # Expand the BED regions for query and filter to coding regions
@@ -34,7 +34,7 @@ bcftools view --threads "$THREADS" -R "$EXPANDED_BED" "$INPUT_VCF" |
 
 # Use a temporary file for sorted output to avoid in-place modification
 SORTED_VARIANTS_LIST=$(mktemp)
-sort -u "$VARIANTS_LIST" > "$SORTED_VARIANTS_LIST"
+sort -V -u "$VARIANTS_LIST" > "$SORTED_VARIANTS_LIST"
 
 # Replace the original list with the sorted list
 mv "$SORTED_VARIANTS_LIST" "$VARIANTS_LIST"
