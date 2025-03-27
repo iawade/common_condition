@@ -147,7 +147,7 @@ rule spa_tests_conditional:
         "{gene}_group_file.txt",
         lambda wildcards: f"{wildcards.gene}_{distance}_{wildcards.maf}_string.txt"
     output:
-        "{gene}_{trait}_{chrom}_saige_results_{maf}.txt"
+        "saige_outputs/{gene}_{trait}_{chrom}_saige_results_{maf}.txt"
     params:
         min_mac=min_mac,
         annotations_to_include=annotations_to_include
@@ -160,7 +160,7 @@ rule spa_tests_conditional:
 rule combine_results:
     input:
         expand(
-            "{gene}_{trait}_{chrom}_saige_results_{maf}.txt",
+            "saige_outputs/{gene}_{trait}_{chrom}_saige_results_{maf}.txt",
             gene=[gene for gene, trait in valid_gene_trait_pairs],  # Use only valid genes
             trait=[trait for gene, trait in valid_gene_trait_pairs],  # Use only valid traits
             chrom=chromosomes,
