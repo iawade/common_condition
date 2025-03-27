@@ -5,6 +5,7 @@ INPUT_VCF="$1" # QC'd, needs GT's; single ancestry-group
 ENSEMBL_ID="$2" # Prevents any potential issues with gene symbols
 BP_DISTANCE="$3" # TODO Error handling / kb vs just the number
 MAF_COMMON="$4" 
+THREADS="$5"
 
 # Output files
 VARIANTS_LIST="${ENSEMBL_ID}_${BP_DISTANCE}_${MAF_COMMON}_list.txt",
@@ -26,18 +27,27 @@ awk -v BP_DISTANCE="$BP_DISTANCE" 'BEGIN {OFS="\t"} {
 }' "$ENSEMBL_ID.bed" | bedtools intersect -a stdin -b protein_coding_regions_hg38_no_padding_no_UTR_v47.bed > "$EXPANDED_BED"
 
 # Use bcftools to filter VCF by the expanded BED regions and MAF threshold
-bcftools view -R "$EXPANDED_BED" "$INPUT_VCF" |
-  bcftools filter -i 'MAC > 40 || MAF > $MAF_COMMON' |
-  bcftools query -f '%CHROM\t%POS\t%REF\t%ALT\n' > "$VARIANTS_LIST"
-# Output for debugging and sanity checking
+# Using && which is the same as max(MAC > 40, MAF > $MAF_COMMON) ; unless I'm losing the plot
+bcftools view --threads "$THREADS" -R "$EXPANDED_BED" "$INPUT_VCF" |
+  bcftools filter --threads "$THREADS" -i 'MAC > 40 && MAF > $MAF_COMMON' |
+  bcftools query --threads "$THREADS" -f '%CHROM\t%POS\t%REF\t%ALT\n' >> "$VARIANTS_LIST"
 
+# Use a temporary file for sorted output to avoid in-place modification
+SORTED_VARIANTS_LIST=$(mktemp)
+sort -u "$VARIANTS_LIST" > "$SORTED_VARIANTS_LIST"
+
+# Replace the original list with the sorted list
+mv "$SORTED_VARIANTS_LIST" "$VARIANTS_LIST"
+
+# Output for debugging and sanity checking
 echo "Variant list written to $VARIANTS_LIST"
 
 # Convert the variants list into a comma-separated format for SAIGE conditioning flag
-awk 'BEGIN {OFS=":"} {print $1,$2,$3,$4}' "$VARIANTS_LIST" |
-  tr '\n' ',' | sed 's/,$/\n/' > "$VARIANTS_COMMA"
+TEMP_COMMA_FILE=$(mktemp)
+awk 'BEGIN {ORS=","} {print $1,$2,$3,$4}' "$VARIANTS_LIST" > "$TEMP_COMMA_FILE"
+sed 's/,$/\n/' "$TEMP_COMMA_FILE" > "$VARIANTS_COMMA"
 
-# Cleanup temporary file
-rm "$EXPANDED_BED"
+# Cleanup temporary files
+rm "$EXPANDED_BED" "$TEMP_COMMA_FILE"
 
 echo "String for --condition flag for SAIGE step 2 written to $VARIANTS_COMMA"

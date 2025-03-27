@@ -122,18 +122,10 @@ rule id_variants_for_conditioning:
         "{gene}_{distance}_{maf}_string.txt"
     params:
         distance=distance,
-        maf=maf
+        threads=config[threads]
     shell:
         """
-        # Check if the gene exists in the VCF file using zgrep (for compressed VCFs)
-        if zgrep -q {wildcards.gene} {input[0]}; then
-            # If gene is found, run the conditioning script
-            bash scripts/id_variants_for_common_variant_conditioning.sh {input[0]} {wildcards.gene} {params.distance} {params.maf}
-        else
-            # If no match is found, just skip the job without producing output
-            echo "No variants found for {wildcards.gene} in {input[0]}, skipping job."
-            exit 0  # Exit without error, no output files are created
-        fi
+        bash scripts/id_variants_for_common_variant_conditioning.sh {input[0]} {wildcards.gene} {params.distance} {wildcards.maf} {params.threads}
         """
 
 rule filter_group_file:
@@ -155,7 +147,7 @@ rule spa_tests_conditional:
         "{gene}_group_file.txt",
         lambda wildcards: f"{wildcards.gene}_{distance}_{maf}_string.txt"
     output:
-        "{gene}_{trait}_{chrom}_saige_results.txt"
+        "{gene}_{trait}_{chrom}_saige_results_{maf}.txt"
     params:
         min_mac=min_mac,
         annotations_to_include=annotations_to_include
@@ -168,10 +160,11 @@ rule spa_tests_conditional:
 rule combine_results:
     input:
         expand(
-            "{gene}_{trait}_{chrom}_saige_results.txt",
+            "{gene}_{trait}_{chrom}_saige_results_{maf}.txt",
             gene=[gene for gene, trait in valid_gene_trait_pairs],  # Use only valid genes
             trait=[trait for gene, trait in valid_gene_trait_pairs],  # Use only valid traits
             chrom=chromosomes,
+            maf=config["maf"]
         )
     output:
         "brava_conditional_analysis_results.txt",

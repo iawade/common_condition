@@ -14,7 +14,10 @@ phenotype_json: "pilot_phenotypes.json"
 
 # id_variants_for_conditioning 
 distance: 4000000
-maf: 0.05
+maf:
+  - 0.01
+  - 0.001
+threads: 8 
 
 # rule spa_tests_conditional
 min_mac: 4
