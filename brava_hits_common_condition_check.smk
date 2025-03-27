@@ -122,7 +122,7 @@ rule id_variants_for_conditioning:
         "{gene}_{distance}_{maf}_string.txt"
     params:
         distance=distance,
-        threads=config[threads]
+        threads=config["threads"]
     shell:
         """
         bash scripts/id_variants_for_common_variant_conditioning.sh {input[0]} {wildcards.gene} {params.distance} {wildcards.maf} {params.threads}
