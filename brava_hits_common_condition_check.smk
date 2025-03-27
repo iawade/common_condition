@@ -102,8 +102,8 @@ print(f"Loaded {len(valid_gene_trait_pairs)} gene-trait pairs.")
 
 # Define chromosome list
 # do not commit this
-chromosomes = [f"chr{i}" for i in range(1, 23)]
-print(f"Chromosomes: {chromosomes}")
+# chromosomes = [f"chr{i}" for i in range(1, 23)]
+# print(f"Chromosomes: {chromosomes}")
 
 # Target Rule for Completion of Pipeline
 rule all:
@@ -150,23 +150,22 @@ rule spa_tests_conditional:
         "{gene_trait}_group_file.txt",  # Group file based on gene_trait
         lambda wildcards: f"{wildcards.gene_trait}_{distance}_{wildcards.maf}_string.txt"  # String file per gene_trait pair
     output:
-        "saige_outputs/{gene_trait}_{chrom}_saige_results_{maf}.txt"  # Output based on gene_trait format
+        "saige_outputs/{gene_trait}_saige_results_{maf}.txt"  # Output based on gene_trait format
     params:
         min_mac=min_mac,
         annotations_to_include=annotations_to_include
     shell:
         """
         bash scripts/saige_step2_conditioning_check.sh \
-         {input[0]} {output} {wildcards.chrom} {params.min_mac} {input[1]} {input[2]} {input[3]} {input[4]} {params.annotations_to_include} {input[5]}
+         {input[0]} {output} {params.min_mac} {input[1]} {input[2]} {input[3]} {input[4]} {params.annotations_to_include} {input[5]}
         """
 
 rule combine_results:
     input:
         expand(
-            "saige_outputs/{gene_trait}_{chrom}_saige_results_{maf}.txt",  # Use gene_trait instead of gene and trait
+            "saige_outputs/{gene_trait}_saige_results_{maf}.txt",  # Use gene_trait instead of gene and trait
             gene_trait=[gene_trait for gene_trait in valid_gene_trait_pairs],  # Use valid gene_trait pairs
-            maf=config["maf"],
-            chrom=chromosomes
+            maf=config["maf"]
         )
     output:
         "brava_conditional_analysis_results.txt",
