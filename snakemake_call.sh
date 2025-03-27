@@ -8,6 +8,7 @@ mkdir -p saige_outputs
 # Run Snakemake with the specified options
 echo "Starting a run of Snakemake workflow..."
 snakemake --snakefile "$WORKFLOW_FILE" --cores 1 --jobs 1 --max-status-checks-per-second 0.01 \
+	-n \
     2>&1 | tee snakemake_run.log 
 
 echo "Run complete."	
