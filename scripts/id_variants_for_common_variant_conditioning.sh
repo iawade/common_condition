@@ -29,7 +29,7 @@ awk -v BP_DISTANCE="$BP_DISTANCE" 'BEGIN {OFS="\t"} {
 # Use bcftools to filter VCF by the expanded BED regions and MAF threshold
 # Using && which is the same as max(MAC > 40, MAF > $MAF_COMMON) ; unless I'm losing the plot
 bcftools view --threads "$THREADS" -R "$EXPANDED_BED" "$INPUT_VCF" |
-  bcftools filter --threads "$THREADS" -i 'MAC > 40 && MAF > $MAF_COMMON' |
+  bcftools filter --threads "$THREADS" -i "MAC > 40 && MAF > $MAF_COMMON" |
   bcftools query -f '%CHROM\t%POS\t%REF\t%ALT\n' >> "$VARIANTS_LIST"
 
 # Use a temporary file for sorted output to avoid in-place modification
