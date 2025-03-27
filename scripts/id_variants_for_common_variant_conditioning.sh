@@ -27,7 +27,7 @@ awk -v BP_DISTANCE="$BP_DISTANCE" 'BEGIN {OFS="\t"} {
 
 # Use bcftools to filter VCF by the expanded BED regions and MAF threshold
 bcftools view -R "$EXPANDED_BED" "$INPUT_VCF" |
-  bcftools filter -i "MAF>$MAF_COMMON" |
+  bcftools filter -i 'MAC > 40 || MAF > $MAF_COMMON' |
   bcftools query -f '%CHROM\t%POS\t%REF\t%ALT\n' > "$VARIANTS_LIST"
 # Output for debugging and sanity checking
 
