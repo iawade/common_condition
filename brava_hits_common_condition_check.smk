@@ -115,7 +115,7 @@ rule identify_gene_start_stop:
 
 rule id_variants_for_conditioning:
     input:
-        lambda wildcards: [vcf for vcf in vcf_files if wildcards.gene in vcf],  # Ensure gene matches
+        lambda wildcards: vcf_files,
         "{gene}.bed"
     output:
         "{gene}_{distance}_{maf}_list.txt",
@@ -124,7 +124,17 @@ rule id_variants_for_conditioning:
         distance=distance,
         maf=maf
     shell:
-        "bash scripts/id_variants_for_common_variant_conditioning.sh {input[0]} {wildcards.gene} {params.distance} {params.maf}"
+        """
+        # Check if the gene exists in the VCF file using zgrep (for compressed VCFs)
+        if zgrep -q {wildcards.gene} {input[0]}; then
+            # If gene is found, run the conditioning script
+            bash scripts/id_variants_for_common_variant_conditioning.sh {input[0]} {wildcards.gene} {params.distance} {params.maf}
+        else
+            # If no match is found, just skip the job without producing output
+            echo "No variants found for {wildcards.gene} in {input[0]}, skipping job."
+            exit 0  # Exit without error, no output files are created
+        fi
+        """
 
 rule filter_group_file:
     input:

@@ -7,8 +7,8 @@ BP_DISTANCE="$3" # TODO Error handling / kb vs just the number
 MAF_COMMON="$4" 
 
 # Output files
-VARIANTS_LIST="${ENSEMBL_ID}_variants_list_for_conditioning.txt"
-VARIANTS_COMMA="${ENSEMBL_ID}_variants_string_for_conditioning.txt"
+VARIANTS_LIST="${ENSEMBL_ID}_${BP_DISTANCE}_${MAF_COMMON}_list.txt",
+VARIANTS_COMMA="${ENSEMBL_ID}_${BP_DISTANCE}_${MAF_COMMON}_string.txt"
 
 # Expand the BED regions for query and filter to coding regions
 EXPANDED_BED="expanded_regions_${ENSEMBL_ID}.bed"
