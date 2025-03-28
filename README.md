@@ -67,4 +67,6 @@ To create the Conda environment from the `brava_hits_common_condition_check_cond
    - The Conda environment handles all required software for the common conditioning pipeline.
 
 
-   examples of inputs
+# TODO
+* examples of inputs
+* how to run
