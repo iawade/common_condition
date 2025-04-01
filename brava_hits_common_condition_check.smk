@@ -43,6 +43,11 @@ traits = set(gene_trait_pairs_df.iloc[:, 1])  # Second column as trait
 genes = sorted(genes)
 traits = sorted(traits)
 
+print(f"Loaded {len(genes)} stable gene ID's from JSON.")
+
+# Debugging: Print phenotype IDs
+print(f"Stable gene IDs from JSON: {genes}")
+
 # Load the phenotype data from JSON and store phenotype_IDs
 with open(phenotype_json) as f:
     phenotype_data = json.load(f)
@@ -76,39 +81,23 @@ for pid in phenotype_ids:  # phenotype IDs from JSON
     if trait_in_model and trait_in_variance:
         available_traits.add(pid)  # Store the phenotype ID instead of an incorrect trait name
 
-# Debugging: Print traits that passed filtering
-print(f"Available traits after filtering: {available_traits}")
-
-# Store valid gene-trait pairs as tuples
-valid_gene_trait_pairs = {(gene, trait) for gene, trait in zip(gene_trait_pairs_df.iloc[:, 0], gene_trait_pairs_df.iloc[:, 1]) if trait in available_traits}
+# Store valid gene-trait pairs as a list
+valid_gene_trait_pairs = [f"{gene}_{trait}" for gene, trait in zip(gene_trait_pairs_df.iloc[:, 0], gene_trait_pairs_df.iloc[:, 1]) if trait in available_traits]
 
 # Debugging: Print valid gene-trait pairs
 print(f"Filtered {len(valid_gene_trait_pairs)} gene-trait pairs with available model/variance files.")
 print(f"Valid gene-trait pairs: {valid_gene_trait_pairs}")
-
-# Debugging: Print traits that passed filtering
-print(f"Available traits after filtering: {available_traits}")
-
-# Store valid gene-trait pairs as tuples
-# valid_gene_trait_pairs = {(gene, trait) for gene, trait in zip(gene_trait_pairs_df.iloc[:, 0], gene_trait_pairs_df.iloc[:, 1]) if trait in available_traits}
-# Store valid gene-trait pairs as strings
-valid_gene_trait_pairs = {f"{gene}_{trait}" for gene, trait in zip(gene_trait_pairs_df.iloc[:, 0], gene_trait_pairs_df.iloc[:, 1]) if trait in available_traits}
-
-# Debugging: Print valid gene-trait pairs
-print(f"Filtered {len(valid_gene_trait_pairs)} gene-trait pairs with available model/variance files.")
-print(f"Valid gene-trait pairs: {valid_gene_trait_pairs}")
-
-print(f"Loaded {len(valid_gene_trait_pairs)} gene-trait pairs.")
-
-# Define chromosome list
-# do not commit this
-# chromosomes = [f"chr{i}" for i in range(1, 23)]
-# print(f"Chromosomes: {chromosomes}")
 
 # Target Rule for Completion of Pipeline
 rule all:
     input:
-        "brava_conditional_analysis_results.txt"
+        expand("{gene}_{distance}_{maf}_string.txt", 
+        gene=genes, distance=config["distance"], maf=config["maf"]),
+        expand("{gene}_group_file.txt", gene=genes),
+        expand("saige_outputs/{gene_trait}_{distance}_saige_results_{maf}.txt",
+               gene_trait=valid_gene_trait_pairs,
+               distance=config["distance"],
+               maf=config["maf"])
 
 rule identify_gene_start_stop:
     output:
@@ -119,7 +108,7 @@ rule identify_gene_start_stop:
 rule id_variants_for_conditioning:
     input:
         lambda wildcards: vcf_files,
-        "{gene}.bed"
+        "{gene}.bed" 
     output:
         "{gene}_{distance}_{maf}_list.txt",
         "{gene}_{distance}_{maf}_string.txt"
@@ -135,22 +124,22 @@ rule filter_group_file:
     input:
         group_file,
     output:
-        "{gene}_group_file.txt",
+        "{gene}_group_file.txt"
     shell:
-        """
+        """bash 
         grep {wildcards.gene} {input[0]} > {output} || touch {output}
         """
 
 rule spa_tests_conditional:
     input:
         lambda wildcards: vcf_files,
-        lambda wildcards: [mf for mf in model_files if f"{wildcards.gene_trait}" in valid_gene_trait_pairs],  # Check gene_trait format
-        lambda wildcards: [vf for vf in variance_files if f"{wildcards.gene_trait}" in valid_gene_trait_pairs],  # Check gene_trait format
+        lambda wildcards: [mf for mf in model_files if wildcards.trait in mf],  
+        lambda wildcards: [vf for vf in variance_files if wildcards.trait in vf],    
         sparse_matrix,
-        "{gene_trait}_group_file.txt",  # Group file based on gene_trait
-        lambda wildcards: f"{wildcards.gene_trait}_{distance}_{wildcards.maf}_string.txt"  # String file per gene_trait pair
+        "{gene}_group_file.txt",
+        "{gene}_{distance}_{maf}_string.txt"
     output:
-        "saige_outputs/{gene_trait}_saige_results_{maf}.txt"  # Output based on gene_trait format
+        "saige_outputs/{gene}_{trait}_{distance}_saige_results_{maf}.txt" 
     params:
         min_mac=min_mac,
         annotations_to_include=annotations_to_include
@@ -163,13 +152,10 @@ rule spa_tests_conditional:
 rule combine_results:
     input:
         expand(
-            "saige_outputs/{gene_trait}_saige_results_{maf}.txt",  # Use gene_trait instead of gene and trait
-            gene_trait=[gene_trait for gene_trait in valid_gene_trait_pairs],  # Use valid gene_trait pairs
-            maf=config["maf"]
+            "saige_outputs/{gene_trait}_saige_results_{maf}.txt", gene_trait=valid_gene_trait_pairs, maf=config["maf"]
         )
     output:
         "brava_conditional_analysis_results.txt",
-    params:
     shell:
         """
         cat {input} > {output}
