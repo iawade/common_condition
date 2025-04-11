@@ -1,4 +1,4 @@
-# Snakemake Pipeline for BRaVa Pilot Study Common Variant Conditioninal Analysis
+# Snakemake Pipeline for BRaVa Pilot Study Common Variant Conditional Analysis
 
 configfile: "config.yaml"
 
@@ -117,7 +117,9 @@ rule id_variants_for_conditioning:
         threads=config["threads"]
     shell:
         """
-        bash scripts/id_variants_for_common_variant_conditioning.sh {input[0]} {wildcards.gene} {params.distance} {wildcards.maf} {params.threads}
+        for vcf in {input[0]}; do
+            bash scripts/id_variants_for_common_variant_conditioning.sh $vcf {wildcards.gene} {params.distance} {wildcards.maf} {params.threads}
+        done
         """
 
 rule filter_group_file:
@@ -145,8 +147,10 @@ rule spa_tests_conditional:
         annotations_to_include=annotations_to_include
     shell:
         """
-        bash scripts/saige_step2_conditioning_check.sh \
-         {input[0]} {output} {params.min_mac} {input[1]} {input[2]} {input[3]} {input[4]} {params.annotations_to_include} {input[5]}
+        for vcf in {input[0]}; do
+            bash scripts/saige_step2_conditioning_check.sh \
+                $vcf {output} {params.min_mac} {input[1]} {input[2]} {input[3]} {input[4]} {params.annotations_to_include} {input[5]}
+        done
         """
 
 rule combine_results:

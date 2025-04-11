@@ -81,7 +81,8 @@
    - VCFs with all samples and sites for analysis included, including individual genotypes
    - Please remember to use a quality-controlled VCF that **still includes common variants**
    - **VCFs must have a `.csi` index**, located in the same place within the file structure as the/each VCF
-   - Multiple (can be as many as you want/have, not just per chromosome) or a single VCF are supported. Either option requires a file with the location of VCF[s]
+   - **Please make sure values/names in VCF `CHROM` column match those in the bed file**: i.e. "chr1" instead of "1", "CM000663.2", "NC_000001.11" or something even more esoteric
+   - Multiple (Although I don't think/know if it will work if VCFs are chunked into multiple VCFs per chromosome) or a single VCF are supported. Either option requires a file with the location of VCF[s]
       > #### `config.yaml`
       > ```yaml
       > list_of_vcf_files: "vcf_list.txt"
@@ -89,8 +90,11 @@
       
       > #### `vcf_list.txt`
       > ```
-      > test_files/10_european.strict_filtered_chr22.vcf.bgz
-      > test_files/10_european.strict_filtered_chr21.vcf.bgz
+      > test_files/QC_applied_common_variants_present_chr21.vcf.bgz
+      > or
+      > ...
+      > test_files/QC_applied_common_variants_present_chr1.vcf.bgz
+      > test_files/QC_applied_common_variants_present_chr2.vcf.bgz
       > ```
 
 6. **Sparse GRM**
@@ -109,7 +113,7 @@ hmm no - because Id'ing the common vars
 ### Required Software
 - **SAIGE**
 - **bedtools**
-- **biomart for Python**
+- **BioMart for Python**
 - **bcftools**
 
 #### **Software Handling:**
