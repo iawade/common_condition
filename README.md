@@ -2,71 +2,188 @@
 
 ## Prerequisites
 
-### Required Files
-- **JSON File**: Contains model and variance data for each trait. Each trait's files must be named according to the `phenotype_ID` field in the provided JSON.
-- **Protein-Coding Regions BED File**: Use your own or generate one with `bedtools`:
-  ```sh
-  wget -O - "http://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_47/gencode.v47.annotation.gtf.gz" |\
-  gunzip -c | grep 'transcript_type "protein_coding"' |\
-  awk '($3=="exon") {printf("%s\t%s\t%s\n",$1,int($4)-1,$5);}' |\
-  sort -T . -V -t $'\t' -k1,1 -k2,2n | bedtools merge > protein_coding_regions_hg38_no_padding_no_UTR_v47.bed
-  ```
-- **Model and Variance Ratio Files**: Previously generated and named with `phenotype_ID`, stored in the main directory.
-- **QC’d Group File**: Contains annotated variants from prior analyses.
-- **QC’d VCF with Genotypes**: The same VCF used in prior analysis, with a `.csi` index.
+### Required Files and Config Set up
+1. **JSON File**
+   - Provided in this repo (no option/entry/key in config file), looks like:
+      > #### `pilot_phenotypes.json`
+      > ```json
+      > {
+      > "phenotype": "Age-related macular degeneration",
+      > "sex_specific_run": "",
+      > "phenotype_ID": "AMD",
+      > "definition": "ICD_Phecode",
+      > "trait_type": "binary",
+      > "invnormalise": "FALSE",
+      > "tol": 0.02
+      > },
+
+2. **Protein-Coding Regions BED File**
+   - Use your own (provided the **Gencode** version is **v39** for consistency with the main pilot analysis) or generate one with `bedtools`:
+      
+      > #### `command-line/sh/zsh`
+      > ```sh
+      > wget -O - "http://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_39/gencode.v39.annotation.gtf.gz" |\
+      > gunzip -c | grep 'transcript_type "protein_coding"' |\
+      > awk '($3=="exon") {printf("%s\t%s\t%s\n",$1,int($4)-1,$5);}' |\
+      > sort -T . -V -t $'\t' -k1,1 -k2,2n | bedtools merge > protein_coding_regions_hg38_no_padding_no_UTR_v39.bed
+      > ```
+
+   - Looks like:
+      > #### `protein_coding_regions_hg38_no_padding_no_UTR_v39.bed`
+      > ```
+      > chr1    65418   65433
+      > chr1    65519   65573
+      > chr1    69036   71585
+      > chr1    450739  451678
+      > chr1    685715  686654
+      > ```
+
+3. **Model and Variance Ratio Files**
+   - GMMAT model files (given `.rda` extension by default in SAIGE step1) from prior BRaVa pilot analysis
+   - Variance ratio files (given `varianceRatio.txt` extension in SAIGE step1)
+   - The config file (config.yaml) has keys/entries for a list of model files and variance ratio files to be used, locations relative to where the pipeline is being run from - change input name as needed
+      > #### `config.yaml`
+      > ```yaml
+      > list_of_model_files: "model_file_list.txt"
+      > variance_ratio_file: "variance_file_list.txt"
+      > ```
+   - **The pipeline expects files to be named based on the phenotype/trait ID's** from the BRaVa pilot analysis nominate phenotypes sheet. These ID's are provided for you as in the phenotype_ID fields in the JSON. That string just needs to be anywhere in the filenames provided for example:
+      > #### `variance_file_list.txt`
+      > ```txt
+      > test_files/TG.varianceRatio.txt
+      > test_files/Urolith.varianceRatio.txt
+      > test_files/but_they_can_be_AMD_called_anything.extension
+      > ```
+
+      > #### `model_file_list.txt`
+      > ```txt
+      > test_files/TG.rda  
+      > test_files/Urolith.rda
+      > ```
+       
+4. **QC’d Group File**
+   - Contains annotated variants used for the pilot analysis
+   - The pipeline currently only supports one group file - if previously split by chromosome please concatenate together
+   - Two lines per gene, one with a space-delineated list of variants, followed by the corresponding annotations:
+      > #### `group file (name and extension are unimportant)`
+      > ```
+      > ENSG00000172967 var chr22:16783569:T:A chr22:16783577:A:G chr22:16783578:G:A chr22:16783579:C:T 
+      > ENSG00000172967 anno non_coding synonymous pLoF damaging_missense
+      > ```
+   
+      > #### `config.yaml`
+      > ```yaml
+      > group_file: "test_files/group_file.txt"
+      > ```
+      
+
+5. **QC’d VCF with Genotypes**
+   - VCFs with all samples and sites for analysis included, including individual genotypes
+   - Please remember to use a quality-controlled VCF that **still includes common variants**
+   - **VCFs must have a `.csi` index**, located in the same place within the file structure as the/each VCF
+   - Multiple (can be as many as you want/have, not just per chromosome) or a single VCF are supported. Either option requires a file with the location of VCF[s]
+      > #### `config.yaml`
+      > ```yaml
+      > list_of_vcf_files: "vcf_list.txt"
+      > ```
+      
+      > #### `vcf_list.txt`
+      > ```
+      > test_files/10_european.strict_filtered_chr22.vcf.bgz
+      > test_files/10_european.strict_filtered_chr21.vcf.bgz
+      > ```
+
+6. **Sparse GRM**
+   - From previous analyses you should have a sparse genetic relationship matrix generated by SAIGE step0 for the individuals included in the analysis. This is required for speeding up the conditional analysis in this pipeline
+      > #### `config.yaml`
+      > ```yaml
+      > sparse_matrix: "test_files/test.sparseGRM.mtx"
+      > ```
+
+TODO:
+note on plink
+I think i'll get them to keep everything the same but provide a list of .bed or .pgen that will get converted or used in saige with a different flag
+hmm no - because Id'ing the common vars
+
 
 ### Required Software
 - **SAIGE**
 - **bedtools**
 - **biomart for Python**
-- **bcftools**: Note - see below
+- **bcftools**
 
-### Conda Environment Setup
+#### **Software Handling:**
+   - You can either independently install the required software or use the conda environment provided in this repo 
+   - The conda environment handles all required software for the common conditioning pipeline.
+
+#### Conda Environment Setup
 
 To create the Conda environment from the `brava_hits_common_condition_check_conda_env.yaml` file, follow these steps:
 
-### **Create the Conda Environment:**
+##### **Activate Conda:**
+   - Activate Conda (double-check with your system admin if unsure)
+   - For example you can activate with:
+      > ```bash
+      > eval "$(conda shell.bash hook)"
+      > ```
+   - Or on some systems:
+      > ```bash
+      > "/opt/software/applications/anaconda/3/etc/profile.d/conda.sh"
+      > ```
+
+##### **Create the Conda Environment:**
    - Run the following command to install the environment in your desired location:
-     ```bash
-     conda env create --prefix /path/to/your/envs/brava_hits_common_condition_check -f brava_hits_common_condition_check_conda_env.yaml
-     ```
+     > ```bash
+     > conda env create --prefix /path/to/your/envs/brava_hits_common_condition_check -f brava_hits_common_condition_check_conda_env.yaml
+     > ```
 
-### **Activate the Environment:**
+##### **Activate the Environment:**
    - Once the environment is created, activate it using the following command:
-     ```bash
-     conda activate /path/to/your/envs/brava_hits_common_condition_check
-     ```
+     > ```bash
+     > conda activate /path/to/your/envs/brava_hits_common_condition_check
+     > ```
 
-### **Note on bcftools and libcrypto:**
+##### **Note on bcftools and libcrypto (especially if using provided Conda environment):**
   
 - **libcrypto Symlink for Compatibility**: If you're encountering issues with `libcrypto`, you can create a symlink to bypass package conflicts when using bcftools with conda. Here's how you can create the symlink:
 
   1. Locate the `libcrypto` library in your Conda environment:
-     ```bash
-     find /path/to/your/envs/brava_hits_common_condition_check/ -name "*libcrypto*"
-     ```
+     > ```bash
+     > find /path/to/your/envs/brava_hits_common_condition_check/ -name "*libcrypto*"
+     > ```
   2. You should see something like this:
-     ```
-     /path/to/your/envs/brava_hits_common_condition_check/lib/libcrypto.so
-     /path/to/your/envs/brava_hits_common_condition_check/lib/libcrypto.so.3
-     ```
+     > ```
+     > /path/to/your/envs/brava_hits_common_condition_check/lib/libcrypto.so
+     > /path/to/your/envs/brava_hits_common_condition_check/lib/libcrypto.so.3
+     > ```
   3. Create a symlink from `libcrypto.so.1.0.0` to the version available in your environment:
-     ```bash
-     ln -s /path/to/your/envs/brava_hits_common_condition_check/lib/libcrypto.so.3 /path/to/your/envs/brava_hits_common_condition_check/lib/libcrypto.so.1.0.0
-     ```
+     > ```bash
+     > ln -s /path/to/your/envs/brava_hits_common_condition_check/lib/libcrypto.so.3 /path/to/your/envs/brava_hits_common_condition_check/lib/libcrypto.so.1.0.0
+     > ```
   4. Verify the symlink:
-     ```bash
-     ls -l /path/to/your/envs/brava_hits_common_condition_check/lib/libcrypto.so.1.0.0
-     ```
+     > ```bash
+     > ls -l /path/to/your/envs/brava_hits_common_condition_check/lib/libcrypto.so.1.0.0
+     > ```
 
   This step ensures that the required version of `libcrypto` is linked correctly and avoids issues with package compatibility.
 
 - **Alternative**: If you already have `bcftools` installed in your system, you can simply load it (for example with `module load BCFtools`) and run the pipeline, bypassing the need to create the symlink.
 
-### **Software Handling:**
-   - The Conda environment handles all required software for the common conditioning pipeline.
+## Running the SnakeMake pipeline
+- Once everything is set up, running should be relatively straightforward
+- A submission script `snakemake_call.sh` is provided, simply run the script locally or submit to your cluster with your chosen options, for example:
+   > ```bash
+   > bash snakemake_call.sh
+   > ```
+or
+   > ```bash
+   > sbatch --job-name=common_conditioning_pipeline --mem-per-cpu=8000  --ntasks=1 --cpus-per-task=8 --partition=short --output=slurm-%x-%A_%a.out snakemake_call.sh 
+   > ```
+etc
 
-
-# TODO
-* examples of inputs
-* how to run
+## Notes
+- This pipeline utilises `mktemp`. By default this writes files in `/tmp/`. If you don't access to `/tmp/` for whatever reason it may be worth double-checking that `mktemp`'s workarounds (for example writing to `/var/tmp/` ) actually work in your case 
+- BioMart is used to extract genomic coordinates for genes. Their servers are very sensitive and, despite the retry strategy used in this pipeline, jobs may rarely fail to complete
+      - To resolve you can either:
+      - Keep re-running the pipeline 
+      - Manually create the bed file outputs needed (although this can complicate running of the snakemake pipeline - which can be resolved with `rm -rf .snakemake/incomplete/` before re-running the pipeline )  

@@ -126,8 +126,8 @@ rule filter_group_file:
     output:
         "{gene}_group_file.txt"
     shell:
-        """bash 
-        grep {wildcards.gene} {input[0]} > {output} || touch {output}
+        """
+        grep -m1 -A1 "{wildcards.gene}" {input[0]} > {output} || touch {output}
         """
 
 rule spa_tests_conditional:

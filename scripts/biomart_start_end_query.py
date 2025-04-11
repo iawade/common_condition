@@ -9,7 +9,7 @@ import logging
 logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger('bioservices')
 
-def get_gene_coordinates(ensembl_id, assembly='GRCh38',  max_retries=5, retry_delay=5):
+def get_gene_coordinates(ensembl_id, assembly='GRCh38',  max_retries=20, retry_delay=20):
     server = BioMart()
 
     # Set the dataset and attributes
