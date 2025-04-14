@@ -66,7 +66,7 @@ def get_gene_coordinates(ensembl_id, assembly='GRCh38',  max_retries=20, retry_d
             sys.exit(1)
 
     # Dynamically create the output filename
-    output_file = f"{ensembl_id}.bed"
+    output_file = f"run_files/{ensembl_id}.bed"
 
     # Process the result and write to the output file in BED format
     with open(output_file, 'w') as output:

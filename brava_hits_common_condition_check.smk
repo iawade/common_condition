@@ -91,9 +91,9 @@ print(f"Valid gene-trait pairs: {valid_gene_trait_pairs}")
 # Target Rule for Completion of Pipeline
 rule all:
     input:
-        expand("{gene}_{distance}_{maf}_string.txt", 
+        expand("run_files/{gene}_{distance}_{maf}_string.txt", 
         gene=genes, distance=config["distance"], maf=config["maf"]),
-        expand("{gene}_group_file.txt", gene=genes),
+        expand("run_files/{gene}_group_file.txt", gene=genes),
         expand("saige_outputs/{gene_trait}_{distance}_saige_results_{maf}.txt",
                gene_trait=valid_gene_trait_pairs,
                distance=config["distance"],
@@ -102,17 +102,17 @@ rule all:
 
 rule identify_gene_start_stop:
     output:
-        "{gene}.bed"
+        "run_files/{gene}.bed"
     shell:
         "python scripts/biomart_start_end_query.py --ensembl_id \"{wildcards.gene}\""
 
 rule id_variants_for_conditioning:
     input:
         lambda wildcards: vcf_files,
-        "{gene}.bed" 
+        "run_files/{gene}.bed" 
     output:
-        "{gene}_{distance}_{maf}_list.txt",
-        "{gene}_{distance}_{maf}_string.txt"
+        "run_files/{gene}_{distance}_{maf}_list.txt",
+        "run_files/{gene}_{distance}_{maf}_string.txt"
     params:
         distance=distance,
         threads=config["threads"]
@@ -127,7 +127,7 @@ rule filter_group_file:
     input:
         group_file,
     output:
-        "{gene}_group_file.txt"
+        "run_files/{gene}_group_file.txt"
     shell:
         """
         grep -m1 -A1 "{wildcards.gene}" {input[0]} > {output} || touch {output}
@@ -139,8 +139,8 @@ rule spa_tests_conditional:
         lambda wildcards: [mf for mf in model_files if wildcards.trait in mf],  
         lambda wildcards: [vf for vf in variance_files if wildcards.trait in vf],    
         sparse_matrix,
-        "{gene}_group_file.txt",
-        "{gene}_{distance}_{maf}_string.txt"
+        "run_files/{gene}_group_file.txt",
+        "run_files/{gene}_{distance}_{maf}_string.txt"
     output:
         "saige_outputs/{gene}_{trait}_{distance}_saige_results_{maf}.txt" 
     params:
