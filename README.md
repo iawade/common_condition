@@ -123,6 +123,7 @@
       > ```
 
 7. **Other Config Parameters**
+   - "gene_trait_pairs_to_test" relates to the csv of BRaVa gene-trait pairs to be tested/confirmed with these conditional analyses. The actual csv is not provided in this repo. It can be downloaded from `gs://brava-meta-pilot-analysis/`
    - "maf" outlines the minor allele frequencies defining "common" variants to be tested in this conditional analysis
    - "distance" relates to how many bases up and downstream of the gene of interest's start/stop coordinates to identify common variants for conditioning
    - The values stored in these entries do not need to be changed in the config 
