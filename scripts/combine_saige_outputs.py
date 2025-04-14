@@ -11,10 +11,10 @@ dfs = []
 # Process each file
 for file in files:
     # Extract ancestry, trait, variant class and mode from filename
-    match = re.search(r"saige_outputs/(.*?)_(.*?)_saige_results_(.*?)\.txt", file)
+    match = re.search(r"saige_outputs/(.*?)_(.*?)_(.*?)_saige_results_(.*?)\.txt", file)
     if not match:
         continue
-    gene, trait, maf_cutoff = match.groups()
+    gene, trait, distance, maf_cutoff = match.groups()
 
     # Read file
     df = pd.read_csv(file, sep="\t")

@@ -156,9 +156,10 @@ rule spa_tests_conditional:
 
 rule combine_results:
     input:
-        expand(
-            "saige_outputs/{gene_trait}_saige_results_{maf}.txt", gene_trait=valid_gene_trait_pairs, maf=config["maf"]
-        )
+        expand("saige_outputs/{gene_trait}_{distance}_saige_results_{maf}.txt",
+               gene_trait=valid_gene_trait_pairs,
+               distance=config["distance"],
+               maf=config["maf"]),
     output:
         "brava_conditional_analysis_results.txt",
     shell:
