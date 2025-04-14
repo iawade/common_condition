@@ -97,7 +97,8 @@ rule all:
         expand("saige_outputs/{gene_trait}_{distance}_saige_results_{maf}.txt",
                gene_trait=valid_gene_trait_pairs,
                distance=config["distance"],
-               maf=config["maf"])
+               maf=config["maf"]),
+        "brava_conditional_analysis_results.txt"
 
 rule identify_gene_start_stop:
     output:
@@ -162,5 +163,5 @@ rule combine_results:
         "brava_conditional_analysis_results.txt",
     shell:
         """
-        cat {input} > {output}
+        python scripts/combine_saige_outputs.py
         """

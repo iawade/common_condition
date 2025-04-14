@@ -133,7 +133,9 @@ test_spa_output # something with no extension
 *_recalibrated
 *_realigned
 
+# Me-specific
 test_files/
+gzip_to_bgzip_and_index.sh
 
 # Keep README and metadata
 !README.md

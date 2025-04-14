@@ -202,6 +202,9 @@ or
    > ```
 etc
 
+TODO - should put something about final outputs
+Actually I should probably sort that script out a la the one on AoU
+
 ## Notes
 - This pipeline utilises `mktemp`. By default this writes files in the `/tmp/` directory. If `/tmp/` is not available, for whatever reason, it may be worth double-checking that `mktemp`'s workarounds (for example writing to `/var/tmp/` ) are working before running the workflow 
 - BioMart is used to extract genomic coordinates for genes. Their servers are very sensitive and, despite the retry strategy used in this pipeline, jobs may rarely fail to complete
