@@ -46,7 +46,7 @@ echo "Variant list written to $VARIANTS_LIST"
 # Convert the variants list into a comma-separated format for SAIGE conditioning flag
 TEMP_COMMA_FILE=$(mktemp)
 awk 'BEGIN {ORS=","} {print $1,$2,$3,$4}' "$VARIANTS_LIST" > "$TEMP_COMMA_FILE"
-sed 's/,$/\n/' "$TEMP_COMMA_FILE" > "$VARIANTS_COMMA"
+sed 's/,$/\n/' "$TEMP_COMMA_FILE" | sed 's/ /\:/g' > "$VARIANTS_COMMA"
 
 # Cleanup temporary files
 rm "$TEMP_COMMA_FILE"

@@ -48,7 +48,7 @@
       > list_of_model_files: "model_file_list.txt"
       > variance_ratio_file: "variance_file_list.txt"
       > ```
-   - **The pipeline expects files to be named based on the phenotype/trait ID's** from the BRaVa pilot analysis "nominate phenotypes" Google sheet. These ID's are provided for in the `phenotype_ID` fields in the JSON. That string just needs to be anywhere in the filenames; for example:
+   - **The pipeline expects files to be named based on the phenotype/trait ID's** from the BRaVa pilot analysis "nominate phenotypes" Google sheet. These ID's are provided in the `phenotype_ID` fields in the JSON. That string just needs to be anywhere in the filenames; for example:
       > #### `variance_file_list.txt`
       > ```txt
       > test_files/TG.varianceRatio.txt
