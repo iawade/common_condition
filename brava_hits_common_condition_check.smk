@@ -135,12 +135,12 @@ rule filter_group_file:
 
 rule spa_tests_conditional:
     input:
-        lambda wildcards: vcf_files,
-        lambda wildcards: [mf for mf in model_files if wildcards.trait in mf],  
-        lambda wildcards: [vf for vf in variance_files if wildcards.trait in vf],    
-        sparse_matrix,
-        "run_files/{gene}_group_file.txt",
-        "run_files/{gene}_{distance}_{maf}_string.txt"
+        vcf=lambda wildcards: vcf_files,
+        model_file=lambda wildcards: [mf for mf in model_files if wildcards.trait in mf],  
+        variance_file=lambda wildcards: [vf for vf in variance_files if wildcards.trait in vf],    
+        sparse_matrix=sparse_matrix,
+        group_file="run_files/{gene}_group_file.txt",
+        conditioning_variants="run_files/{gene}_{distance}_{maf}_string.txt"
     output:
         "saige_outputs/{gene}_{trait}_{distance}_saige_results_{maf}.txt" 
     params:
@@ -148,9 +148,9 @@ rule spa_tests_conditional:
         annotations_to_include=annotations_to_include
     shell:
         """
-        for vcf in {input[0]}; do
+        for vcf in {input.vcf}; do
             bash scripts/saige_step2_conditioning_check.sh \
-                $vcf {output} {params.min_mac} {input[1]} {input[2]} {input[3]} {input[4]} {params.annotations_to_include} {input[5]}
+                $vcf {output} {params.min_mac} {input.model_file} {input.variance_file} {input.sparse_matrix} {input.group_file} {params.annotations_to_include} {input.conditioning_variants}
         done
         """
 

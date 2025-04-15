@@ -13,7 +13,7 @@ VARIANTS_COMMA="run_files/${ENSEMBL_ID}_${BP_DISTANCE}_${MAF_COMMON}_string.txt"
 
 # Expand the BED regions for query and filter to coding regions
 ## include common variation within the gene of interest too 
-EXPANDED_BED="expanded_regions_${ENSEMBL_ID}.bed"
+EXPANDED_BED="run_files/expanded_regions_${ENSEMBL_ID}.bed"
 awk -v BP_DISTANCE="$BP_DISTANCE" 'BEGIN {OFS="\t"} {
     start = $2 - BP_DISTANCE;
     end = $3 + BP_DISTANCE;
@@ -49,6 +49,6 @@ awk 'BEGIN {ORS=","} {print $1,$2,$3,$4}' "$VARIANTS_LIST" > "$TEMP_COMMA_FILE"
 sed 's/,$/\n/' "$TEMP_COMMA_FILE" > "$VARIANTS_COMMA"
 
 # Cleanup temporary files
-rm "$EXPANDED_BED" "$TEMP_COMMA_FILE"
+rm "$TEMP_COMMA_FILE"
 
 echo "String for --condition flag for SAIGE step 2 written to $VARIANTS_COMMA"

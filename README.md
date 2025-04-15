@@ -61,6 +61,7 @@
       > test_files/TG.rda  
       > test_files/Urolith.rda
       > ```
+   - There is one exception: "WHRBMI" has been chnaged to **WHRbmi** to avoid mismatch errors
        
 4. **QC’d Group File**
    - Contains all annotated variants used for the pilot analysis

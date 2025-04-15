@@ -422,7 +422,7 @@
   {
     "phenotype": "WHR adjusted for BMI",
     "sex_specific_run": "",
-    "phenotype_ID": "WHRBMI",
+    "phenotype_ID": "WHRbmi",
     "definition": "N/A (quantitative trait)",
     "trait_type": "quantitative",
     "invnormalise": "TRUE",
