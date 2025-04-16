@@ -46,6 +46,9 @@ step2_SPAtests.R \
 # Append TMPFILE to OUT (header and all)
 [[ -s "${TMPFILE}" ]] && cat "${TMPFILE}" >> "${OUT}"
 
+# Also copy over single assoc files to verify case/control numbers
+[[ -s "${TMPFILE.singleAssoc.txt}" ]] && cat "${TMPFILE.singleAssoc.txt}" >> "${OUT.singleAssoc.txt}"
+
 # Ensure output exists for Snakemake
 touch "${OUT}"
 
