@@ -43,24 +43,11 @@ step2_SPAtests.R \
         --condition="$CONDITION" \
         --maxMissing=1
 
-# Check if output file does not exist or if temporary file is empty
-if [[ ! -e "${OUT}" || ! -s "${TMPFILE}" ]]; then
-    echo "No variants found for the gene on chromosome ${CHR}. Exiting gracefully."
-    touch "${OUT}"  # Ensure the file exists to prevent Snakemake errors
-    rm ${TMPFILE}
-    exit 0
-fi
+# Append TMPFILE to OUT (header and all)
+[[ -s "${TMPFILE}" ]] && cat "${TMPFILE}" >> "${OUT}"
 
-# If output file exists and temporary file is empty, append an empty file to OUT
-if [[ -e "${OUT}" && ! -s "${TMPFILE}" ]]; then
-    touch "${OUT}"
-    rm ${TMPFILE}
-    exit 0
-fi
+# Ensure output exists for Snakemake
+touch "${OUT}"
 
-# Extract the header from the TMPFILE and append the rest of the content
-HEADER=$(head -n 1 ${TMPFILE})
-tail -n +2 ${TMPFILE} | sort -V -u >> ${OUT}
-echo "${HEADER}" | cat - ${OUT} > temp && mv temp ${OUT}
-
-rm ${TMPFILE}
+# Clean up
+rm -f "${TMPFILE}"

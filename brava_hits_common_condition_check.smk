@@ -43,7 +43,7 @@ traits = set(gene_trait_pairs_df.iloc[:, 1])  # Second column as trait
 genes = sorted(genes)
 traits = sorted(traits)
 
-print(f"Loaded {len(genes)} stable gene ID's from JSON.")
+print(f"Loaded {len(genes)} stable gene ID's.")
 
 # Debugging: Print phenotype IDs
 print(f"Stable gene IDs from JSON: {genes}")

@@ -38,6 +38,7 @@
       > chr1    450739  451678
       > chr1    685715  686654
       > ```
+   - Note: if you don't have `bedtools` already installed it can be installed as part of the conda environment provided in this repo (see below)
 
 3. **Model and Variance Ratio Files**
    - GMMAT model files (are given `.rda` extension by default in SAIGE step1) from prior BRaVa pilot analysis
@@ -158,6 +159,7 @@ To create the Conda environment from the `brava_hits_common_condition_check_cond
      > ```bash
      > conda env create --prefix /path/to/envs/brava_hits_common_condition_check -f brava_hits_common_condition_check_conda_env.yaml
      > ```
+   - Note: This is a relatively large environment and needs and a machine with at least 4-8Gb of memory to 
 
 ##### **Activate the Environment:**
    - Once the environment is created, activate it using the following command:
@@ -186,6 +188,14 @@ To create the Conda environment from the `brava_hits_common_condition_check_cond
      > ```bash
      > ls -l /path/to/envs/brava_hits_common_condition_check/lib/libcrypto.so.1.0.0
      > ```
+   Note:
+   - TODO 
+   - if still not working need a different symlink - rm prev link
+    -- ldconfig -p | grep libcrypto
+        libcrypto.so.1.1 (libc6,x86-64) => /lib/x86_64-linux-gnu/libcrypto.so.1.1
+        libcrypto.so (libc6,x86-64) => /lib/x86_64-linux-gnu/libcrypto.so
+   -- do rm envs/brava_hits_common_condition_check/lib/libcrypto.so.1.0.0 
+ ln -s /lib/x86_64-linux-gnu/libcrypto.so.1.1 envs/brava_hits_common_condition_check/lib/libcrypto.so.1.0.0
 
   This step ensures that the required version of `libcrypto` is linked correctly and avoids issues with package compatibility.
 
@@ -197,14 +207,14 @@ To create the Conda environment from the `brava_hits_common_condition_check_cond
    > ```bash
    > bash snakemake_call.sh
    > ```
-or
+   or
    > ```bash
    > sbatch --job-name=common_conditioning_pipeline --mem-per-cpu=8000  --ntasks=1 --cpus-per-task=8 --partition=short --output=slurm-%x-%A_%a.out snakemake_call.sh 
    > ```
-etc
+   etc
 
 TODO - should put something about final outputs
-Actually I should probably sort that script out a la the one on AoU
+
 
 ## Notes
 - This pipeline utilises `mktemp`. By default this writes files in the `/tmp/` directory. If `/tmp/` is not available, for whatever reason, it may be worth double-checking that `mktemp`'s workarounds (for example writing to `/var/tmp/` ) are working before running the workflow 
