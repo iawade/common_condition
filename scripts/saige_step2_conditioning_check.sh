@@ -30,7 +30,6 @@ step2_SPAtests.R \
         --sparseGRMSampleIDFile=${SPARSEGRMID} \
         --LOCO=FALSE \
         --is_Firth_beta=TRUE \
-        --SPAcutoff=0.5 \
         --pCutoffforFirth=0.10 \
         --is_output_moreDetails=TRUE \
         --is_fastTest=TRUE \
@@ -41,7 +40,6 @@ step2_SPAtests.R \
         --is_single_in_groupTest=TRUE \
         --maxMAF_in_groupTest=0.0001,0.001,0.01 \
         --condition="$CONDITION" \
-        --maxMissing=1
 
 # Append TMPFILE to OUT (header and all)
 [[ -s "${TMPFILE}" ]] && cat "${TMPFILE}" >> "${OUT}"
