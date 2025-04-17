@@ -1,4 +1,8 @@
-# Ignore common system files
+#
+*.csv
+
+#
+#Ignore common system files
 .DS_Store
 Thumbs.db
 
