@@ -108,8 +108,8 @@ rule identify_gene_start_stop:
 
 rule id_variants_for_conditioning:
     input:
-        lambda wildcards: vcf_files,
-        "run_files/{gene}.bed" 
+        vcf = lambda wildcards: vcf_files,
+        bed = "run_files/{gene}.bed" 
     output:
         "run_files/{gene}_{distance}_{maf}_list.txt",
         "run_files/{gene}_{distance}_{maf}_string.txt"
@@ -118,7 +118,7 @@ rule id_variants_for_conditioning:
         threads=config["threads"]
     shell:
         """
-        for vcf in {input[0]}; do
+        for vcf in {input.vcf}; do
             bash scripts/id_variants_for_common_variant_conditioning.sh $vcf {wildcards.gene} {params.distance} {wildcards.maf} {params.threads}
         done
         """
