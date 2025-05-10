@@ -22,7 +22,7 @@ def get_gene_coordinates(ensembl_id, file='data/all_genes.tsv.gz', is_gzipped=Tr
 if __name__ == "__main__":
     # Parse command-line arguments
     parser = argparse.ArgumentParser(description='Retrieve gene coordinates all_genes.tsv.gz file.')
-    parser.add_argument('--gene_file', required=False, default='all_genes.tsv.gz', help='lookup file of all gene (start, end) pairs')
+    parser.add_argument('--gene_file', required=False, default='data/all_genes.tsv.gz', help='lookup file of all gene (start, end) pairs')
     parser.add_argument('--not_gzipped', action='store_true', help='is the lookup file gzipped? If not, use this flag')
     parser.add_argument('--ensembl_id', required=True, help='Ensembl gene ID')
     args = parser.parse_args()
