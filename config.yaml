@@ -1,4 +1,4 @@
-# Config File for BRaVa Pilot Study Common Variant Conditional Analysis Pipeline
+# Config File for BRaVa Pilot Study Common Variant Conditional Analysis Pipeline on AoU
 
 # Prerequisite
 list_of_vcf_files: "vcf_list.txt"
