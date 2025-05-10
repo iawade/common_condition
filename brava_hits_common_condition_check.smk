@@ -104,7 +104,7 @@ rule identify_gene_start_stop:
     output:
         "run_files/{gene}.bed"
     shell:
-        "python scripts/biomart_start_end_query.py --ensembl_id \"{wildcards.gene}\""
+        "python scripts/start_end_query.py --ensembl_id \"{wildcards.gene}\""
 
 rule id_variants_for_conditioning:
     input:
@@ -130,7 +130,12 @@ rule filter_group_file:
         "run_files/{gene}_group_file.txt"
     shell:
         """
-        grep -m1 -A1 "{wildcards.gene}" {input[0]} > {output} || touch {output}
+        infile="{input[0]}"
+        if [[ "$infile" == *.gz ]]; then
+               zcat "$infile" | grep -m1 -A1 "{wildcards.gene}" > {output} || touch {output}
+        else
+               grep -m1 -A1 "{wildcards.gene}" "$infile" > {output} || touch {output}
+        fi
         """
 
 rule spa_tests_conditional:
