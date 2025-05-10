@@ -6,9 +6,8 @@ import gzip
 
 # Configure logging to capture warnings from bioservices
 logging.basicConfig(level=logging.WARNING)
-logger = logging.getLogger('bioservices')
 
-def get_gene_coordinates(ensembl_id, file='all_genes.tsv.gz', is_gzipped=True):
+def get_gene_coordinates(ensembl_id, file='data/all_genes.tsv.gz', is_gzipped=True):
 
     # Dynamically create the output filename
     output_file = f"run_files/{ensembl_id}.bed"
