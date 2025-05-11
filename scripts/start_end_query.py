@@ -4,9 +4,6 @@ import time
 import logging
 import gzip
 
-# Configure logging to capture warnings from bioservices
-logging.basicConfig(level=logging.WARNING)
-
 def get_gene_coordinates(ensembl_id, file='data/all_genes.tsv.gz', is_gzipped=True):
 
     # Dynamically create the output filename
