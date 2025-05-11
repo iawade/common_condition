@@ -10,7 +10,8 @@ SPARSEGRM="$6"
 SPARSEGRMID="${SPARSEGRM}.sampleIDs.txt"
 GROUPFILE="$7"
 ANNOTATIONS="$8"
-CONDITION=$(cat "${9}") 
+CONDITION=$(cat "${9}")
+MAX_MAF=${10}
 # no error thrown if condition string is empty
 
 echo -e "VCF=$VCF\nOUT=$OUT\nMIN_MAC=$MIN_MAC\nMODELFILE=$MODELFILE\nVARIANCERATIO=$VARIANCERATIO\nSPARSEGRM=$SPARSEGRM\nSPARSEGRMID=$SPARSEGRMID\nGROUPFILE=$GROUPFILE\nANNOTATIONS=$ANNOTATIONS\nCONDITION=$CONDITION"
@@ -38,7 +39,7 @@ step2_SPAtests.R \
         --annotation_in_groupTest=$ANNOTATIONS \
         --is_output_markerList_in_groupTest=TRUE \
         --is_single_in_groupTest=TRUE \
-        --maxMAF_in_groupTest=0.0001,0.001,0.01 \
+        --maxMAF_in_groupTest=${MAX_MAF} \
         --condition="$CONDITION" \
 
 # Append TMPFILE to OUT (header and all)

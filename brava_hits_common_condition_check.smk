@@ -150,12 +150,13 @@ rule spa_tests_conditional:
         "saige_outputs/{gene}_{trait}_{distance}_saige_results_{maf}.txt" 
     params:
         min_mac=min_mac,
-        annotations_to_include=annotations_to_include
+        annotations_to_include=annotations_to_include,
+        max_MAF=maf
     shell:
         """
         for vcf in {input.vcf}; do
             bash scripts/saige_step2_conditioning_check.sh \
-                $vcf {output} {params.min_mac} {input.model_file} {input.variance_file} {input.sparse_matrix} {input.group_file} {params.annotations_to_include} {input.conditioning_variants}
+                $vcf {output} {params.min_mac} {input.model_file} {input.variance_file} {input.sparse_matrix} {input.group_file} {params.annotations_to_include} {input.conditioning_variants} {params.max_MAF}
         done
         """
 
