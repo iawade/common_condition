@@ -151,7 +151,7 @@ rule spa_tests_conditional:
     params:
         min_mac=min_mac,
         annotations_to_include=annotations_to_include,
-        max_MAF=maf
+        max_MAF="{maf}"
     shell:
         """
         for vcf in {input.vcf}; do
