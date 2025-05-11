@@ -8,8 +8,7 @@ MAF_COMMON="$4"
 THREADS="$5"
 
 # Output files
-VARIANTS_LIST="run_files/${ENSEMBL_ID}_${BP_DISTANCE}_${MAF_COMMON}_list.txt"
-VARIANTS_COMMA="run_files/${ENSEMBL_ID}_${BP_DISTANCE}_${MAF_COMMON}_string.txt"
+OUTPUT_VCF="run_files/${ENSEMBL_ID}_${BP_DISTANCE}_${MAF_COMMON}_filtered_variants.vcf.bgz"
 
 # Expand the BED regions for query and filter to coding regions
 ## include common variation within the gene of interest too 
@@ -31,24 +30,8 @@ awk -v BP_DISTANCE="$BP_DISTANCE" 'BEGIN {OFS="\t"} {
 # Using && which is the same as max(MAC > 40, MAF > $MAF_COMMON) ; unless I'm losing the plot
 bcftools view --threads "$THREADS" -R "$EXPANDED_BED" "$INPUT_VCF" |
   bcftools filter --threads "$THREADS" -i "MAC > 40 && MAF > $MAF_COMMON" |
-  bcftools query -f '%CHROM\t%POS\t%REF\t%ALT\n' >> "$VARIANTS_LIST"
+  bcftools view -Oz -o "${OUTPUT_VCF}"
 
-# Use a temporary file for sorted output to avoid in-place modification
-SORTED_VARIANTS_LIST=$(mktemp)
-sort -V -u "$VARIANTS_LIST" > "$SORTED_VARIANTS_LIST"
+bcftools index --csi "${OUTPUT_VCF}"
 
-# Replace the original list with the sorted list
-mv "$SORTED_VARIANTS_LIST" "$VARIANTS_LIST"
-
-# Output for debugging and sanity checking
-echo "Variant list written to $VARIANTS_LIST"
-
-# Convert the variants list into a comma-separated format for SAIGE conditioning flag
-TEMP_COMMA_FILE=$(mktemp)
-awk 'BEGIN {ORS=","} {print $1,$2,$3,$4}' "$VARIANTS_LIST" > "$TEMP_COMMA_FILE"
-sed 's/,$/\n/' "$TEMP_COMMA_FILE" | sed 's/ /\:/g' > "$VARIANTS_COMMA"
-
-# Cleanup temporary files
-rm "$TEMP_COMMA_FILE"
-
-echo "String for --condition flag for SAIGE step 2 written to $VARIANTS_COMMA"
+echo "Created indexed bgzipped VCF files for the gene ${ENSEMBL_ID}"
