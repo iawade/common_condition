@@ -8,7 +8,7 @@ MAF_COMMON="$4"
 THREADS="$5"
 
 # Output files
-OUTPUT_VCF="run_files/${ENSEMBL_ID}_${BP_DISTANCE}_${MAF_COMMON}_filtered_variants.vcf.bgz"
+OUTPUT_VCF="run_files/${ENSEMBL_ID}_${BP_DISTANCE}_${MAF_COMMON}.vcf.bgz"
 
 # Expand the BED regions for query and filter to coding regions
 ## include common variation within the gene of interest too 
