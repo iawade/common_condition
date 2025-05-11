@@ -113,7 +113,7 @@ rule filter_to_coding_gene_vcf:
         vcf = lambda wildcards: vcf_files,
         bed = "run_files/{gene}.bed" 
     output:
-        "run_files/{gene}_{distance}_{maf}.vcf.bgz"
+        "run_files/{gene}_{distance}_{maf}.vcf.bgz",
         "run_files/{gene}_{distance}_{maf}.vcf.bgz.csi"
     params:
         distance=distance,
