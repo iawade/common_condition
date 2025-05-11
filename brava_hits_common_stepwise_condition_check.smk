@@ -121,7 +121,7 @@ rule filter_to_coding_gene_vcf:
     shell:
         """
         for vcf in {input.vcf}; do
-            bash scripts/id_variants_for_common_variant_conditioning.sh $vcf {wildcards.gene} {params.distance} {wildcards.maf} {params.threads}
+            bash scripts/filter_to_coding_gene_vcf.sh $vcf {wildcards.gene} {params.distance} {wildcards.maf} {params.threads}
         done
         """
 
