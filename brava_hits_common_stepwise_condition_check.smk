@@ -117,8 +117,8 @@ rule filter_coding_gene_vcf:
         vcf = lambda wildcards: vcf_files,
         bed = "run_files/{gene}.bed" 
     output:
-        "run_files/{gene}_{distance}.vcf.bgz",
-        "run_files/{gene}_{distance}.vcf.bgz.csi"
+        "run_files/{gene}_dist{distance}.vcf.bgz",
+        "run_files/{gene}_dist{distance}.vcf.bgz.csi"
     params:
         distance=distance,
         threads=config["threads"]
@@ -133,8 +133,8 @@ rule filter_coding_gene_maf_vcf:
     input:
         vcf = "run_files/{gene}_{distance}.vcf.bgz"
     output:
-        vcf_maf = "run_files/{gene}_{distance}_{maf}.vcf.bgz",
-        vcf_maf_csi = "run_files/{gene}_{distance}_{maf}.vcf.bgz.csi"
+        vcf_maf = "run_files/{gene}_dist{distance}_maf{maf}.vcf.bgz",
+        vcf_maf_csi = "run_files/{gene}_dist{distance}_maf{maf}.vcf.bgz.csi"
     params:
         distance=distance,
         threads=config["threads"]

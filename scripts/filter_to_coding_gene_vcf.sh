@@ -8,7 +8,7 @@ BP_DISTANCE="$3" # TODO Error handling / kb vs just the number
 THREADS="$4"
 
 # Output files
-OUTPUT_VCF="run_files/${ENSEMBL_ID}_${BP_DISTANCE}.vcf.bgz"
+OUTPUT_VCF="run_files/${ENSEMBL_ID}_dist${BP_DISTANCE}.vcf.bgz"
 
 # Expand the BED regions for query and filter to coding regions
 ## include common variation within the gene of interest too 
