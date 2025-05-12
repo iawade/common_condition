@@ -98,7 +98,7 @@ rule all:
         gene=genes, distance=config["distance"], maf=config["maf"]),
         expand("run_files/{gene}_{distance}_{maf}.vcf.bgz.csi", 
         gene=genes, distance=config["distance"], maf=config["maf"]),
-        expand("run_files/{gene}_group_file.txt", gene=genes)#,
+        expand("run_files/{gene}_group_file.txt", gene=genes),
         expand("saige_outputs/{gene_trait}_{distance}_saige_results_{maf}.txt",
                gene_trait=valid_gene_trait_pairs,
                distance=config["distance"],
