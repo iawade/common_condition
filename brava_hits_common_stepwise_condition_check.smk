@@ -111,22 +111,40 @@ rule identify_gene_start_stop:
     shell:
         "python scripts/start_end_query.py --ensembl_id \"{wildcards.gene}\""
 
-rule filter_to_coding_gene_vcf:
+
+rule filter_coding_gene_vcf:
     input:
         vcf = lambda wildcards: vcf_files,
         bed = "run_files/{gene}.bed" 
     output:
-        "run_files/{gene}_{distance}_{maf}.vcf.bgz",
-        "run_files/{gene}_{distance}_{maf}.vcf.bgz.csi"
+        "run_files/{gene}_{distance}.vcf.bgz",
+        "run_files/{gene}_{distance}.vcf.bgz.csi"
     params:
         distance=distance,
         threads=config["threads"]
     shell:
         """
         for vcf in {input.vcf}; do
-            bash scripts/filter_to_coding_gene_vcf.sh $vcf {wildcards.gene} {params.distance} {wildcards.maf} {params.threads}
+            bash scripts/filter_to_coding_gene_vcf.sh $vcf {wildcards.gene} {params.distance} {params.threads}
         done
         """
+
+rule filter_coding_gene_maf_vcf:
+    input:
+        vcf = "run_files/{gene}_{distance}.vcf.bgz"
+    output:
+        vcf_maf = "run_files/{gene}_{distance}_{maf}.vcf.bgz",
+        vcf_maf_csi = "run_files/{gene}_{distance}_{maf}.vcf.bgz.csi"
+    params:
+        distance=distance,
+        threads=config["threads"]
+    shell:
+        """
+        bcftools filter --threads {params.threads} -i "MAC > 40 && MAF > $MAF_COMMON" {input.vcf} |
+        bcftools view -Oz -o {output.vcf_maf}
+        bcftools index --csi {output.vcf_maf}
+        """
+
 
 rule filter_group_file:
     input:
@@ -145,7 +163,7 @@ rule filter_group_file:
 
 rule spa_tests_stepwise_conditional:
     input:
-        vcf= "run_files/{gene}_{distance}_{maf}.vcf.bgz",
+        vcf="run_files/{gene}_{distance}_{maf}.vcf.bgz",
         model_file=lambda wildcards: [mf for mf in model_files if wildcards.trait in mf],  
         variance_file=lambda wildcards: [vf for vf in variance_files if wildcards.trait in vf],    
         sparse_matrix=sparse_matrix,
@@ -159,6 +177,28 @@ rule spa_tests_stepwise_conditional:
         for vcf in {input.vcf}; do
             bash scripts/stepwise_conditional_SAIGE.sh \
                 $vcf {output} {input.model_file} {input.variance_file} {input.sparse_matrix}
+        done
+        """
+
+rule spa_tests_conditional:
+    input:
+        vcf=lambda wildcards: vcf_files,
+        model_file=lambda wildcards: [mf for mf in model_files if wildcards.trait in mf],  
+        variance_file=lambda wildcards: [vf for vf in variance_files if wildcards.trait in vf],    
+        sparse_matrix=sparse_matrix,
+        group_file="run_files/{gene}_group_file.txt",
+        conditioning_variants="run_files/{gene}_{distance}_{maf}_string.txt"
+    output:
+        "saige_outputs/{gene}_{trait}_{distance}_saige_results_{maf}.txt" 
+    params:
+        min_mac=min_mac,
+        annotations_to_include=annotations_to_include,
+        max_MAF="{maf}"
+    shell:
+        """
+        for vcf in {input.vcf}; do
+            bash scripts/saige_step2_conditioning_check.sh \
+                $vcf {output} {params.min_mac} {input.model_file} {input.variance_file} {input.sparse_matrix} {input.group_file} {params.annotations_to_include} {input.conditioning_variants} {params.max_MAF}
         done
         """
 

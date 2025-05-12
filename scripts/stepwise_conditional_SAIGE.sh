@@ -2,7 +2,7 @@
 
 # Input and output variables
 VCF="${1}" 
-OUT="${2}"
+VARIANTS_COMMA="${2}"
 MODELFILE="${3}"
 VARIANCERATIO="${4}"
 SPARSEGRM="${5}"
@@ -10,8 +10,6 @@ SPARSEGRMID="${SPARSEGRM}.sampleIDs.txt"
 CHR="chr12" # DEV: need to include this
 
 TMPFILE=$(mktemp)
-VARIANTS_COMMA="${OUT}_string.txt"
-SAIGE_OUT="${OUT}_saige_results.txt"
 
 # Run the step2_SPAtests.R and redirect output to TMPFILE
 step2_SPAtests.R \
@@ -46,6 +44,7 @@ echo ${P_T}
 # Add the top variant to the list of conditioning markers
 CONDITION=${cond_M}
 intFlag=$(awk -v P_top="${P_top}" -v P_T="${P_T}" 'BEGIN{print (P_top<P_T)?1:0}')
+rm -f "${TMPFILE}"
 
 while [ "${intFlag}" -eq 1 ]
 do
@@ -83,10 +82,8 @@ do
   echo $CONDITION
 
   intFlag=$(awk -v P_top="${P_top}" -v P_T="${P_T}" 'BEGIN{print (P_top<P_T)?1:0}')
+  rm -f "${TMPFILE}"
 done
-
-[[ -s "${TMPFILE}" ]] && cat "${TMPFILE}" >> "${SAIGE_OUT}"
-rm -f "${TMPFILE}"
 
 # Note that the very last variant in "$CONDITION" is not significant any more after the final conditioning:
 CONDITION=$(echo "$CONDITION" | awk -F',' 'NF>1 { for (i=1; i<NF; i++) printf "%s%s", $i, (i<NF-1 ? "," : "") }')
