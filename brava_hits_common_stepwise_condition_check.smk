@@ -91,6 +91,9 @@ print(f"Valid gene-trait pairs: {valid_gene_trait_pairs}")
 # Target Rule for Completion of Pipeline
 rule all:
     input:
+        expand("run_files/{gene_trait}_{distance}_{maf}_string.txt",
+        gene_trait=valid_gene_trait_pairs,
+        distance=config["distance"], maf=config["maf"]),
         expand("run_files/{gene}_{distance}_{maf}.vcf.bgz", 
         gene=genes, distance=config["distance"], maf=config["maf"]),
         expand("run_files/{gene}_{distance}_{maf}.vcf.bgz.csi", 
@@ -99,8 +102,8 @@ rule all:
         # expand("saige_outputs/{gene_trait}_{distance}_saige_results_{maf}.txt",
                # gene_trait=valid_gene_trait_pairs,
                # distance=config["distance"],
-               # maf=config["maf"]),
-        # "brava_conditional_analysis_results.txt"
+               # maf=config["maf"]) #,
+        # "brava_stepwise_conditional_analysis_results.txt"
 
 rule identify_gene_start_stop:
     output:
@@ -140,27 +143,24 @@ rule filter_group_file:
         fi
         """
 
-# rule spa_tests_conditional:
-#     input:
-#         vcf=lambda wildcards: vcf_files,
-#         model_file=lambda wildcards: [mf for mf in model_files if wildcards.trait in mf],  
-#         variance_file=lambda wildcards: [vf for vf in variance_files if wildcards.trait in vf],    
-#         sparse_matrix=sparse_matrix,
-#         group_file="run_files/{gene}_group_file.txt",
-#         conditioning_variants="run_files/{gene}_{distance}_{maf}_string.txt"
-#     output:
-#         "saige_outputs/{gene}_{trait}_{distance}_saige_results_{maf}.txt" 
-#     params:
-#         min_mac=min_mac,
-#         annotations_to_include=annotations_to_include,
-#         max_MAF="{maf}"
-#     shell:
-#         """
-#         for vcf in {input.vcf}; do
-#             bash scripts/saige_step2_conditioning_check.sh \
-#                 $vcf {output} {params.min_mac} {input.model_file} {input.variance_file} {input.sparse_matrix} {input.group_file} {params.annotations_to_include} {input.conditioning_variants} {params.max_MAF}
-#         done
-#         """
+rule spa_tests_stepwise_conditional:
+    input:
+        vcf=lambda wildcards: vcf_files,
+        model_file=lambda wildcards: [mf for mf in model_files if wildcards.trait in mf],  
+        variance_file=lambda wildcards: [vf for vf in variance_files if wildcards.trait in vf],    
+        sparse_matrix=sparse_matrix,
+        group_file="run_files/{gene}_group_file.txt",
+    output:
+        "saige_outputs/{gene}_{trait}_{distance}_{maf}_string.txt" 
+    params:
+        maf_common="{maf}",
+    shell:
+        """
+        for vcf in {input.vcf}; do
+            bash scripts/stepwise_conditional_SAIGE.sh \
+                $vcf {output} {input.model_file} {input.variance_file} {input.sparse_matrix}
+        done
+        """
 
 # rule combine_results:
 #     input:
