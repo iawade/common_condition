@@ -24,8 +24,7 @@ step2_SPAtests.R \
         --sparseGRMFile="${SPARSEGRM}" \
         --sparseGRMSampleIDFile="${SPARSEGRMID}" \
         --LOCO=FALSE \
-        --is_Firth_beta=TRUE \
-        --pCutoffforFirth=0.10 \
+        --pCutoffforFirth=0.01 \
         --is_output_moreDetails=TRUE \
         --is_fastTest=TRUE \
         --SAIGEOutputFile="${TMPFILE}"

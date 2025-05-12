@@ -162,6 +162,10 @@ rule spa_tests_stepwise_conditional:
         done
         """
 
+# Now we need to run the final conditioning step
+
+# Finally, combine the results
+
 # rule combine_results:
 #     input:
 #         expand("saige_outputs/{gene_trait}_{distance}_saige_results_{maf}.txt",
