@@ -163,7 +163,7 @@ rule filter_group_file:
 
 rule spa_tests_stepwise_conditional:
     input:
-        vcf="run_files/{gene}_{distance}_{maf}.vcf.bgz",
+        vcf="run_files/{gene}_dist{distance}_maf{maf}.vcf.bgz",
         model_file=lambda wildcards: [mf for mf in model_files if wildcards.trait in mf],  
         variance_file=lambda wildcards: [vf for vf in variance_files if wildcards.trait in vf],    
         sparse_matrix=sparse_matrix,
