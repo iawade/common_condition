@@ -102,8 +102,8 @@ rule all:
         expand("saige_outputs/{gene_trait}_{distance}_saige_results_{maf}.txt",
                gene_trait=valid_gene_trait_pairs,
                distance=config["distance"],
-               maf=config["maf"]) #,
-        # "brava_stepwise_conditional_analysis_results.txt"
+               maf=config["maf"]),
+        "brava_stepwise_conditional_analysis_results.txt"
 
 rule identify_gene_start_stop:
     output:
