@@ -151,7 +151,7 @@ rule spa_tests_stepwise_conditional:
         sparse_matrix=sparse_matrix,
         group_file="run_files/{gene}_group_file.txt",
     output:
-        "saige_outputs/{gene}_{trait}_{distance}_{maf}_string.txt" 
+        "run_files/{gene_trait}_{distance}_{maf}_string.txt" 
     params:
         maf_common="{maf}",
     shell:
