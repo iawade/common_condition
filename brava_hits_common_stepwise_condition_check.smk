@@ -198,5 +198,5 @@ rule combine_results:
         "brava_stepwise_conditional_analysis_results.txt",
     shell:
         """
-        python scripts/combine_saige_outputs.py
+        python scripts/combine_saige_outputs.py {output}
         """
