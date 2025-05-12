@@ -4,11 +4,11 @@
 INPUT_VCF="$1" # QC'd, needs GT's; single ancestry-group
 ENSEMBL_ID="$2" # Prevents any potential issues with gene symbols
 BP_DISTANCE="$3" # TODO Error handling / kb vs just the number
-# MAF_COMMON="$4" 
-THREADS="$4"
+MAF_COMMON="$4" 
+THREADS="$5"
 
 # Output files
-OUTPUT_VCF="run_files/${ENSEMBL_ID}_dist${BP_DISTANCE}.vcf.bgz"
+OUTPUT_VCF="run_files/${ENSEMBL_ID}_${BP_DISTANCE}_${MAF_COMMON}.vcf.bgz"
 
 # Expand the BED regions for query and filter to coding regions
 ## include common variation within the gene of interest too 
@@ -28,11 +28,10 @@ awk -v BP_DISTANCE="$BP_DISTANCE" 'BEGIN {OFS="\t"} {
 
 # Use bcftools to filter VCF by the expanded BED regions and MAF threshold
 # Using && which is the same as max(MAC > 40, MAF > $MAF_COMMON) ; unless I'm losing the plot
-# bcftools view --threads "$THREADS" -R "$EXPANDED_BED" "$INPUT_VCF" |
-#   bcftools filter --threads "$THREADS" -i "MAC > 40 && MAF > $MAF_COMMON" |
-#   bcftools view -Oz -o "${OUTPUT_VCF}"
+bcftools view --threads "$THREADS" -R "$EXPANDED_BED" "$INPUT_VCF" |
+  bcftools filter --threads "$THREADS" -i "MAC > 40 && MAF > $MAF_COMMON" |
+  bcftools view -Oz -o "${OUTPUT_VCF}"
 
-bcftools view --threads "$THREADS" -R "$EXPANDED_BED" "$INPUT_VCF" -Oz -o "${OUTPUT_VCF}"
 bcftools index --csi "${OUTPUT_VCF}"
 
 echo "Created indexed bgzipped VCF files for the gene ${ENSEMBL_ID}"
