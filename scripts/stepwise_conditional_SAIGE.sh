@@ -69,8 +69,18 @@ do
           --SAIGEOutputFile="${TMPFILE}" \
           --condition="${CONDITION}"
 
-  cond_M=$(sort -g -k20,20 ${TMPFILE} | head -n 2 | tail -1 | awk '{print $1":"$2":"$4":"$5}')
-  P_top=$(sort -g -k20,20 ${TMPFILE} | head -n 2 | tail -1 | awk '{print $20}')
+  ncol=$(awk '{print NF; exit}' "${TMPFILE}")
+
+  if [ "$ncol" -eq 29 ]; then
+    cond_M=$(sort -g -k20,20 ${TMPFILE} | head -n 2 | tail -1 | awk '{print $1":"$2":"$4":"$5}')
+    P_top=$(sort -g -k20,20 ${TMPFILE} | head -n 2 | tail -1 | awk '{print $20}')
+  elif [ "$ncol" -eq 19 ]; then
+    cond_M=$(sort -g -k18,18 ${TMPFILE} | head -n 2 | tail -1 | awk '{print $1":"$2":"$4":"$5}')
+    P_top=$(sort -g -k18,18 ${TMPFILE} | head -n 2 | tail -1 | awk '{print $18}')
+  else
+    echo "Unexpected number of columns ($ncol) in $TMPFILE" >&2
+    exit 1
+  fi
 
   echo 'Lowest Pvalue in the sumstats file'
   echo ${P_top}
