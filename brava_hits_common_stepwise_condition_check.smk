@@ -94,9 +94,6 @@ rule all:
         expand("run_files/{gene_trait}_{distance}_{maf}_string.txt",
         gene_trait=valid_gene_trait_pairs,
         distance=config["distance"], maf=config["maf"]),
-        expand("run_files/{gene_trait}_{distance}_{maf}_saige_results.txt",
-        gene_trait=valid_gene_trait_pairs,
-        distance=config["distance"], maf=config["maf"]),
         expand("run_files/{gene}_{distance}_{maf}.vcf.bgz", 
         gene=genes, distance=config["distance"], maf=config["maf"]),
         expand("run_files/{gene}_{distance}_{maf}.vcf.bgz.csi", 
@@ -154,8 +151,7 @@ rule spa_tests_stepwise_conditional:
         sparse_matrix=sparse_matrix,
         group_file="run_files/{gene}_group_file.txt",
     output:
-        "run_files/{gene}_{trait}_{distance}_{maf}_saige_results.txt"
-        "run_files/{gene}_{trait}_{distance}_{maf}_string.txt"
+        "run_files/{gene}_{trait}_{distance}_{maf}_string.txt" 
     params:
         maf_common="{maf}",
     shell:
