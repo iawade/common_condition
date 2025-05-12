@@ -162,6 +162,28 @@ rule spa_tests_stepwise_conditional:
         done
         """
 
+rule spa_tests_conditional:
+    input:
+        vcf=lambda wildcards: vcf_files,
+        model_file=lambda wildcards: [mf for mf in model_files if wildcards.trait in mf],  
+        variance_file=lambda wildcards: [vf for vf in variance_files if wildcards.trait in vf],    
+        sparse_matrix=sparse_matrix,
+        group_file="run_files/{gene}_group_file.txt",
+        conditioning_variants="run_files/{gene}_{trait}_{distance}_{maf}_string.txt"
+    output:
+        "saige_outputs/{gene}_{trait}_{distance}_saige_results_{maf}.txt" 
+    params:
+        min_mac=min_mac,
+        annotations_to_include=annotations_to_include,
+        max_MAF="{maf}"
+    shell:
+        """
+        for vcf in {input.vcf}; do
+            bash scripts/saige_step2_conditioning_check.sh \
+                $vcf {output} {params.min_mac} {input.model_file} {input.variance_file} {input.sparse_matrix} {input.group_file} {params.annotations_to_include} {input.conditioning_variants} {params.max_MAF}
+        done
+        """
+
 # Now we need to run the final conditioning step
 
 # Finally, combine the results
