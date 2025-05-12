@@ -195,7 +195,7 @@ rule combine_results:
                distance=config["distance"],
                maf=config["maf"]),
     output:
-        "brava_conditional_analysis_results.txt",
+        "brava_stepwise_conditional_analysis_results.txt",
     shell:
         """
         python scripts/combine_saige_outputs.py
