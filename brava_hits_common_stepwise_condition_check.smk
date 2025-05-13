@@ -1,6 +1,6 @@
 # Snakemake Pipeline for BRaVa Pilot Study Common Variant Conditional Analysis
 
-configfile: "config.yaml"
+configfile: "afr_config.yaml"
 
 # Read inputs from config file
 list_of_vcf_files = config["list_of_vcf_files"]

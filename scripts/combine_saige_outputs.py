@@ -49,7 +49,7 @@ def combine_outputs(out):
     # Process each file
     for file in files_single:
         # Extract ancestry, trait, variant class and mode from filename
-        match = re.search(r"saige_outputs/(.*?)_(.*?)_(.*?)_saige_results_(.*?)\.singleAssoc\.txt", file)
+        match = re.search(r"saige_outputs/(.*?)_(.*?)_(.*?)_saige_results_(.*?)\.txt\.singleAssoc\.txt", file)
 
         if not match:
             continue
@@ -72,7 +72,7 @@ def combine_outputs(out):
         # Combine all dataframes
         combined_df = pd.concat(df_singles, ignore_index=True)
         # Save to a new file
-        combined_df.to_csv(out + "singleAssoc.txt", sep="\t", index=False)
+        combined_df.to_csv(out + ".singleAssoc.txt", sep="\t", index=False)
     else:
         open(out + "singleAssoc.txt", 'a').close()
 
