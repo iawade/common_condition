@@ -19,4 +19,5 @@ if __name__ == "__main__":
     parser.add_argument('--ensembl_id', required=True, help='Ensembl gene ID')
     args = parser.parse_args()
     # Run the function with provided arguments
-    get_gene_chr(args.ensembl_id)
+    chr=get_gene_chr(args.ensembl_id)
+    print(chr)
