@@ -122,7 +122,7 @@ rule id_variants_for_conditioning:
 
 rule filter_group_file:
     input:
-        group = lambda wildcards: group_files,
+        group = lambda wildcards: group_files
     output:
         "run_files/{gene}_group_file.txt"
     shell:
