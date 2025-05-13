@@ -121,7 +121,6 @@ rule filter_to_coding_gene_vcf:
     shell:
         """
         chr=$(python scripts/extract_chromosome.py --ensembl_id \"{wildcards.gene}\")
-        echo $chr
         for vcf in {input.vcf}; do
             if [[ "$vcf" =~ \\.($chr)\\. ]]; then
                 bash scripts/filter_to_coding_gene_vcf.sh $vcf {wildcards.gene} {params.distance} {wildcards.maf} {params.threads}
@@ -183,7 +182,6 @@ rule spa_tests_conditional:
     shell:
         """
         chr=$(python scripts/extract_chromosome.py --ensembl_id \"{wildcards.gene}\")
-        echo $chr
         for vcf in {input.vcf}; do
             if [[ "$vcf" =~ \\.($chr)\\. ]]; then
                 bash scripts/saige_step2_conditioning_check.sh \
