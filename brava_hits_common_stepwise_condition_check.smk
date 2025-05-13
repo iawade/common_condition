@@ -127,16 +127,17 @@ rule filter_to_coding_gene_vcf:
 
 rule filter_group_file:
     input:
-        group = lambda wildcards: group_files,
+        group = lambda wildcards: group_files
     output:
         "run_files/{gene}_group_file.txt"
     shell:
         """
+        > {output}
         for group in {input.group}; do
             if [[ "$group" == *.gz ]]; then
-                   zcat "$group" | grep -m1 -A1 "{wildcards.gene}" >> {output}
+                   zcat "$group" | grep -m1 -A1 "{wildcards.gene}" >> {output} || true
             else
-                   grep -m1 -A1 "{wildcards.gene}" "$group" >> {output}
+                   grep -m1 -A1 "{wildcards.gene}" "$group" >> {output} || true
             fi
         done
         touch {output}
@@ -182,10 +183,6 @@ rule spa_tests_conditional:
                 $vcf {output} {params.min_mac} {input.model_file} {input.variance_file} {input.sparse_matrix} {input.group_file} {params.annotations_to_include} {input.conditioning_variants} {params.max_MAF}
         done
         """
-
-# Now we need to run the final conditioning step
-
-# Finally, combine the results
 
 rule combine_results:
     input:
