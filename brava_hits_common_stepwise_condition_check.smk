@@ -121,7 +121,9 @@ rule filter_to_coding_gene_vcf:
     shell:
         """
         for vcf in {input.vcf}; do
-            bash scripts/filter_to_coding_gene_vcf.sh $vcf {wildcards.gene} {params.distance} {wildcards.maf} {params.threads}
+            if [[ "$vcf" =~ \.($chr)\. ]]; then
+                bash scripts/filter_to_coding_gene_vcf.sh $vcf {wildcards.gene} {params.distance} {wildcards.maf} {params.threads}
+            fi
         done
         """
 
