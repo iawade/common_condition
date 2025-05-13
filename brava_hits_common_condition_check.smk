@@ -131,6 +131,7 @@ rule filter_group_file:
         "run_files/{gene}_group_file.txt"
     shell:
         """
+        > {output}
         for group in {input.group}; do
             if [[ "$group" == *.gz ]]; then
                    zcat "$group" | grep -m1 -A1 "{wildcards.gene}" >> {output}
