@@ -158,6 +158,8 @@ rule spa_tests_stepwise_conditional:
         maf_common="{maf}",
     shell:
         """
+        chr=$(python scripts/extract_chromosome.py --ensembl_id \"{wildcards.gene}\")
+        echo $chr
         for vcf in {input.vcf}; do
             bash scripts/stepwise_conditional_SAIGE.sh \
                 $vcf {output} {input.model_file} {input.variance_file} {input.sparse_matrix}
@@ -181,6 +183,7 @@ rule spa_tests_conditional:
     shell:
         """
         chr=$(python scripts/extract_chromosome.py --ensembl_id \"{wildcards.gene}\")
+        echo $chr
         for vcf in {input.vcf}; do
             if [[ "$vcf" =~ \\.($chr)\\. ]]; then
                 bash scripts/saige_step2_conditioning_check.sh \
