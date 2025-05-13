@@ -134,9 +134,9 @@ rule filter_group_file:
         > {output}
         for group in {input.group}; do
             if [[ "$group" == *.gz ]]; then
-                   zcat "$group" | grep -m1 -A1 "{wildcards.gene}" >> {output}
+                   zcat "$group" | grep -m1 -A1 "{wildcards.gene}" >> {output} || true
             else
-                   grep -m1 -A1 "{wildcards.gene}" "$group" >> {output}
+                   grep -m1 -A1 "{wildcards.gene}" "$group" >> {output} || true
             fi
         done
         touch {output}
