@@ -11,8 +11,7 @@ def get_gene_chr(ensembl_id, file='data/all_genes.tsv.gz', is_gzipped=True):
         for line in infile:
             columns = line.rstrip('\n').split()
             if len(columns) >= 3 and columns[3] == ensembl_id:
-                gene_line=line
-    return gene_line[0]
+                return columns[0]
 
 if __name__ == "__main__":
     # Parse command-line arguments
