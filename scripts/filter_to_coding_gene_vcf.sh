@@ -32,6 +32,6 @@ bcftools view --threads "$THREADS" -R "$EXPANDED_BED" "$INPUT_VCF" |
   bcftools filter --threads "$THREADS" -i "MAC > 40 && MAF > $MAF_COMMON" |
   bcftools view -Oz -o "${OUTPUT_VCF}"
 
-bcftools index --csi "${OUTPUT_VCF}"
+bcftools index --csi -f "${OUTPUT_VCF}"
 
 echo "Created indexed bgzipped VCF files for the gene ${ENSEMBL_ID}"

@@ -22,7 +22,7 @@ def combine_outputs(out):
             continue
         gene, trait, distance, maf_cutoff = match.groups()
 
-        if os.path.getsize('filename') == 0:
+        if os.path.getsize(file) == 0:
             print("File is empty")
         else:
             # Read file
