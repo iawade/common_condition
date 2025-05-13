@@ -5,9 +5,9 @@ configfile: "config.yaml"
 # Read inputs from config file
 list_of_vcf_files = config["list_of_vcf_files"]
 list_of_model_files = config["list_of_model_files"]
-variance_ratio_file = config["variance_ratio_file"]
+list_of_variance_ratio_files = config["list_of_variance_ratio_files"]
+list_of_group_files = config["list_of_group_files"]
 sparse_matrix = config["sparse_matrix"]
-group_file = config["group_file"]
 gene_trait_pairs_to_test = config["gene_trait_pairs_to_test"]
 protein_coding_region_bed = config["protein_coding_region_bed"]
 phenotype_json = config["phenotype_json"]
@@ -16,12 +16,9 @@ phenotype_json = config["phenotype_json"]
 with open(list_of_vcf_files) as f:
     vcf_files = [line.strip() for line in f]
 
-# Read model and variance ratio files
-with open(list_of_model_files) as f:
-    model_files = [line.strip() for line in f]
-
-with open(variance_ratio_file) as f:
-    variance_files = [line.strip() for line in f]
+# Load group files
+with open(list_of_group_files) as f:
+    group_files = [line.strip() for line in f]
 
 distance = config["distance"]
 maf = config["maf"]
@@ -62,7 +59,7 @@ print(f"Phenotype IDs from JSON: {phenotype_ids}")
 with open(list_of_model_files) as f:
     model_files = [line.strip() for line in f]
 
-with open(variance_ratio_file) as f:
+with open(list_of_variance_ratio_files) as f:
     variance_files = [line.strip() for line in f]
 
 # Debugging: Print first few model and variance files
@@ -130,17 +127,19 @@ rule filter_to_coding_gene_vcf:
 
 rule filter_group_file:
     input:
-        group_file,
+        group = lambda wildcards: group_files,
     output:
         "run_files/{gene}_group_file.txt"
     shell:
         """
-        infile="{input[0]}"
-        if [[ "$infile" == *.gz ]]; then
-               zcat "$infile" | grep -m1 -A1 "{wildcards.gene}" > {output} || touch {output}
-        else
-               grep -m1 -A1 "{wildcards.gene}" "$infile" > {output} || touch {output}
-        fi
+        for group in {input.group}; do
+            if [[ "$group" == *.gz ]]; then
+                   zcat "$group" | grep -m1 -A1 "{wildcards.gene}" >> {output}
+            else
+                   grep -m1 -A1 "{wildcards.gene}" "$group" >> {output}
+            fi
+        done
+        touch {output}
         """
 
 rule spa_tests_stepwise_conditional:

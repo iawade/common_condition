@@ -3,14 +3,14 @@
 # Prerequisite
 list_of_vcf_files: "vcf_list.txt"
 list_of_model_files: "model_file_list.txt"
-variance_ratio_file: "variance_file_list.txt"
+list_of_variance_ratio_files: "variance_file_list.txt"
 sparse_matrix: "conditioning_test/allofus_array_eur_snp_wise_relatednessCutoff_0.05_5000_randomMarkersUsed.sparseGRM.mtx"
-group_file: "conditioning_test/aou.v8.chr12.eur.variants_only.spliceai=0.20_cadd=28.1_revel=0.773.canonical.txt.gz"
+list_of_group_files: "group_file_list.txt"
 
 ## Prerequisite: Don't need to change if using files/instructions provided in repo 
 gene_trait_pairs_to_test: "/home/jupyter/common_condition/gene_pheno_test.csv"
-protein_coding_region_bed: "protein_coding_regions_hg38_no_padding_no_UTR_v39.bed"
-phenotype_json: "pilot_phenotypes.json"
+protein_coding_region_bed: "/home/jupyter/common_condition/protein_coding_regions_hg38_no_padding_no_UTR_v39.bed"
+phenotype_json: "/home/jupyter/common_condition/pilot_phenotypes.json"
 
 # rule: id_variants_for_conditioning 
 distance: 500000
