@@ -13,12 +13,6 @@ def get_gene_chr(ensembl_id, file='data/all_genes.tsv.gz', is_gzipped=True):
                 gene_line=line
     return gene_line[0]
 
-file = "data/gene_phenotype_pairs_170425.csv"
-df = pd.read_csv(file, sep=",")
-
-for i in range(len(df.Region)):
-	print(f'{df.phenotype[i]}, {get_gene_coordinates(df.Region[i])}')
-
 if __name__ == "__main__":
     # Parse command-line arguments
     parser = argparse.ArgumentParser(description='Retrieve chr for a gene.')
