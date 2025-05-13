@@ -178,9 +178,12 @@ rule spa_tests_conditional:
         max_MAF="{maf}"
     shell:
         """
+        chr=$(python scripts/extract_chromosome.py --ensembl_id \"{wildcards.gene}\")
         for vcf in {input.vcf}; do
-            bash scripts/saige_step2_conditioning_check.sh \
-                $vcf {output} {params.min_mac} {input.model_file} {input.variance_file} {input.sparse_matrix} {input.group_file} {params.annotations_to_include} {input.conditioning_variants} {params.max_MAF}
+            if [[ "$vcf" =~ \.($chr)\. ]]; then
+                bash scripts/saige_step2_conditioning_check.sh \
+                    $vcf {output} {params.min_mac} {input.model_file} {input.variance_file} {input.sparse_matrix} {input.group_file} {params.annotations_to_include} {input.conditioning_variants} {params.max_MAF}
+            fi
         done
         """
 
