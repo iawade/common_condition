@@ -2,6 +2,7 @@ import pandas as pd
 import sys
 import time
 import gzip
+import argparse
 
 def get_gene_chr(ensembl_id, file='data/all_genes.tsv.gz', is_gzipped=True):
     # Dynamically create the output filename
