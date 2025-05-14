@@ -17,7 +17,10 @@ distance: 500000
 maf:
   - 0.001
   - 0.0001
-threads: 2 
+threads: 2
+
+# rule: prune
+prune: true
 
 # rule: spa_tests_conditional
 min_mac: 0.5
