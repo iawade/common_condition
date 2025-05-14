@@ -6,6 +6,7 @@ ENSEMBL_ID="$2" # Prevents any potential issues with gene symbols
 BP_DISTANCE="$3" # TODO Error handling / kb vs just the number
 MAF_COMMON="$4" 
 THREADS="$5"
+PRUNE="$6"
 
 # Output files
 VARIANTS_LIST="run_files/${ENSEMBL_ID}_${BP_DISTANCE}_${MAF_COMMON}_list.txt"
@@ -29,9 +30,16 @@ awk -v BP_DISTANCE="$BP_DISTANCE" 'BEGIN {OFS="\t"} {
 
 # Use bcftools to filter VCF by the expanded BED regions and MAF threshold
 # Using && which is the same as max(MAC > 40, MAF > $MAF_COMMON) ; unless I'm losing the plot
-bcftools view --threads "$THREADS" -R "$EXPANDED_BED" "$INPUT_VCF" |
-  bcftools filter --threads "$THREADS" -i "MAC > 40 && MAF > $MAF_COMMON" |
-  bcftools query -f '%CHROM\t%POS\t%REF\t%ALT\n' >> "$VARIANTS_LIST"
+if [ "${PRUNE}" = "true" ]; then
+  bcftools view --threads "$THREADS" -R "$EXPANDED_BED" "$INPUT_VCF" | 
+    bcftools filter --threads "$THREADS" -i "MAC > 40 && MAF > $MAF_COMMON" | 
+    bcftools +prune -w 500kb --max-LD 0.8 | \
+    bcftools query -f '%CHROM\t%POS\t%REF\t%ALT\n' >> "$VARIANTS_LIST"
+else
+  bcftools view --threads "$THREADS" -R "$EXPANDED_BED" "$INPUT_VCF" | 
+    bcftools filter --threads "$THREADS" -i "MAC > 40 && MAF > $MAF_COMMON" | 
+    bcftools query -f '%CHROM\t%POS\t%REF\t%ALT\n' >> "$VARIANTS_LIST"
+fi
 
 # Use a temporary file for sorted output to avoid in-place modification
 SORTED_VARIANTS_LIST=$(mktemp)
