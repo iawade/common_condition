@@ -7,7 +7,7 @@ MODELFILE="${3}"
 VARIANCERATIO="${4}"
 SPARSEGRM="${5}"
 SPARSEGRMID="${SPARSEGRM}.sampleIDs.txt"
-CHR="chr12" # DEV: need to include this
+CHR="${6}"
 
 TMPFILE=$(mktemp)
 

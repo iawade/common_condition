@@ -16,12 +16,11 @@ phenotype_json = config["phenotype_json"]
 with open(list_of_vcf_files) as f:
     vcf_files = [line.strip() for line in f]
 
-print("VCF files:", vcf_files[:5])
-
 # Load group files
 with open(list_of_group_files) as f:
     group_files = [line.strip() for line in f]
 
+print("VCF files:", vcf_files[:5])
 print("Group files:", group_files[:5])
 
 distance = config["distance"]

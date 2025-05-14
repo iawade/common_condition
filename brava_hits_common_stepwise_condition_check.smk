@@ -160,6 +160,7 @@ rule filter_group_file:
 rule spa_tests_stepwise_conditional:
     input:
         vcf= "run_files/{gene}_{distance}_{maf}.vcf.bgz",
+        vcf_csi = "run_files/{gene}_{distance}_{maf}.vcf.bgz.csi",
         model_file=lambda wildcards: [mf for mf in model_files if wildcards.trait in mf],  
         variance_file=lambda wildcards: [vf for vf in variance_files if wildcards.trait in vf],    
         sparse_matrix=sparse_matrix,
@@ -170,9 +171,10 @@ rule spa_tests_stepwise_conditional:
         maf_common="{maf}",
     shell:
         """
+        chr=$(python scripts/extract_chromosome.py --ensembl_id \"{wildcards.gene}\")
         for vcf in {input.vcf}; do
             bash scripts/stepwise_conditional_SAIGE.sh \
-                $vcf {output} {input.model_file} {input.variance_file} {input.sparse_matrix}
+                $vcf {output} {input.model_file} {input.variance_file} {input.sparse_matrix} $chr
         done
         """
 
