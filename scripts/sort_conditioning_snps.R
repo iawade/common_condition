@@ -14,14 +14,20 @@ opt_parser <- OptionParser(option_list = option_list)
 opt <- parse_args(opt_parser)
 
 # Define a function that does something with the condition
-sort_conditoioning_snps <- function(snps) {
+sort_conditioning_snps <- function(snps)
+{
   cat("Sorting these condition SNPs:", snps, "\n")
-  # ... do something more useful here ...
+  snps_vec <- strsplit(snps, split=",")[[1]]
+  if (length(snps) > 1) {
+    return(paste(snps_vec[order(unlist(lapply(strsplit(snps_vec, split=":"), `[`, 2)))], collapse=","))
+  } else {
+    return(snps)
+  }
 }
 
 # Call the function with the argument from the command line
 if (is.null(opt$condition)) {
   stop("Please provide a --condition argument.", call. = FALSE)
 } else {
-  sort_conditoioning_snps(opt$condition)
+  sort_conditioning_snps(opt$condition)
 }
