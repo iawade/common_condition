@@ -29,5 +29,6 @@ sort_conditioning_snps <- function(snps)
 if (is.null(opt$condition)) {
   stop("Please provide a --condition argument.", call. = FALSE)
 } else {
-  sort_conditioning_snps(opt$condition)
+  snps <- sort_conditioning_snps(opt$condition)
+  cat(snps)
 }
