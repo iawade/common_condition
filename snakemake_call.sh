@@ -3,7 +3,7 @@
 # Path to the Snakemake workflow file
 WORKFLOW_FILE="brava_hits_common_condition_check.smk"
 
-mkdir -p saige_no_iter_outputs run_no_iter_files
+mkdir -p saige_outputs run_files
 
 CORES=$(nproc)
 

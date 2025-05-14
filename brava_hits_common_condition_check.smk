@@ -91,31 +91,31 @@ print(f"Valid gene-trait pairs: {valid_gene_trait_pairs}")
 # Target Rule for Completion of Pipeline
 rule all:
     input:
-        expand("run_no_iter_files/{gene}_{distance}_{maf}_string.txt",
+        expand("run_files/{gene}_{distance}_{maf}_no_iter_string.txt",
         gene=genes, distance=config["distance"], maf=config["maf"]),
-        expand("run_no_iter_files/{gene}_group_file.txt", gene=genes),
-        expand("saige_no_iter_outputs/{gene_trait}_{distance}_saige_results_{maf}.txt",
+        expand("run_files/{gene}_group_file.txt", gene=genes),
+        expand("saige_outputs/{gene_trait}_{distance}_no_iter_saige_results_{maf}.txt",
                gene_trait=valid_gene_trait_pairs,
                distance=config["distance"],
                maf=config["maf"]),
-        "brava_conditional_analysis_results.txt"
+        "brava_conditional_analysis_no_iter_results.txt"
 
 rule identify_gene_start_stop:
     output:
-        "run_no_iter_files/{gene}.bed"
+        "run_files/{gene}.bed"
     shell:
         "python scripts/start_end_query.py --ensembl_id \"{wildcards.gene}\""
 
 rule id_variants_for_conditioning:
     input:
         vcf = lambda wildcards: vcf_files,
-        bed = "run_no_iter_files/{gene}.bed" 
+        bed = "run_files/{gene}.bed" 
     output:
-        "run_no_iter_files/{gene}_{distance}_{maf}_list.txt",
-        "run_no_iter_files/{gene}_{distance}_{maf}_string.txt"
+        "run_files/{gene}_{distance}_no_iter_{maf}_list.txt",
+        "run_files/{gene}_{distance}_no_iter_{maf}_string.txt"
     params:
         distance=distance,
-        threads=config["threads"],
+        threads=config["threads"]
         prune=config["prune"]
     shell:
         """
@@ -128,7 +128,7 @@ rule filter_group_file:
     input:
         group = lambda wildcards: group_files
     output:
-        "run_no_iter_files/{gene}_group_file.txt"
+        "run_files/{gene}_group_file.txt"
     shell:
         """
         > {output}
@@ -148,10 +148,10 @@ rule spa_tests_conditional:
         model_file=lambda wildcards: [mf for mf in model_files if wildcards.trait in mf],  
         variance_file=lambda wildcards: [vf for vf in variance_files if wildcards.trait in vf],    
         sparse_matrix=sparse_matrix,
-        group_file="run_no_iter_files/{gene}_group_file.txt",
-        conditioning_variants="run_no_iter_files/{gene}_{distance}_{maf}_string.txt"
+        group_file="run_files/{gene}_group_file.txt",
+        conditioning_variants="run_files/{gene}_{distance}_no_iter_{maf}_string.txt"
     output:
-        "saige_no_iter_outputs/{gene}_{trait}_{distance}_saige_results_{maf}.txt" 
+        "saige_outputs/{gene}_{trait}_{distance}_no_iter_saige_results_{maf}.txt" 
     params:
         min_mac=min_mac,
         annotations_to_include=annotations_to_include,
@@ -166,13 +166,13 @@ rule spa_tests_conditional:
 
 rule combine_results:
     input:
-        expand("saige_no_iter_outputs/{gene_trait}_{distance}_saige_results_{maf}.txt",
+        expand("saige_outputs/{gene_trait}_{distance}_no_iter_saige_results_{maf}.txt",
                gene_trait=valid_gene_trait_pairs,
                distance=config["distance"],
                maf=config["maf"]),
     output:
-        "brava_conditional_analysis_results.txt",
+        "brava_conditional_analysis_no_iter_results.txt",
     shell:
         """
-        python scripts/combine_saige_no_iter_outputs.py --out {output}
+        python scripts/combine_saige_outputs.py --out {output}
         """
