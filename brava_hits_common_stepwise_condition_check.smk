@@ -112,33 +112,33 @@ rule identify_gene_start_stop:
     shell:
         "python scripts/start_end_query.py --ensembl_id \"{wildcards.gene}\""
 
-# rule filter_to_coding_gene_vcf:
-#     input:
-#         vcf = lambda wildcards: vcf_files,
-#         bed = "run_files/{gene}.bed" 
-#     output:
-#         "run_files/{gene}_{distance}_{maf}.vcf.bgz",
-#         "run_files/{gene}_{distance}_{maf}.vcf.bgz.csi"
-#     params:
-#         distance=distance,
-#         threads=config["threads"]
-#     shell:
-#         """
-#         chr=$(python scripts/extract_chromosome.py --ensembl_id \"{wildcards.gene}\")
-#         echo $chr
-#         for vcf in {input.vcf}; do
-#             if [[ "$vcf" =~ \\.($chr)\\. ]]; then
-#                 echo $vcf
-#                 matched_vcf=$vcf
-#                 bash scripts/filter_to_coding_gene_vcf.sh $vcf {wildcards.gene} {params.distance} {wildcards.maf} {params.threads}
-#             fi
-#         done
+rule filter_to_coding_gene_vcf:
+    input:
+        vcf = lambda wildcards: vcf_files,
+        bed = "run_files/{gene}.bed" 
+    output:
+        "run_files/{gene}_{distance}_{maf}.vcf.bgz",
+        "run_files/{gene}_{distance}_{maf}.vcf.bgz.csi"
+    params:
+        distance=distance,
+        threads=config["threads"]
+    shell:
+        """
+        chr=$(python scripts/extract_chromosome.py --ensembl_id \"{wildcards.gene}\")
+        echo $chr
+        for vcf in {input.vcf}; do
+            if [[ "$vcf" =~ \\.($chr)\\. ]]; then
+                echo $vcf
+                matched_vcf=$vcf
+                bash scripts/filter_to_coding_gene_vcf.sh $vcf {wildcards.gene} {params.distance} {wildcards.maf} {params.threads}
+            fi
+        done
 
-#         if [[ -z "$matched_vcf" ]]; then
-#             echo "ERROR: No matching VCF found for chromosome $chr"
-#             exit 1
-#         fi
-#         """
+        if [[ -z "$matched_vcf" ]]; then
+            echo "ERROR: No matching VCF found for chromosome $chr"
+            exit 1
+        fi
+        """
 
 rule filter_group_file:
     input:
