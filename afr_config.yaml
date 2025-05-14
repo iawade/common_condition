@@ -7,9 +7,6 @@ list_of_variance_ratio_files: "afr_variance_file_list.txt"
 sparse_matrix: "conditioning_test/afr/mtx/allofus_array_afr_snp_wise_relatednessCutoff_0.05_5000_randomMarkersUsed.sparseGRM.mtx"
 list_of_group_files: "afr_group_file_list.txt"
 
-# Run name for output folders
-run_name: "afr"
-
 ## Prerequisite: Don't need to change if using files/instructions provided in repo 
 gene_trait_pairs_to_test: "/home/jupyter/common_condition/gene_pheno_test.csv"
 protein_coding_region_bed: "/home/jupyter/common_condition/protein_coding_regions_hg38_no_padding_no_UTR_v39.bed"
