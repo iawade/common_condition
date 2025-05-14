@@ -111,8 +111,8 @@ rule id_variants_for_conditioning:
         vcf = lambda wildcards: vcf_files,
         bed = "run_files/{gene}.bed" 
     output:
-        "run_files/{gene}_{distance}_no_iter_{maf}_list.txt",
-        "run_files/{gene}_{distance}_no_iter_{maf}_string.txt"
+        "run_files/{gene}_{distance}_{maf}_no_iter_list.txt",
+        "run_files/{gene}_{distance}_{maf}_no_iter_string.txt"
     params:
         distance=distance,
         threads=config["threads"],
@@ -149,7 +149,7 @@ rule spa_tests_conditional:
         variance_file=lambda wildcards: [vf for vf in variance_files if wildcards.trait in vf],    
         sparse_matrix=sparse_matrix,
         group_file="run_files/{gene}_group_file.txt",
-        conditioning_variants="run_files/{gene}_{distance}_no_iter_{maf}_string.txt"
+        conditioning_variants="run_files/{gene}_{distance}_{maf}_no_iter_string.txt"
     output:
         "saige_outputs/{gene}_{trait}_{distance}_no_iter_saige_results_{maf}.txt" 
     params:
