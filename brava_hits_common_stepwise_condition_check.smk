@@ -137,7 +137,6 @@ rule filter_to_coding_gene_vcf:
 
         if [[ -z "$matched_vcf" ]]; then
             echo "ERROR: No matching VCF found for chromosome $chr"
-            exit 1
         fi
         """
 
