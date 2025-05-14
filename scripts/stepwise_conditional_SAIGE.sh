@@ -49,7 +49,7 @@ rm -f "${TMPFILE}"
 while [ "${intFlag}" -eq 1 ]
 do
   # Run the step2_SPAtests.R and redirect output to TMPFILE
-  # TMPFILE=$(mktemp)
+  TMPFILE=$(mktemp)
 
   step2_SPAtests.R \
           --vcfFile="${VCF}" \
