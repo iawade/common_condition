@@ -4,7 +4,7 @@
 list_of_vcf_files: "afr_vcf_list.txt"
 list_of_model_files: "afr_model_file_list.txt"
 list_of_variance_ratio_files: "afr_variance_file_list.txt"
-sparse_matrix: "conditioning_test/afr/mtx/allofus_array_eur_snp_wise_relatednessCutoff_0.05_5000_randomMarkersUsed.sparseGRM.mtx"
+sparse_matrix: "conditioning_test/afr/mtx/allofus_array_afr_snp_wise_relatednessCutoff_0.05_5000_randomMarkersUsed.sparseGRM.mtx"
 list_of_group_files: "afr_group_file_list.txt"
 
 ## Prerequisite: Don't need to change if using files/instructions provided in repo 
