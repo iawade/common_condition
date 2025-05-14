@@ -49,7 +49,7 @@ rm -f "${TMPFILE}"
 while [ "${intFlag}" -eq 1 ]
 do
   # Run the step2_SPAtests.R and redirect output to TMPFILE
-  TMPFILE=$(mktemp)
+  # TMPFILE=$(mktemp)
 
   step2_SPAtests.R \
           --vcfFile="${VCF}" \
@@ -78,8 +78,8 @@ do
     cond_M=$(sort -g -k18,18 ${TMPFILE} | head -n 2 | tail -1 | awk '{print $1":"$2":"$4":"$5}')
     P_top=$(sort -g -k18,18 ${TMPFILE} | head -n 2 | tail -1 | awk '{print $18}')
   else
-    echo "Unexpected number of columns ($ncol) in $TMPFILE" >&2
-    exit 1
+    echo "Unexpected number of columns ($ncol) in $TMPFILE" #>&2
+    # exit 1
   fi
 
   echo 'Lowest Pvalue in the sumstats file'
@@ -89,9 +89,12 @@ do
 
   CONDITION="${CONDITION},${cond_M}"
   echo "conditioning..."
+  # Write a small R script to ensure that the conditioning SNPs are 
+  # in order
+  CONDITION=$(Rscript scripts/sort_conditioning_snps.R --condition)
   echo $CONDITION
 
-  intFlag=$(awk -v P_top="${P_top}" -v P_T="${P_T}" 'BEGIN{print (P_top<P_T)?1:0}')
+  # intFlag=$(awk -v P_top="${P_top}" -v P_T="${P_T}" 'BEGIN{print (P_top<P_T)?1:0}')
   rm -f "${TMPFILE}"
 done
 
