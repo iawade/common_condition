@@ -126,6 +126,7 @@ rule filter_to_coding_gene_vcf:
         """
         chr=$(python scripts/extract_chromosome.py --ensembl_id \"{wildcards.gene}\")
         echo $chr
+        echo "hello"
         for vcf in {input.vcf}; do
             if [[ "$vcf" =~ \\.($chr)\\. ]]; then
                 echo $vcf
