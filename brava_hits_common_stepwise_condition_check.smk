@@ -98,8 +98,8 @@ rule all:
         # gene=genes, distance=config["distance"], maf=config["maf"]),
         # expand("run_files/{gene}_{distance}_{maf}.vcf.bgz.csi", 
         # gene=genes, distance=config["distance"], maf=config["maf"]),
-        # expand("run_files/{gene}_group_file.txt", gene=genes),
-        expand("run_files/{gene}.bed", gene=genes),
+        expand("run_files/{gene}_group_file.txt", gene=genes),
+        expand("run_files/{gene}.bed", gene=genes) #,
         # expand("saige_outputs/{gene_trait}_{distance}_saige_results_{maf}.txt",
                # gene_trait=valid_gene_trait_pairs,
                # distance=config["distance"],
@@ -140,23 +140,23 @@ rule identify_gene_start_stop:
 #         fi
 #         """
 
-# rule filter_group_file:
-#     input:
-#         group = lambda wildcards: group_files
-#     output:
-#         "run_files/{gene}_group_file.txt"
-#     shell:
-#         """
-#         > {output}
-#         for group in {input.group}; do
-#             if [[ "$group" == *.gz ]]; then
-#                    zcat "$group" | grep -m1 -A1 "{wildcards.gene}" >> {output} || true
-#             else
-#                    grep -m1 -A1 "{wildcards.gene}" "$group" >> {output} || true
-#             fi
-#         done
-#         touch {output}
-#         """
+rule filter_group_file:
+    input:
+        group = lambda wildcards: group_files
+    output:
+        "run_files/{gene}_group_file.txt"
+    shell:
+        """
+        > {output}
+        for group in {input.group}; do
+            if [[ "$group" == *.gz ]]; then
+                   zcat "$group" | grep -m1 -A1 "{wildcards.gene}" >> {output} || true
+            else
+                   grep -m1 -A1 "{wildcards.gene}" "$group" >> {output} || true
+            fi
+        done
+        touch {output}
+        """
 
 # rule spa_tests_stepwise_conditional:
 #     input:
