@@ -127,17 +127,17 @@ rule filter_to_coding_gene_vcf:
         chr=$(python scripts/extract_chromosome.py --ensembl_id \"{wildcards.gene}\")
         echo $chr
         echo "hello"
-        for vcf in {input.vcf}; do
-            if [[ "$vcf" =~ \\.($chr)\\. ]]; then
-                echo $vcf
-                matched_vcf=$vcf
-                bash scripts/filter_to_coding_gene_vcf.sh $vcf {wildcards.gene} {params.distance} {wildcards.maf} {params.threads}
-            fi
-        done
+        # for vcf in {input.vcf}; do
+            # if [[ "$vcf" =~ \\.($chr)\\. ]]; then
+                # echo $vcf
+                # matched_vcf=$vcf
+                # bash scripts/filter_to_coding_gene_vcf.sh $vcf {wildcards.gene} {params.distance} {wildcards.maf} {params.threads}
+            # fi
+        # done
 
-        if [[ -z "$matched_vcf" ]]; then
-            echo "ERROR: No matching VCF found for chromosome $chr"
-        fi
+        # if [[ -z "$matched_vcf" ]]; then
+            # echo "ERROR: No matching VCF found for chromosome $chr"
+        # fi
         """
 
 rule filter_group_file:
