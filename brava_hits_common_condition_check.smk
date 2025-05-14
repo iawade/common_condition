@@ -115,7 +115,7 @@ rule id_variants_for_conditioning:
         "run_files/{gene}_{distance}_no_iter_{maf}_string.txt"
     params:
         distance=distance,
-        threads=config["threads"]
+        threads=config["threads"],
         prune=config["prune"]
     shell:
         """
