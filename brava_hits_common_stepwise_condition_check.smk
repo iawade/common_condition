@@ -124,16 +124,16 @@ rule filter_to_coding_gene_vcf:
         threads=config["threads"]
     shell:
         """
-        chr=$(python scripts/extract_chromosome.py --ensembl_id \"{wildcards.gene}\")
-        echo $chr
-        echo "hello"
-        # for vcf in {input.vcf}; do
+        # chr=$(python scripts/extract_chromosome.py --ensembl_id \"{wildcards.gene}\")
+        # echo $chr
+        # echo "hello"
+        for vcf in {input.vcf}; do
             # if [[ "$vcf" =~ \\.($chr)\\. ]]; then
-                # echo $vcf
+                echo $vcf
                 # matched_vcf=$vcf
-                # bash scripts/filter_to_coding_gene_vcf.sh $vcf {wildcards.gene} {params.distance} {wildcards.maf} {params.threads}
+                bash scripts/filter_to_coding_gene_vcf.sh $vcf {wildcards.gene} {params.distance} {wildcards.maf} {params.threads}
             # fi
-        # done
+        done
 
         # if [[ -z "$matched_vcf" ]]; then
             # echo "ERROR: No matching VCF found for chromosome $chr"
