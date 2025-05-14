@@ -16,7 +16,7 @@ opt <- parse_args(opt_parser)
 # Define a function that does something with the condition
 sort_conditioning_snps <- function(snps)
 {
-  cat("Sorting these condition SNPs:", snps, "\n")
+  message("Sorting these condition SNPs:", snps, "\n")
   snps_vec <- strsplit(snps, split=",")[[1]]
   if (length(snps) > 1) {
     return(paste(snps_vec[order(unlist(lapply(strsplit(snps_vec, split=":"), `[`, 2)))], collapse=","))
