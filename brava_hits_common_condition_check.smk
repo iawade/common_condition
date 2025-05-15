@@ -91,7 +91,7 @@ print(f"Valid gene-trait pairs: {valid_gene_trait_pairs}")
 # Target Rule for Completion of Pipeline
 rule all:
     input:
-        expand("run_files/{gene}_{distance}_{maf}_no_iter_string.txt",
+        expand("run_files/{gene}_{distance}_{maf}_string.txt",
         gene=genes, distance=config["distance"], maf=config["maf"]),
         expand("run_files/{gene}_group_file.txt", gene=genes),
         expand("saige_outputs/{gene_trait}_{distance}_no_iter_saige_results_{maf}.txt",
@@ -149,7 +149,7 @@ rule spa_tests_conditional:
         variance_file=lambda wildcards: [vf for vf in variance_files if wildcards.trait in vf],    
         sparse_matrix=sparse_matrix,
         group_file="run_files/{gene}_group_file.txt",
-        conditioning_variants="run_files/{gene}_{distance}_{maf}_no_iter_string.txt"
+        conditioning_variants="run_files/{gene}_{distance}_{maf}_string.txt"
     output:
         "saige_outputs/{gene}_{trait}_{distance}_no_iter_saige_results_{maf}.txt" 
     params:
