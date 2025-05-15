@@ -21,6 +21,7 @@ threads: 2
 
 # rule: prune
 prune: true
+p_thres: 0.01
 
 # rule: spa_tests_conditional
 min_mac: 0.5

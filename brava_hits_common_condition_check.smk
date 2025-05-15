@@ -111,8 +111,8 @@ rule id_variants_for_conditioning:
         vcf = lambda wildcards: vcf_files,
         bed = "run_files/{gene}.bed" 
     output:
-        "run_files/{gene}_{distance}_{maf}_no_iter_list.txt",
-        "run_files/{gene}_{distance}_{maf}_no_iter_string.txt"
+        "run_files/{gene}_{distance}_{maf}_list.txt",
+        "run_files/{gene}_{distance}_{maf}_string.txt"
     params:
         distance=distance,
         threads=config["threads"],

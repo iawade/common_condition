@@ -33,7 +33,7 @@ awk -v BP_DISTANCE="$BP_DISTANCE" 'BEGIN {OFS="\t"} {
 if [ "${PRUNE}" = "true" ]; then
   bcftools view --threads "$THREADS" -R "$EXPANDED_BED" "$INPUT_VCF" | 
     bcftools filter --threads "$THREADS" -i "MAC > 40 && MAF > $MAF_COMMON" | 
-    bcftools +prune -w 500kb --max-LD 0.8 | \
+    bcftools +prune -w 500kb --max-LD 0.4 | \
     bcftools query -f '%CHROM\t%POS\t%REF\t%ALT\n' >> "$VARIANTS_LIST"
 else
   bcftools view --threads "$THREADS" -R "$EXPANDED_BED" "$INPUT_VCF" | 
