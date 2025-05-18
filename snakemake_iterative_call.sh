@@ -14,7 +14,8 @@ LOGFILE="snakemake_run_${TIMESTAMP}.log"
 # Run Snakemake with the specified options
 echo "Starting a run of Snakemake workflow..."
 snakemake --snakefile "$WORKFLOW_FILE" --cores $CORES --jobs $CORES --max-status-checks-per-second 0.01 \
-    --keep-going --retries 3 --rerun-incomplete --printshellcmds --verbose --forcerun all \
+    --keep-going --retries 3 --use-conda --conda-prefix "${HOME}/conda-envs" \
+    --rerun-incomplete --printshellcmds --verbose --forcerun all \
     > "$LOGFILE" 2>&1
 
 echo "Run complete. Log saved to $LOGFILE"

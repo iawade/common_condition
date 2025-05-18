@@ -111,6 +111,8 @@ rule identify_gene_start_stop:
         "run_files/{gene}.bed"
     shell:
         "python scripts/start_end_query.py --ensembl_id \"{wildcards.gene}\""
+    conda:
+        "brava_hits_common_condition_check_conda_env.yaml"
 
 rule filter_to_coding_gene_vcf:
     input:
@@ -122,6 +124,8 @@ rule filter_to_coding_gene_vcf:
     params:
         distance=distance,
         threads=config["threads"]
+    conda:
+        "brava_hits_common_condition_check_conda_env.yaml"
     shell:
         """
         chr=$(python scripts/extract_chromosome.py --ensembl_id \"{wildcards.gene}\")
@@ -144,6 +148,8 @@ rule filter_group_file:
         group = lambda wildcards: group_files
     output:
         "run_files/{gene}_group_file.txt"
+    conda:
+        "brava_hits_common_condition_check_conda_env.yaml"
     shell:
         """
         > {output}
@@ -168,7 +174,9 @@ rule spa_tests_stepwise_conditional:
     output:
         "run_files/{gene}_{trait}_{distance}_{maf}_string.txt" 
     params:
-        maf_common="{maf}",
+        maf_common="{maf}"
+    conda:
+        "brava_hits_common_condition_check_conda_env.yaml"
     shell:
         """
         chr=$(python scripts/extract_chromosome.py --ensembl_id \"{wildcards.gene}\")
@@ -192,6 +200,8 @@ rule spa_tests_conditional:
         min_mac=min_mac,
         annotations_to_include=annotations_to_include,
         max_MAF="{maf}"
+    conda:
+        "brava_hits_common_condition_check_conda_env.yaml"
     shell:
         """
         chr=$(python scripts/extract_chromosome.py --ensembl_id \"{wildcards.gene}\")
@@ -210,7 +220,9 @@ rule combine_results:
                distance=config["distance"],
                maf=config["maf"]),
     output:
-        "brava_stepwise_conditional_analysis_results.txt",
+        "brava_stepwise_conditional_analysis_results.txt"
+    conda:
+        "brava_hits_common_condition_check_conda_env.yaml"
     shell:
         """
         python scripts/combine_saige_outputs.py --out {output}
