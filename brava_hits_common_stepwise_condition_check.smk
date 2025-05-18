@@ -109,10 +109,10 @@ rule all:
 rule identify_gene_start_stop:
     output:
         "run_files/{gene}.bed"
-    shell:
-        "python scripts/start_end_query.py --ensembl_id \"{wildcards.gene}\""
     conda:
         "brava_hits_common_condition_check_conda_env.yaml"
+    shell:
+        "python scripts/start_end_query.py --ensembl_id \"{wildcards.gene}\""
 
 rule filter_to_coding_gene_vcf:
     input:
