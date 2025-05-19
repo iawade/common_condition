@@ -7,7 +7,7 @@ cd ${SCRIPT_DIR}
 mv ${DATA_DIR} ${SCRIPT_DIR}
 mv configs/${ANC}_config.yaml config.yaml
 ls . 
-
+echo "mv configs/${ANC}_config.yaml config.yaml"
 WORKFLOW_FILE="brava_hits_common_stepwise_condition_check.smk"
 
 mkdir -p saige_outputs run_files
@@ -26,4 +26,4 @@ snakemake --snakefile "$WORKFLOW_FILE" --cores $CORES --jobs $CORES --max-status
     > "$LOGFILE" 2>&1
 
 echo "Run complete. Log saved to $LOGFILE"
-cp ${LOGFILE} 
+cp ${LOGFILE} ${OUTPUT}/
