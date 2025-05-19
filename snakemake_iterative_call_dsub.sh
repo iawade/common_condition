@@ -3,6 +3,15 @@
 source /opt/conda/etc/profile.d/conda.sh
 conda activate brava_hits_common_condition_check
 
+wget https://github.com/samtools/bcftools/releases/download/${bcftoolsVer}/bcftools-${bcftoolsVer}.tar.bz2 && \
+ tar -vxjf bcftools-${bcftoolsVer}.tar.bz2 && \
+ rm bcftools-${bcftoolsVer}.tar.bz2 && \
+ cd bcftools-${bcftoolsVer} && \
+ make && \
+ make install
+
+bcftools --help
+
 # Path to the Snakemake workflow file
 cd ${SCRIPT_DIR}
 # Make files present in same filepath, so that file locations
