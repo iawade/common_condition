@@ -5,7 +5,7 @@ cd ${SCRIPT_DIR}
 # Make files present in same filepath, so that file locations
 # in the list files are relative to the script directory
 mv ${DATA_DIR} ${SCRIPT_DIR}
-
+mv configs/${ANC}_config.yaml config.yaml
 ls . 
 
 WORKFLOW_FILE="brava_hits_common_stepwise_condition_check.smk"
