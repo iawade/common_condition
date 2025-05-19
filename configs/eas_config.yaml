@@ -1,7 +1,7 @@
 # Config File for BRaVa Pilot Study Common Variant Conditional Analysis Pipeline on AoU
 
 # Prerequisite
-list_of_vcf_files: "aou_paths/eas/eas_vcf_list.txt"
+list_of_vcf_files: "aou_paths/eas/eas_vcf_file_list.txt"
 list_of_model_files: "aou_paths/eas/eas_model_file_list.txt"
 list_of_variance_ratio_files: "aou_paths/eas/eas_variance_file_list.txt"
 sparse_matrix: "snakemake_eas/mtx/allofus_array_eas_snp_wise_relatednessCutoff_0.05_5000_randomMarkersUsed.sparseGRM.mtx"
