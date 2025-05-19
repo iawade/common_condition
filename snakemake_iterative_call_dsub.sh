@@ -2,6 +2,11 @@
 
 # Path to the Snakemake workflow file
 cd ${SCRIPT_DIR}
+# Make files present in same filepath, so that file locations
+# in the list files are relative to the script directory
+mv ${DATA_DIR} ${SCRIPT_DIR}
+
+ls . 
 
 WORKFLOW_FILE="brava_hits_common_stepwise_condition_check.smk"
 
@@ -21,3 +26,4 @@ snakemake --snakefile "$WORKFLOW_FILE" --cores $CORES --jobs $CORES --max-status
     > "$LOGFILE" 2>&1
 
 echo "Run complete. Log saved to $LOGFILE"
+cp ${LOGFILE} 
