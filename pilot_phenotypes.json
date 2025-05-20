@@ -20,7 +20,7 @@
   },
 
   {
-    "phenotype": "Atrial Fibrillation",
+    "phenotype": "Atrial fibrillation",
     "sex_specific_run": "",
     "phenotype_ID": "AFib",
     "definition": "ICD_Phecode",
@@ -70,7 +70,7 @@
   },
 
   {
-    "phenotype": "Chronic obstructive pulmonary disease (COPD)",
+    "phenotype": "Chronic obstructive pulmonary disease",
     "sex_specific_run": "",
     "phenotype_ID": "COPD",
     "definition": "ICD_Phecode",
@@ -80,7 +80,7 @@
   },
 
   {
-    "phenotype": "Chronic Renal Failure",
+    "phenotype": "Chronic renal failure",
     "sex_specific_run": "",
     "phenotype_ID": "CRF",
     "definition": "ICD_Phecode",
@@ -140,7 +140,7 @@
   },
 
   {
-    "phenotype": "Heart Failure (HF)",
+    "phenotype": "Heart failure",
     "sex_specific_run": "",
     "phenotype_ID": "HF",
     "definition": "ICD_Phecode",
@@ -300,7 +300,7 @@
   },
 
   {
-    "phenotype": "Varicose Veins",
+    "phenotype": "Varicose veins",
     "sex_specific_run": "",
     "phenotype_ID": "VaricVeins",
     "definition": "ICD_Phecode",
@@ -310,7 +310,7 @@
   },
 
   {
-    "phenotype": "Venous Thromboembolism (VTE)",
+    "phenotype": "Venous thromboembolism",
     "sex_specific_run": "",
     "phenotype_ID": "VTE",
     "definition": "ICD_Phecode, Procedures",
@@ -340,7 +340,7 @@
   },
 
   {
-    "phenotype": "Aspartate aminotransferase (AST)",
+    "phenotype": "Aspartate aminotransferase",
     "sex_specific_run": "",
     "phenotype_ID": "AST",
     "definition": "N/A (quantitative trait)",
@@ -360,7 +360,7 @@
   },
 
   {
-    "phenotype": "C-reactive protein (CRP)",
+    "phenotype": "C-reactive protein",
     "sex_specific_run": "",
     "phenotype_ID": "CRP",
     "definition": "N/A (quantitative trait)",
@@ -422,7 +422,7 @@
   {
     "phenotype": "WHR adjusted for BMI",
     "sex_specific_run": "",
-    "phenotype_ID": "WHRbmi",
+    "phenotype_ID": "WHRBMI",
     "definition": "N/A (quantitative trait)",
     "trait_type": "quantitative",
     "invnormalise": "TRUE",
@@ -446,6 +446,6 @@
     "definition": "N/A (quantitative trait)",
     "trait_type": "quantitative",
     "invnormalise": "TRUE",
-    "tol": 1e-05
+    "tol": 0.00001
   }
 ]
