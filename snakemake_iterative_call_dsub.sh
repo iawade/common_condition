@@ -27,7 +27,7 @@ LOGFILE="snakemake_run_${TIMESTAMP}.log"
 echo "Starting a run of Snakemake workflow..."
 snakemake --snakefile "$WORKFLOW_FILE" --cores $CORES --jobs $CORES --max-status-checks-per-second 0.01 \
     --keep-going --retries 3 --rerun-incomplete --printshellcmds --verbose --forcerun all \
-    > "$LOGFILE" 2>&1
+     2>&1 | tee "$LOGFILE"
 
 echo "Run complete. Log saved to $LOGFILE"
 cp ${LOGFILE} ${OUTPUT}/
