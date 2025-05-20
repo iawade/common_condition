@@ -36,8 +36,8 @@ import json
 gene_trait_pairs_df = pd.read_csv(gene_trait_pairs_to_test)
 
 # Extract unique genes and traits
-genes = set(gene_trait_pairs_df.iloc[:, 0])  # First column as gene
-traits = set(gene_trait_pairs_df.iloc[:, 1])  # Second column as trait
+genes = set(gene_trait_pairs_df.iloc[:, 1])  # Second column is gene
+traits = set(gene_trait_pairs_df.iloc[:, 0])  # First column is trait
 
 # Convert to sorted lists for consistency
 genes = sorted(genes)
