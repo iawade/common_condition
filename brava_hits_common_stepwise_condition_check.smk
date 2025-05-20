@@ -31,6 +31,7 @@ annotations_to_include = config["annotations_to_include"]
 
 import pandas as pd
 import json
+import re
 
 # Load gene-trait pairs from CSV
 gene_trait_pairs_df = pd.read_csv(gene_trait_pairs_to_test)
@@ -75,16 +76,17 @@ print(f"All traits before filtering: {traits}")
 # Filter traits based on presence in model and variance ratio files
 available_traits = set()
 for pid in phenotype_ids:  # phenotype IDs from JSON
-    trait_in_model = any(pid in mf for mf in model_files)
-    print(pid)
-    print(trait_in_model)
-    trait_in_variance = any(pid in vf for vf in variance_files)
-    print(trait_in_variance)
-    print(trait_in_model and trait_in_variance)
-    
+    # trait_in_model = any(pid in mf for mf in model_files)
+    model_pattern = rf'(?<=[_\.\-]){re.escape(pid)}(?=[_\.\-])|' \
+          rf'(?<=[_\.\-]){re.escape(pid)}(?=\.rda$)'
+    trait_in_model = any(re.search(model_pattern, mf) for mf in model_files)
+    variance_pattern = rf'(?<=[_\.\-]){re.escape(pid)}(?=[_\.\-])|' \
+          rf'(?<=[_\.\-]){re.escape(pid)}(?=\.varianceRatio\.txt$)'
+    trait_in_variance = any(re.search(variance_pattern, mf) for mf in model_files)
+
     if trait_in_model and trait_in_variance:
         available_traits.add(pid)  # Store the phenotype ID instead of an incorrect trait name
-    print(available_traits)
+        
 # Store valid gene-trait pairs as a list
 valid_gene_trait_pairs = [f"{gene}_{trait}" for gene, trait in zip(gene_trait_pairs_df.iloc[:, 1], gene_trait_pairs_df.iloc[:, 0]) if trait in available_traits]
 
