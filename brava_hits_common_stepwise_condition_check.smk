@@ -92,6 +92,8 @@ valid_gene_trait_pairs = [f"{gene}_{trait}" for gene, trait in zip(gene_trait_pa
 print(f"Filtered {len(valid_gene_trait_pairs)} gene-trait pairs with available model/variance files.")
 print(f"Valid gene-trait pairs: {valid_gene_trait_pairs}")
 
+genes_in_valid_pairs = sorted({pair.split("_")[0] for pair in valid_gene_trait_pairs})
+
 # Target Rule for Completion of Pipeline
 rule all:
     input:
@@ -99,11 +101,11 @@ rule all:
         gene_trait=valid_gene_trait_pairs,
         distance=config["distance"], maf=config["maf"]),
         expand("run_files/{gene}_{distance}_{maf}.vcf.bgz", 
-        gene=genes, distance=config["distance"], maf=config["maf"]),
+        gene=genes_in_valid_pairs, distance=config["distance"], maf=config["maf"]),
         expand("run_files/{gene}_{distance}_{maf}.vcf.bgz.csi", 
-        gene=genes, distance=config["distance"], maf=config["maf"]),
-        expand("run_files/{gene}_group_file.txt", gene=genes),
-        expand("run_files/{gene}.bed", gene=genes),
+        gene=genes_in_valid_pairs, distance=config["distance"], maf=config["maf"]),
+        expand("run_files/{gene}_group_file.txt", gene=genes_in_valid_pairs),
+        expand("run_files/{gene}.bed", gene=genes_in_valid_pairs),
         expand("saige_outputs/{gene_trait}_{distance}_saige_results_{maf}.txt",
                gene_trait=valid_gene_trait_pairs,
                distance=config["distance"],
