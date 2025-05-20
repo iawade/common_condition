@@ -76,15 +76,17 @@ print(f"All traits before filtering: {traits}")
 available_traits = set()
 for pid in phenotype_ids:  # phenotype IDs from JSON
     trait_in_model = any(pid in mf for mf in model_files)
+    print(pid)
     print(trait_in_model)
     trait_in_variance = any(pid in vf for vf in variance_files)
     print(trait_in_variance)
+    print(trait_in_model and trait_in_variance)
     
     if trait_in_model and trait_in_variance:
         available_traits.add(pid)  # Store the phenotype ID instead of an incorrect trait name
-
+    print(available_traits)
 # Store valid gene-trait pairs as a list
-valid_gene_trait_pairs = [f"{gene}_{trait}" for gene, trait in zip(gene_trait_pairs_df.iloc[:, 0], gene_trait_pairs_df.iloc[:, 1]) if trait in available_traits]
+valid_gene_trait_pairs = [f"{gene}_{trait}" for gene, trait in zip(gene_trait_pairs_df.iloc[:, 1], gene_trait_pairs_df.iloc[:, 0]) if trait in available_traits]
 
 # Debugging: Print valid gene-trait pairs
 print(f"Filtered {len(valid_gene_trait_pairs)} gene-trait pairs with available model/variance files.")
