@@ -76,7 +76,9 @@ print(f"All traits before filtering: {traits}")
 available_traits = set()
 for pid in phenotype_ids:  # phenotype IDs from JSON
     trait_in_model = any(pid in mf for mf in model_files)
+    print(trait_in_model)
     trait_in_variance = any(pid in vf for vf in variance_files)
+    print(trait_in_variance)
     
     if trait_in_model and trait_in_variance:
         available_traits.add(pid)  # Store the phenotype ID instead of an incorrect trait name
