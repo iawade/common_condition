@@ -30,4 +30,6 @@ snakemake --snakefile "$WORKFLOW_FILE" --cores $CORES --jobs $CORES --max-status
      2>&1 | tee "$LOGFILE"
 
 echo "Run complete. Log saved to $LOGFILE"
-cp ${LOGFILE} ${OUTPUT}/
+mv ${LOGFILE} ${OUTPUT}/
+mv saige_outputs ${OUTPUT}/${ANC}_saige_outputs
+mv run_files ${OUTPUT}/${ANC}_run_files
