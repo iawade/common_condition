@@ -1,11 +1,11 @@
 # Config File for BRaVa Pilot Study Common Variant Conditional Analysis Pipeline on AoU
 
 # Prerequisite
-list_of_vcf_files: "sas_vcf_file_list.txt"
-list_of_model_files: "sas_model_file_list.txt"
-list_of_variance_ratio_files: "sas_variance_file_list.txt"
-sparse_matrix: "inputs/mtx/brava_SAS_relatednessCutoff_0.05_5000_randomMarkersUsed.sparseGRM.mtx"
-list_of_group_files: "sas_group_file_list.txt"
+list_of_vcf_files: "aou_paths/sas/sas_vcf_file_list.txt"
+list_of_model_files: "aou_paths/sas/sas_model_file_list.txt"
+list_of_variance_ratio_files: "aou_paths/sas/sas_variance_file_list.txt"
+sparse_matrix: "snakemake_sas/mtx/allofus_array_sas_snp_wise_relatednessCutoff_0.05_5000_randomMarkersUsed.sparseGRM.mtx"
+list_of_group_files: "aou_paths/sas/sas_group_file_list.txt"
 
 ## Prerequisite: Don't need to change if using files/instructions provided in repo 
 gene_trait_pairs_to_test: "gene_pheno.csv"
