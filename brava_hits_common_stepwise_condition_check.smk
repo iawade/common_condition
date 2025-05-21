@@ -76,17 +76,13 @@ print(f"All traits before filtering: {traits}")
 # Filter traits based on presence in model and variance ratio files
 available_traits = set()
 for pid in phenotype_ids:  # phenotype IDs from JSON
-    # trait_in_model = any(pid in mf for mf in model_files)
-    model_pattern = rf'(?<=[_\.\-]){re.escape(pid)}(?=[_\.\-])|' \
-          rf'(?<=[_\.\-]){re.escape(pid)}(?=\.rda$)'
-    trait_in_model = any(re.search(model_pattern, mf) for mf in model_files)
-    variance_pattern = rf'(?<=[_\.\-]){re.escape(pid)}(?=[_\.\-])|' \
-          rf'(?<=[_\.\-]){re.escape(pid)}(?=\.varianceRatio\.txt$)'
-    trait_in_variance = any(re.search(variance_pattern, mf) for mf in model_files)
-
+    pattern = rf'(?<=[_\.\-]){re.escape(pid)}(?=[_\.\-])'
+    trait_in_model = any(re.search(pattern, mf) for mf in model_files)
+    trait_in_variance = any(re.search(pattern, mf) for mf in model_files)
+    print(trait_in_variance)
     if trait_in_model and trait_in_variance:
         available_traits.add(pid)  # Store the phenotype ID instead of an incorrect trait name
-        
+
 # Store valid gene-trait pairs as a list
 valid_gene_trait_pairs = [f"{gene}_{trait}" for gene, trait in zip(gene_trait_pairs_df.iloc[:, 1], gene_trait_pairs_df.iloc[:, 0]) if trait in available_traits]
 
@@ -169,8 +165,14 @@ rule spa_tests_stepwise_conditional:
     input:
         vcf= "run_files/{gene}_{distance}_{maf}.vcf.bgz",
         vcf_csi = "run_files/{gene}_{distance}_{maf}.vcf.bgz.csi",
-        model_file=lambda wildcards: [mf for mf in model_files if wildcards.trait in mf],  
-        variance_file=lambda wildcards: [vf for vf in variance_files if wildcards.trait in vf],    
+        model_file=lambda wildcards: [
+            mf for mf in model_files
+            if re.search(rf'(?:^|[_\.\-]){re.escape(wildcards.trait)}(?:[_\.\-]|\.rda$)', mf)
+        ],
+        variance_file=lambda wildcards: [
+            vf for vf in variance_files
+            if re.search(rf'(?:^|[_\.\-]){re.escape(wildcards.trait)}(?:[_\.\-]|\.rda$)', vf)
+        ], 
         sparse_matrix=sparse_matrix,
         group_file="run_files/{gene}_group_file.txt",
     output:
@@ -189,8 +191,14 @@ rule spa_tests_stepwise_conditional:
 rule spa_tests_conditional:
     input:
         vcf=lambda wildcards: vcf_files,
-        model_file=lambda wildcards: [mf for mf in model_files if wildcards.trait in mf],  
-        variance_file=lambda wildcards: [vf for vf in variance_files if wildcards.trait in vf],    
+        model_file=lambda wildcards: [
+            mf for mf in model_files
+            if re.search(rf'(?:^|[_\.\-]){re.escape(wildcards.trait)}(?:[_\.\-]|\.rda$)', mf)
+        ],
+        variance_file=lambda wildcards: [
+            vf for vf in variance_files
+            if re.search(rf'(?:^|[_\.\-]){re.escape(wildcards.trait)}(?:[_\.\-]|\.rda$)', vf)
+        ], 
         sparse_matrix=sparse_matrix,
         group_file="run_files/{gene}_group_file.txt",
         conditioning_variants="run_files/{gene}_{trait}_{distance}_{maf}_string.txt"
