@@ -30,7 +30,7 @@ step2_SPAtests.R \
         --SAIGEOutputFile="${TMPFILE}"
 
 # Signficant threshold for p-values
-P_T=5e-3
+P_T=1e-5
 
 # Obtain the top hit as the first conditioning marker
 cond_M=$(sort -g -k13,13 ${TMPFILE} | head -n 2 | tail -1 | awk '{print $1":"$2":"$4":"$5}')

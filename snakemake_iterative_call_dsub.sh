@@ -11,8 +11,7 @@ cd ${SCRIPT_DIR}
 # in the list files are relative to the script directory
 mv ${DATA_DIR} ${SCRIPT_DIR}
 mv configs/${ANC}_config.yaml config.yaml
-ls . 
-echo "mv configs/${ANC}_config.yaml config.yaml"
+
 WORKFLOW_FILE="brava_hits_common_stepwise_condition_check.smk"
 
 mkdir -p saige_outputs run_files
@@ -33,3 +32,5 @@ echo "Run complete. Log saved to $LOGFILE"
 mv ${LOGFILE} ${OUTPUT}/
 mv saige_outputs ${OUTPUT}/${ANC}_saige_outputs
 mv run_files ${OUTPUT}/${ANC}_run_files
+mv brava_stepwise_conditional_analysis_results.txt ${OUTPUT}/brava_${ANC}_stepwise_conditional_analysis_results.txt
+mv brava_stepwise_conditional_analysis_results.txt.singleAssoc.txt ${OUTPUT}/brava_${ANC}_stepwise_conditional_analysis_results.txt.singleAssoc.txt

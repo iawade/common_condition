@@ -79,7 +79,6 @@ for pid in phenotype_ids:  # phenotype IDs from JSON
     pattern = rf'(?<=[_\.\-]){re.escape(pid)}(?=[_\.\-])'
     trait_in_model = any(re.search(pattern, mf) for mf in model_files)
     trait_in_variance = any(re.search(pattern, mf) for mf in model_files)
-    print(trait_in_variance)
     if trait_in_model and trait_in_variance:
         available_traits.add(pid)  # Store the phenotype ID instead of an incorrect trait name
 
