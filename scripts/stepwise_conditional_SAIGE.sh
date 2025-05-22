@@ -8,11 +8,30 @@ VARIANCERATIO="${4}"
 SPARSEGRM="${5}"
 SPARSEGRMID="${SPARSEGRM}.sampleIDs.txt"
 CHR="${6}"
+USE_NULL_VAR_RATIO=${7}
 
 TMPFILE=$(mktemp)
 
-# Run the step2_SPAtests.R and redirect output to TMPFILE
-step2_SPAtests.R \
+if [ "$USE_NULL_VAR_RATIO" = "true" ]; then
+
+  step2_SPAtests.R \
+        --vcfFile=${VCF} \
+        --vcfFileIndex=${VCF}.csi \
+        --vcfField=GT \
+        --chrom="${CHR}" \
+        --minMAF=0 \
+        --minMAC=10 \
+        --GMMATmodelFile=${MODELFILE} \
+        --varianceRatioFile=${VARIANCERATIO} \
+        --LOCO=FALSE \
+        --is_Firth_beta=TRUE \
+        --pCutoffforFirth=0.01 \
+        --is_output_moreDetails=TRUE \
+        --is_fastTest=TRUE \
+        --SAIGEOutputFile="${TMPFILE}"
+else 
+  # Run the step2_SPAtests.R and redirect output to TMPFILE
+  step2_SPAtests.R \
         --vcfFile="${VCF}" \
         --vcfFileIndex="${VCF}.csi" \
         --vcfField="GT" \
@@ -28,6 +47,7 @@ step2_SPAtests.R \
         --is_output_moreDetails=TRUE \
         --is_fastTest=TRUE \
         --SAIGEOutputFile="${TMPFILE}"
+fi
 
 # Signficant threshold for p-values
 P_T=1e-5
@@ -50,23 +70,42 @@ while [ "${intFlag}" -eq 1 ]
 do
   # Run the step2_SPAtests.R and redirect output to TMPFILE
 
-  step2_SPAtests.R \
-          --vcfFile="${VCF}" \
-          --vcfFileIndex="${VCF}.csi" \
-          --vcfField="GT" \
-          --chrom="${CHR}" \
-          --minMAF=0 \
-          --minMAC=10 \
-          --GMMATmodelFile="${MODELFILE}" \
-          --varianceRatioFile="${VARIANCERATIO}" \
-          --sparseGRMFile="${SPARSEGRM}" \
-          --sparseGRMSampleIDFile="${SPARSEGRMID}" \
-          --LOCO=FALSE \
-          --pCutoffforFirth=0.01 \
-          --is_output_moreDetails=TRUE \
-          --is_fastTest=TRUE \
-          --SAIGEOutputFile="${TMPFILE}" \
-          --condition="${CONDITION}"
+  if [ "$USE_NULL_VAR_RATIO" = "true" ]; then
+    step2_SPAtests.R \
+        --vcfFile=${VCF} \
+        --vcfFileIndex=${VCF}.csi \
+        --vcfField=GT \
+        --chrom="${CHR}" \
+        --minMAF=0 \
+        --minMAC=10 \
+        --GMMATmodelFile=${MODELFILE} \
+        --varianceRatioFile=${VARIANCERATIO} \
+        --LOCO=FALSE \
+        --is_Firth_beta=TRUE \
+        --pCutoffforFirth=0.01 \
+        --is_output_moreDetails=TRUE \
+        --is_fastTest=TRUE \
+        --SAIGEOutputFile="${TMPFILE}" \
+        --condition="${CONDITION}"
+  else
+    step2_SPAtests.R \
+        --vcfFile="${VCF}" \
+        --vcfFileIndex="${VCF}.csi" \
+        --vcfField="GT" \
+        --chrom="${CHR}" \
+        --minMAF=0 \
+        --minMAC=10 \
+        --GMMATmodelFile="${MODELFILE}" \
+        --varianceRatioFile="${VARIANCERATIO}" \
+        --sparseGRMFile="${SPARSEGRM}" \
+        --sparseGRMSampleIDFile="${SPARSEGRMID}" \
+        --LOCO=FALSE \
+        --pCutoffforFirth=0.01 \
+        --is_output_moreDetails=TRUE \
+        --is_fastTest=TRUE \
+        --SAIGEOutputFile="${TMPFILE}" \
+        --condition="${CONDITION}"
+  fi
 
   ncol=$(awk '{print NF; exit}' "${TMPFILE}")
 
