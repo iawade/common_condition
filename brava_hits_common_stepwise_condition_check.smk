@@ -11,6 +11,7 @@ sparse_matrix = config["sparse_matrix"]
 gene_trait_pairs_to_test = config["gene_trait_pairs_to_test"]
 protein_coding_region_bed = config["protein_coding_region_bed"]
 phenotype_json = config["phenotype_json"]
+use_null_var_ratio = config["use_null_var_ratio"]
 
 # Load VCF files
 with open(list_of_vcf_files) as f:
@@ -178,12 +179,13 @@ rule spa_tests_stepwise_conditional:
         "run_files/{gene}_{trait}_{distance}_{maf}_string.txt" 
     params:
         maf_common="{maf}"
+        use_null_var_ratio=config["use_null_var_ratio"]
     shell:
         """
         chr=$(python scripts/extract_chromosome.py --ensembl_id \"{wildcards.gene}\")
         for vcf in {input.vcf}; do
             bash scripts/stepwise_conditional_SAIGE.sh \
-                $vcf {output} {input.model_file} {input.variance_file} {input.sparse_matrix} $chr
+                $vcf {output} {input.model_file} {input.variance_file} {input.sparse_matrix} $chr {params.use_null_var_ratio}
         done
         """
 
@@ -207,13 +209,14 @@ rule spa_tests_conditional:
         min_mac=min_mac,
         annotations_to_include=annotations_to_include,
         max_MAF="{maf}"
+        use_null_var_ratio=config["use_null_var_ratio"]
     shell:
         """
         chr=$(python scripts/extract_chromosome.py --ensembl_id \"{wildcards.gene}\")
         for vcf in {input.vcf}; do
             if [[ "$vcf" =~ \\.($chr)\\. ]]; then
                 bash scripts/saige_step2_conditioning_check.sh \
-                    $vcf {output} {params.min_mac} {input.model_file} {input.variance_file} {input.sparse_matrix} {input.group_file} {params.annotations_to_include} {input.conditioning_variants} {params.max_MAF}
+                    $vcf {output} {params.min_mac} {input.model_file} {input.variance_file} {input.sparse_matrix} {input.group_file} {params.annotations_to_include} {input.conditioning_variants} {params.max_MAF} {params.use_null_var_ratio}
             fi
         done
         """

@@ -12,14 +12,37 @@ GROUPFILE="$7"
 ANNOTATIONS="$8"
 CONDITION=$(cat "${9}")
 MAX_MAF=${10}
+USE_NULL_VAR_RATIO=${11}
 
 echo -e "VCF=$VCF\nOUT=$OUT\nMIN_MAC=$MIN_MAC\nMODELFILE=$MODELFILE\nVARIANCERATIO=$VARIANCERATIO\nSPARSEGRM=$SPARSEGRM\nSPARSEGRMID=$SPARSEGRMID\nGROUPFILE=$GROUPFILE\nANNOTATIONS=$ANNOTATIONS\nCONDITION=$CONDITION"
 
 TMPFILE=$(mktemp)
 
 if [ -n "$CONDITION" ]; then
-    # Run the step2_SPAtests.R and redirect output to TMPFILE
-    step2_SPAtests.R \
+    if [ "$USE_NULL_VAR_RATIO" = "true" ]; then
+        
+        step2_SPAtests.R \
+            --vcfFileIndex=${VCF}.csi \
+            --vcfField=GT \
+            --minMAF=0 \
+            --minMAC=${MIN_MAC} \
+            --GMMATmodelFile=${MODELFILE} \
+            --varianceRatioFile=${VARIANCERATIO} \
+            --LOCO=FALSE \
+            --is_Firth_beta=TRUE \
+            --pCutoffforFirth=0.05 \
+            --is_output_moreDetails=TRUE \
+            --is_fastTest=TRUE \
+            --SAIGEOutputFile=${TMPFILE} \
+            --groupFile=${GROUPFILE} \
+            --annotation_in_groupTest=${ANNOTATIONS} \
+            --is_output_markerList_in_groupTest=TRUE \
+            --is_single_in_groupTest=TRUE \
+            --maxMAF_in_groupTest=${MAX_MAF} \
+            --condition="${CONDITION}"
+    else
+        # Run the step2_SPAtests.R and redirect output to TMPFILE
+        step2_SPAtests.R \
             --vcfFile=${VCF} \
             --vcfFileIndex="${VCF}.csi" \
             --vcfField="GT" \
@@ -35,12 +58,13 @@ if [ -n "$CONDITION" ]; then
             --is_output_moreDetails=TRUE \
             --is_fastTest=TRUE \
             --SAIGEOutputFile=${TMPFILE} \
-            --groupFile=$GROUPFILE \
-            --annotation_in_groupTest=$ANNOTATIONS \
+            --groupFile=${GROUPFILE} \
+            --annotation_in_groupTest=${ANNOTATIONS} \
             --is_output_markerList_in_groupTest=TRUE \
             --is_single_in_groupTest=TRUE \
             --maxMAF_in_groupTest=${MAX_MAF} \
-            --condition="$CONDITION"
+            --condition="${CONDITION}"
+    fi
 
     # Append TMPFILE to OUT (header and all)
     [[ -s "${TMPFILE}" ]] && cat "${TMPFILE}" >> "${OUT}"
