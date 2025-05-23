@@ -3,7 +3,7 @@
 # Prerequisite
 list_of_vcf_files: "aou_paths/amr/amr_vcf_file_list.txt"
 list_of_model_files: "aou_paths/amr/amr_model_file_list.txt"
-list_of_variance_ratio_files: "aou_paths/amr/amr_variance_file_list.txt"
+list_of_variance_ratio_files: "aou_paths/amr/amr_variance_null_file_list.txt"
 sparse_matrix: "snakemake_amr/mtx/allofus_array_amr_snp_wise_relatednessCutoff_0.05_5000_randomMarkersUsed.sparseGRM.mtx"
 list_of_group_files: "aou_paths/amr/amr_group_file_list.txt"
 
