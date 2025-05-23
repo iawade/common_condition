@@ -178,7 +178,7 @@ rule spa_tests_stepwise_conditional:
     output:
         "run_files/{gene}_{trait}_{distance}_{maf}_string.txt" 
     params:
-        maf_common="{maf}"
+        maf_common="{maf}",
         use_null_var_ratio=config["use_null_var_ratio"]
     shell:
         """
@@ -208,7 +208,7 @@ rule spa_tests_conditional:
     params:
         min_mac=min_mac,
         annotations_to_include=annotations_to_include,
-        max_MAF="{maf}"
+        max_MAF="{maf}",
         use_null_var_ratio=config["use_null_var_ratio"]
     shell:
         """
