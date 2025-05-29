@@ -72,7 +72,7 @@ while [ "${intFlag}" -eq 1 ]
 do
   # Run the step2_SPAtests.R and redirect output to TMPFILE
 
-  if [ "$USE_NULL_VAR_RATIO" = "true" ]; then
+  if [ "${USE_NULL_VAR_RATIO,,}" = "true" ]; then
     step2_SPAtests.R \
         --vcfFile=${VCF} \
         --vcfFileIndex=${VCF}.csi \
