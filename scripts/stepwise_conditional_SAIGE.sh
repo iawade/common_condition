@@ -14,7 +14,7 @@ echo "${USE_NULL_VAR_RATIO}"
 
 TMPFILE=$(mktemp)
 
-if [ "${USE_NULL_VAR_RATIO}" = "true" ]; then
+if [ "${USE_NULL_VAR_RATIO,,}" = "true" ]; then
 
   step2_SPAtests.R \
         --vcfFile=${VCF} \
