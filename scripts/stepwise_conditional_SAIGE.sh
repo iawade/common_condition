@@ -8,11 +8,13 @@ VARIANCERATIO="${4}"
 SPARSEGRM="${5}"
 SPARSEGRMID="${SPARSEGRM}.sampleIDs.txt"
 CHR="${6}"
-USE_NULL_VAR_RATIO=${7}
+USE_NULL_VAR_RATIO="${7}"
+echo "null var vatio"
+echo "${USE_NULL_VAR_RATIO}"
 
 TMPFILE=$(mktemp)
 
-if [ "$USE_NULL_VAR_RATIO" = "true" ]; then
+if [ "${USE_NULL_VAR_RATIO}" = "true" ]; then
 
   step2_SPAtests.R \
         --vcfFile=${VCF} \
