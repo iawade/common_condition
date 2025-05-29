@@ -74,7 +74,7 @@ def combine_outputs(out):
         # Save to a new file
         combined_df.to_csv(out + ".singleAssoc.txt", sep="\t", index=False)
     else:
-        open(out + "singleAssoc.txt", 'a').close()
+        open(out + ".singleAssoc.txt", 'a').close()
 
     print(f"Files merged and sorted. Output saved as {out}")
 
