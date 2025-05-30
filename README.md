@@ -171,7 +171,7 @@ This workflow requires input variant files in VCF format. If your data is curren
 > This is the same naming as exported by SAIGE step0, so shouldn't be an issue! 
 
 7. **Other Config Parameters**
-   - "gene_trait_pairs_to_test" relates to the csv of BRaVa gene-trait pairs to be tested/confirmed with these conditional analyses. The actual csv is not provided in this repo. It can be downloaded from `gs://brava-meta-pilot-analysis/`. **If you're unable to access as an analyst in BRaVa, please email bravaconsortium@gmail.com.
+   - "gene_trait_pairs_to_test" relates to the csv of BRaVa gene-trait pairs to be tested/confirmed with these conditional analyses. The actual csv is not provided in this repo. It can be downloaded from `gs://brava-meta-pilot-analysis/gene_phenotype_pairs_290525.csv`. **If you're unable to access as an analyst in BRaVa, please email bravaconsortium@gmail.com.
    - "maf" outlines the minor allele frequencies defining "common" variants to be tested in this conditional analysis
    - "distance" relates to how many bases up and downstream of the gene of interest's start/stop coordinates to identify common variants for conditioning
    - The values stored in these entries **should not be changed** in the config. The config file you use should have:
