@@ -7,7 +7,12 @@ conda activate brava_hits_common_condition_check
 cd ${SCRIPT_DIR}
 # Make files present in same filepath, so that file locations
 # in the list files are relative to the script directory
-mv ${DATA_DIR} ${SCRIPT_DIR}
+mv ${DATA_DIR} .
+
+# move any already completed run information into the VM
+mv ${RUN_DIR} run_files
+mv ${SAIGE_DIR} saige_outputs
+
 mv configs/${ANC}_config.yaml config.yaml
 
 WORKFLOW_FILE="brava_hits_common_stepwise_condition_check.smk"
