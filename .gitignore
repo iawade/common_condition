@@ -146,6 +146,8 @@ localize_inputs.sh
 upload_ints.sh
 dnanexus-upload-agent-1.5.33-linux/
 upload_ints_ua.sh
+aou_paths/
+snakemake_iterative_call_dsub.sh
 
 # Keep README and metadata
 !README.md

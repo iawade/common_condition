@@ -1,4 +1,5 @@
 # Instructions for Confirming BRaVa Gene-Trait "hits" by Conditioning on Nearby Common Variants 
+[Please read until the end - some important considerations/potential pitfalls]
 
 ## Prerequisites
 
@@ -62,9 +63,8 @@
       > test_files/TG.rda  
       > test_files/Urolith.rda
       > ```
-   - There is one exception: "WHRBMI" has been chnaged to **WHRbmi** to avoid mismatch errors
        
-4. **QC’d Group File**
+4. **QC’d Group File (see warning below)**
    - Contains all annotated variants used for the pilot analysis
    - The pipeline currently only supports one group file - if previously split by chromosome please concatenate together
    - Two lines per gene, one with a space-delineated list of variants, followed by the corresponding annotations:
@@ -79,7 +79,7 @@
       > group_file: "test_files/group_file.txt"
       > ```
    - Annotations for potential common variants that will be pulled out in this workflow and used for conditioning **are not** required to be in the group file
-      
+
 
 5. **QC’d VCF with Genotypes**
    - VCFs with all samples and sites for analysis included, including individual genotypes
@@ -100,21 +100,28 @@
       > test_files/QC_applied_common_variants_present_chr1.vcf.bgz
       > test_files/QC_applied_common_variants_present_chr2.vcf.bgz
       > ```
+---
+##### **Converting PLINK or BGEN to VCF**
 
-##### **plink Conversion**
-   - As the SAIGE step2-conditional analysis is on such a small region, the benefits of using plink would be relatively marginal. If variant files are currently in these file formats please convert them first and then use the output VCF[s] in this workflow
-   - Conversion (with bgzip compression and creation of .csi index) can be achieved with `plink1/2` and `bcftools`/`tabix`:
-      > #### plink v1.x (.bed/.bim/.fam):
-      > ```sh
-      > plink --bfile input_prefix --recode vcf --out output_prefix
-      > bgzip output_prefix.vcf
-      > tabix --csi -p vcf output_prefix.vcf.gz
-   
-      > #### plink v2 (.pgen/.pvar/.psam):
-      > ```sh
-      > plink2 --pfile input_prefix --export vcf bgz --out output_prefix
-      > bgzip output_prefix.vcf
-      > tabix --csi -p vcf output_prefix.vcf.gz
+This workflow requires input variant files in VCF format. If your data is currently in PLINK (`.bed/.bim/.fam` or `.pgen/.pvar/.psam`) or BGEN format, **you must convert it to VCF first**.
+
+   ##### Important Notes on PLINK 1.x
+
+   PLINK v1.9 can alter data in ways that cause serious issues:
+
+   - Chromosome names may be output as numeric (e.g. `1`) instead of `chr1`
+   - Sample IDs in the VCF may include family IDs (e.g. `FID_IID`)
+   - Reference/alternate allele order may be flipped unless `--keep-allele-order` is used
+
+   An example script is provided to safely convert from PLINK v1 format:
+      scripts/UTILITY_export_vcf_from_plink.sh
+
+      This script:
+      - Enforces `chr1`, `chr2`, ... chromosome naming
+      - Strips family IDs from sample names
+      - Uses `--keep-allele-order` to preserve allele direction
+      - Outputs a bgzipped VCF with `.csi` index
+---
 
 
 6. **Sparse GRM**
@@ -203,22 +210,82 @@ To create the Conda environment from the `brava_hits_common_condition_check_cond
 
 ## Running the SnakeMake pipeline
 - Once everything is set up, running should be relatively straightforward
-- A submission script `snakemake_call.sh` is provided, simply run the script locally or submit to a cluster with relevant options, for example:
+- A submission script `snakemake_iterative_call.sh` is provided, simply run the script locally or submit to a cluster with relevant options, for example:
    > ```bash
-   > bash snakemake_call.sh
+   > bash snakemake_iterative_call.sh
    > ```
    or
    > ```bash
-   > sbatch --job-name=common_conditioning_pipeline --mem-per-cpu=8000  --ntasks=1 --cpus-per-task=8 --partition=short --output=slurm-%x-%A_%a.out snakemake_call.sh 
+   > sbatch --job-name=common_conditioning_pipeline --mem-per-cpu=8000  --ntasks=1 --cpus-per-task=8 --partition=short --output=slurm-%x-%A_%a.out snakemake_iterative_call.sh
    > ```
    etc
 
-TODO - should put something about final outputs
+## Final Outputs
+- The pipeline ultimately produces two files:
+   - `brava_stepwise_conditional_analysis_results.txt`
+   - `brava_stepwise_conditional_analysis_results.txt.singleAssoc.txt`
+- These contain all the conditional SAIGE step2 outputs concatenated together
+- Please rename to something appropriate and send to Duncan Palmer!
 
+---
+
+## Group File Reordering — CRITICAL WARNING
+
+   WARNING: Variant order must exactly match between your VCF and the group file.  
+   If not, SAIGE will either silently skip variants or misalign them, leading to incorrect or silently corrupted results.
+
+   SAIGE reads variants from the group file in the order they appear, assuming the VCF files contain variants in the exact same order. If the order does not match:
+
+   - Variants may be skipped or misread
+   - SAIGE may assign the wrong variant annotations
+   - Your association results could be incomplete or wrong, with no explicit error message
+
+   This is especially important if:
+   - You've subsetted or filtered the VCF
+   - You merged or re-sorted group files
+   - You're running with partial data from the full variant list
+
+   ### Recommended Fix
+
+   We provide utility scripts to regenerate a reordered and filtered group file to match the actual VCF content.
+
+   Step 1: Extract variant IDs from your working VCF(s)
+   Step 1: Extract variant IDs from your working VCF(s)
+
+      bash scripts/UTILITY_extract_chrom_pos_ref_alt_from_vcf.sh
+
+   This creates a file `all_var_ids.txt` with one line per variant in the format:
+
+      CHROM:POS:REF:ALT
+
+   Step 2: Reorder the group file based on those VCF variants
+
+      python scripts/UTILITY_reorder_group_file_based_on_extracted_vars_from_vcf.py
+
+   This script:
+   - Filters out variants not present in the VCF
+   - Keeps the original order from the VCF
+   - Writes a new `filtered_group_file.txt.gz`
+
+   ### Expected Inputs
+
+   - `groups/combined_group_file.txt.gz` — your original group file
+   - `*.vcf.gz` — the VCFs you're using for association tests
+
+   If your paths differ, edit the paths in the scripts accordingly.
+
+
+
+   - The script assumes variants are listed as `CHROM:POS:REF:ALT` in both the VCF and group file.
+   - If this format differs in your data, you'll need to modify the extraction and matching logic accordingly.
+   - Keep the `var` and `anno` lines in sync — they must remain paired after filtering.
+
+   ### Final Reminder
+
+   SAIGE will not warn you if variant IDs mismatch or go out of order.  
+   You must manually ensure correct ordering, or you risk invalid results.
+   
+   ---
 
 ## Notes
 - This pipeline utilises `mktemp`. By default this writes files in the `/tmp/` directory. If `/tmp/` is not available, for whatever reason, it may be worth double-checking that `mktemp`'s workarounds (for example writing to `/var/tmp/` ) are working before running the workflow 
-- BioMart is used to extract genomic coordinates for genes. Their servers are very sensitive and, despite the retry strategy used in this pipeline, jobs may rarely fail to complete
-      - To resolve, either:
-      - Keep re-running the pipeline 
-      - Manually create the bed file outputs needed (although this can complicate running of the snakemake pipeline - which can be resolved with `rm -rf .snakemake/incomplete/` before re-running the pipeline )  
