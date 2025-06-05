@@ -140,6 +140,12 @@ test_spa_output # something with no extension
 # Me-specific
 test_files/
 gzip_to_bgzip_and_index.sh
+download_inputs.sh
+inputs/
+localize_inputs.sh
+upload_ints.sh
+dnanexus-upload-agent-1.5.33-linux/
+upload_ints_ua.sh
 
 # Keep README and metadata
 !README.md
