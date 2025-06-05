@@ -1,9 +1,5 @@
-<<<<<<< HEAD
-# Instructions for Confirming BRaVa Gene-Trait "hits" by Conditioning on Nearby Common Variants 
-[Please read until the end - some important considerations/potential pitfalls]
-=======
 # Instructions for confirming BRaVa rare-variant gene-trait associations by conditioning on nearby common variants 
->>>>>>> c129743 (Update README.md)
+[Please read until the end - some important considerations/potential pitfalls]
 
 ## Prerequisites
 
@@ -69,13 +65,8 @@
       > test_files/Urolith.rda
       > ```
        
-<<<<<<< HEAD
-4. **QC’d Group File (see warning below)**
-   - Contains all annotated variants used for the pilot analysis
-=======
 4. **QCed Group File**
    - Contains all annotated variants used for the pilot analysis (this should be the group file used in the pilot analysis)
->>>>>>> c129743 (Update README.md)
    - The pipeline currently only supports one group file - if previously split by chromosome please concatenate together
    - As a reminder, there are two lines per gene, one with a space-delineated list of variants, followed by the corresponding annotations:
       > #### `group file (name and extension are unimportant)`
@@ -88,13 +79,8 @@
       > ```yaml
       > group_file: "test_files/group_file.txt"
       > ```
-<<<<<<< HEAD
-   - Annotations for potential common variants that will be pulled out in this workflow and used for conditioning **are not** required to be in the group file
-
-=======
 > [!NOTE]
 >  - Annotations for potential common variants that will be pulled out in this workflow and used for conditioning **are not** required to be in the group file
->>>>>>> c129743 (Update README.md)
 
 5. **QCed VCF with Genotypes**
    - VCFs with all samples and sites for analysis included, including individual genotypes
@@ -116,7 +102,6 @@
       > test_files/QC_applied_common_variants_present_chr1.vcf.bgz
       > test_files/QC_applied_common_variants_present_chr2.vcf.bgz
       > ```
-<<<<<<< HEAD
 ---
 ##### **Converting PLINK or BGEN to VCF**
 
@@ -139,22 +124,6 @@ This workflow requires input variant files in VCF format. If your data is curren
       - Uses `--keep-allele-order` to preserve allele direction
       - Outputs a bgzipped VCF with `.csi` index
 ---
-=======
-##### **plink Conversion**
-   - As the SAIGE step2-conditional analysis is on such a small region, the benefits of using plink would be relatively marginal. If variant files are currently in these file formats please convert them first and then use the output VCFs in this workflow
-   - Conversion (with bgzip compression and creation of .csi index) can be achieved with `plink1/2` and `bcftools`/`tabix`:
-      > #### plink v1.x (.bed/.bim/.fam):
-      > ```sh
-      > plink --bfile input_prefix --recode vcf --out output_prefix
-      > bgzip output_prefix.vcf
-      > tabix --csi -p vcf output_prefix.vcf.gz
-   
-      > #### plink v2 (.pgen/.pvar/.psam):
-      > ```sh
-      > plink2 --pfile input_prefix --export vcf bgz --out output_prefix
-      > bgzip output_prefix.vcf
-      > tabix --csi -p vcf output_prefix.vcf.gz
->>>>>>> c129743 (Update README.md)
 
 > [!IMPORTANT]
 > Remember, ensure that the CHROM column in the VCF matches the protein coding BED file format (e.g. "chr1", not "1"). Similarly, ensure the group file also matches ("chr1" not "1") for variants in the group file.
@@ -230,7 +199,6 @@ To create the conda environment from the `brava_hits_common_condition_check_cond
    > ```
    or
    > ```bash
-<<<<<<< HEAD
    > sbatch --job-name=common_conditioning_pipeline --mem-per-cpu=8000  --ntasks=1 --cpus-per-task=8 --partition=short --output=slurm-%x-%A_%a.out snakemake_iterative_call.sh
    > ```
    etc
@@ -302,11 +270,3 @@ To create the conda environment from the `brava_hits_common_condition_check_cond
 
 ## Notes
 - This pipeline utilises `mktemp`. By default this writes files in the `/tmp/` directory. If `/tmp/` is not available, for whatever reason, it may be worth double-checking that `mktemp`'s workarounds (for example writing to `/var/tmp/` ) are working before running the workflow 
-=======
-   > sbatch --job-name=common_conditioning_pipeline --mem-per-cpu=8000  --ntasks=1 --cpus-per-task=8 --partition=short --output=slurm-%x-%A_%a.out snakemake_iterative_call.sh 
-   > ```
-   etc
-
-## Notes
-- This pipeline utilises `mktemp`. By default this writes files in the `/tmp/` directory. If `/tmp/` is not available, for whatever reason, it may be worth double-checking that `mktemp`'s workarounds (for example writing to `/var/tmp/` ) are working before running the workflow. 
->>>>>>> c129743 (Update README.md)
