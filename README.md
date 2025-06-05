@@ -274,8 +274,6 @@ To create the Conda environment from the `brava_hits_common_condition_check_cond
 
    If your paths differ, edit the paths in the scripts accordingly.
 
-
-
    - The script assumes variants are listed as `CHROM:POS:REF:ALT` in both the VCF and group file.
    - If this format differs in your data, you'll need to modify the extraction and matching logic accordingly.
    - Keep the `var` and `anno` lines in sync — they must remain paired after filtering.
