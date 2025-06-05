@@ -1,5 +1,6 @@
 # Instructions for confirming BRaVa rare-variant gene-trait associations by conditioning on nearby common variants 
-[Please read until the end - some important considerations/potential pitfalls]
+> [!IMPORTANT]
+> Please read until the end - some important considerations/potential pitfalls
 
 ## Prerequisites
 
