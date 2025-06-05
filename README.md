@@ -108,8 +108,8 @@
 This workflow requires input variant files in VCF format. If your data is currently in PLINK (`.bed/.bim/.fam` or `.pgen/.pvar/.psam`) or BGEN format, **you must convert it to VCF first**.
 
    ##### Important Notes on PLINK 1.x
-
-   PLINK v1.9 can alter data in ways that cause serious issues:
+> [!WARNING]  
+> PLINK v1.9 can alter data in ways that cause serious issues:
 
    - Chromosome names may be output as numeric (e.g. `1`) instead of `chr1`
    - Sample IDs in the VCF may include family IDs (e.g. `FID_IID`)
@@ -212,10 +212,12 @@ To create the conda environment from the `brava_hits_common_condition_check_cond
 
 ---
 
-## Group File Reordering — CRITICAL WARNING
 
-   WARNING: Variant order must exactly match between your VCF and the group file.  
-   If not, SAIGE will either silently skip variants or misalign them, leading to incorrect or silently corrupted results.
+## Group File Reordering
+
+> [!WARNING]  
+> Variant order must exactly match between your VCF and the group file.  
+> If not, SAIGE will either silently skip variants or misalign them, leading to incorrect or silently corrupted results.
 
    SAIGE reads variants from the group file in the order they appear, assuming the VCF files contain variants in the exact same order. If the order does not match:
 
@@ -268,5 +270,5 @@ To create the conda environment from the `brava_hits_common_condition_check_cond
    
    ---
 
-## Notes
-- This pipeline utilises `mktemp`. By default this writes files in the `/tmp/` directory. If `/tmp/` is not available, for whatever reason, it may be worth double-checking that `mktemp`'s workarounds (for example writing to `/var/tmp/` ) are working before running the workflow 
+> [!NOTE]  
+> This pipeline utilises `mktemp`. By default this writes files in the `/tmp/` directory. If `/tmp/` is not available, for whatever reason, it may be worth double-checking that `mktemp`'s workarounds (for example writing to `/var/tmp/` ) are working before running the workflow 
