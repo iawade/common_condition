@@ -66,9 +66,9 @@
       > test_files/Urolith.rda
       > ```
        
-4. **QCed Group File**
+4. **QCed Group File or Files**
    - Contains all annotated variants used for the pilot analysis (this should be the group file used in the pilot analysis)
-   - The pipeline currently only supports one group file - if previously split by chromosome please concatenate together
+   - A list of the file paths of these are then passed to the config (this can also be a "list" of just one file; the file/files may  also be gzip compressed)
    - As a reminder, there are two lines per gene, one with a space-delineated list of variants, followed by the corresponding annotations:
       > #### `group file (name and extension are unimportant)`
       > ```
@@ -78,7 +78,7 @@
    
       > #### `config.yaml`
       > ```yaml
-      > group_file: "test_files/group_file.txt"
+      > list_of_group_files: "test_files/group_file_list.txt"
       > ```
 > [!NOTE]
 >  - Annotations for potential common variants that will be pulled out in this workflow and used for conditioning **are not** required to be in the group file
