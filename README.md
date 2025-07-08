@@ -2,6 +2,18 @@
 > [!IMPORTANT]
 > Please read until the end - some important considerations/potential pitfalls
 
+## Motivation and outline of the procedure
+
+This pipeline is designed to determine common variants which have the potential to be driving rare variant associations uncovered in our meta-analysis. We will then condition on these variants in a final collection of gene-based association tests at candidate (gene, phenotype) pairs.
+
+Briefly, following gene-based analysis and subsequent meta-analysis, we will carry out common variant conditioning for all gene-phenotype pairs with significant meta-analysis association _P_-values. For each (biobank, ancestry, phenotype) tuple, we will then determine a collection of variants to condition on to account for signal driven by common variation nearby. To do this, we have created the iterative conditioning pipeline in this repository (`snakemake_iterative_call.sh`).
+
+For each MAF mask, we carry out association analysis of all variants with MAF greater than the MAF of the mask within 500kb of the gene. If any variant association has an association _P_-value < 1 × 10<sup>-5</sup>, we add it to a set of conditioning variants and condition on it `--condition` flag within SAIGE, and iteratively rerun until no variant in the region is associated (_P_-value < 1 × 10<sup>-5</sup>) with the trait. This procedure is carried out for all (ancestry, biobank) pairs.
+
+Each biobank (you!) then provides conditioning variant lists.
+
+In a final step, we then determine the union of these lists centrally for each genetic ancestry. The resultant variant lists are then shared back with the constituent biobanks. Biobanks then perform final gene-based association analysis conditioning on these variants. To guard against collinearity in the variants used for conditioning, we first perform linkage disequilibrium pruning, ensuring that no-pair of variants in the set have _r_<sup>2</sup> > 0.9. (WORK IN PROGRESS).
+
 ## Prerequisites
 
 ### Required Files and Config (config.yaml - see configs folder for examples) set up
