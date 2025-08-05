@@ -25,5 +25,5 @@ p_thres: 0.01
 
 # rule: spa_tests_conditional
 min_mac: 0.5
-annotations_to_include: "pLoF,damaging_missense,other_missense,synonymous,pLoF:damaging_missense,pLoF:damaging_missense:other_missense:synonymous"
+annotations_to_include: "pLoF,damaging_missense_or_protein_altering,other_missense,synonymous,pLoF:damaging_missense_or_protein_altering,pLoF:damaging_missense_or_protein_altering:other_missense:synonymous"
 use_null_var_ratio: false
