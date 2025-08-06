@@ -78,9 +78,9 @@ In a final step, we then determine the union of these lists centrally for each g
       > test_files/Urolith.rda
       > ```
        
-4. **QCed Group File or Files**
+4. **QCed Group File**
    - Contains all annotated variants used for the pilot analysis (this should be the group file used in the pilot analysis)
-   - A list of the file paths of these are then passed to the config (this can also be a "list" of just one file; the file/files may  also be gzip compressed)
+   - The pipeline currently only supports one group file - if previously split by chromosome please concatenate together
    - As a reminder, there are two lines per gene, one with a space-delineated list of variants, followed by the corresponding annotations:
       > #### `group file (name and extension are unimportant)`
       > ```
