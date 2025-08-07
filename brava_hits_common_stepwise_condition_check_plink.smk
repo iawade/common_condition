@@ -14,21 +14,25 @@ phenotype_json = config["phenotype_json"]
 use_null_var_ratio = config["use_null_var_ratio"]
 
 # For debugging
-list_of_plink_files="plink_testing/afr_plink_file_list.txt"
-list_of_model_files="plink_testing/afr_model_file_list.txt"
-list_of_variance_ratio_files="plink_testing/afr_variance_file_list.txt"
-sparse_matrix="/home/jupyter/conditioning_test/afr/mtx/allofus_array_afr_snp_wise_relatednessCutoff_0.05_5000_randomMarkersUsed.sparseGRM.mtx"
-list_of_group_files="plink_testing/afr_group_file_list.txt"
-distance=500000
-maf=[0.001, 0.0001]
-min_mac=0.5
-annotations_to_include="pLoF,damaging_missense,other_missense,synonymous,pLoF:damaging_missense,pLoF:damaging_missense:other_missense:synonymous"
-gene_trait_pairs_to_test="gene_pheno_test.csv"
-phenotype_json="pilot_phenotypes.json"
+# list_of_plink_files="plink_testing/afr_plink_file_list.txt"
+# list_of_model_files="plink_testing/afr_model_file_list.txt"
+# list_of_variance_ratio_files="plink_testing/afr_variance_file_list.txt"
+# sparse_matrix="/home/jupyter/conditioning_test/afr/mtx/allofus_array_afr_snp_wise_relatednessCutoff_0.05_5000_randomMarkersUsed.sparseGRM.mtx"
+# list_of_group_files="plink_testing/afr_group_file_list.txt"
+# distance=500000
+# maf=[0.001, 0.0001]
+# min_mac=0.5
+# annotations_to_include="pLoF,damaging_missense,other_missense,synonymous,pLoF:damaging_missense,pLoF:damaging_missense:other_missense:synonymous"
+# gene_trait_pairs_to_test="gene_pheno_test.csv"
+# phenotype_json="pilot_phenotypes.json"
 
 # Load plink files
 with open(list_of_plink_files) as f:
     plink_files = [line.strip() for line in f]
+
+plink_bim_files = [f"{p}.bim" for p in plink_files]
+plink_bed_files = [f"{p}.bed" for p in plink_files]
+plink_fam_files = [f"{p}.fam" for p in plink_files]
 
 # Load group files
 with open(list_of_group_files) as f:
@@ -112,9 +116,11 @@ rule all:
         expand("run_files/{gene_trait}_{distance}_{maf}_string.txt",
         gene_trait=valid_gene_trait_pairs,
         distance=config["distance"], maf=config["maf"]),
-        expand("run_files/{gene}_{distance}_{maf}.vcf.bgz", 
+        expand("run_files/{gene}_{distance}_{maf}.bim", 
         gene=genes_in_valid_pairs, distance=config["distance"], maf=config["maf"]),
-        expand("run_files/{gene}_{distance}_{maf}.vcf.bgz.csi", 
+        expand("run_files/{gene}_{distance}_{maf}.bed", 
+        gene=genes_in_valid_pairs, distance=config["distance"], maf=config["maf"]),
+        expand("run_files/{gene}_{distance}_{maf}.fam", 
         gene=genes_in_valid_pairs, distance=config["distance"], maf=config["maf"]),
         expand("run_files/{gene}_group_file.txt", gene=genes_in_valid_pairs),
         expand("run_files/{gene}.bed", gene=genes_in_valid_pairs),
@@ -132,7 +138,9 @@ rule identify_gene_start_stop:
 
 rule filter_to_coding_gene_plink:
     input:
-        plink = lambda wildcards: plink_files,
+        plink_bim = lambda wildcards: plink_bim_files,
+        plink_bed = lambda wildcards: plink_bed_files,
+        plink_fam = lambda wildcards: plink_fam_files,
         bed = "run_files/{gene}.bed" 
     output:
         "run_files/{gene}_{distance}_{maf}.bim",
@@ -145,9 +153,9 @@ rule filter_to_coding_gene_plink:
         """
         chr=$(python scripts/extract_chromosome.py --ensembl_id \"{wildcards.gene}\")
         echo $chr
-        for plink_fileset in {input.plink}; do
-            if [[ "$plink_fileset" =~ \\.($chr)\\. ]]; then
-                echo $plink_fileset
+        for plink_bed in {input.plink_bed}; do
+            if [[ "$plink_bed" =~ \\.($chr)\\. ]]; then
+                plink_fileset=$(echo "$plink_bed" | sed 's/\\.bed$//')
                 matched_plink=$plink_fileset
                 bash scripts/filter_to_coding_gene_plink.sh $plink_fileset {wildcards.gene} {params.distance} {wildcards.maf} {params.threads}
             fi
@@ -199,7 +207,8 @@ rule spa_tests_stepwise_conditional:
     shell:
         """
         chr=$(python scripts/extract_chromosome.py --ensembl_id \"{wildcards.gene}\")
-        for plink_fileset in {input.plink}; do
+        for plink_bed in {input.plink_bed}; do
+            plink_fileset=$(echo "$plink_bed" | sed 's/\\.bed$//')
             bash scripts/stepwise_conditional_SAIGE_plink.sh \
                 $plink_fileset {output} {input.model_file} {input.variance_file} {input.sparse_matrix} $chr {params.use_null_var_ratio}
         done
@@ -207,7 +216,9 @@ rule spa_tests_stepwise_conditional:
 
 rule spa_tests_conditional:
     input:
-        plink=lambda wildcards: plink_files,
+        plink_bim = lambda wildcards: plink_bim_files,
+        plink_bed = lambda wildcards: plink_bed_files,
+        plink_fam = lambda wildcards: plink_fam_files,
         model_file=lambda wildcards: [
             mf for mf in model_files
             if re.search(rf'(?:^|[/_.\-]){re.escape(wildcards.trait)}(?=[/_.\-])', mf)
@@ -229,8 +240,9 @@ rule spa_tests_conditional:
     shell:
         """
         chr=$(python scripts/extract_chromosome.py --ensembl_id \"{wildcards.gene}\")
-        for plink_fileset in {input.plink}; do
-            if [[ "$plink_fileset" =~ \\.($chr)\\. ]]; then
+        for plink_bed in {input.plink_bed}; do
+            if [[ "$plink_bed" =~ \\.($chr)\\. ]]; then
+                plink_fileset=$(echo "$plink_bed" | sed 's/\\.bed$//')
                 bash scripts/saige_step2_conditioning_check.sh \
                     $plink_fileset {output} {params.min_mac} {input.model_file} {input.variance_file} {input.sparse_matrix} {input.group_file} {params.annotations_to_include} {input.conditioning_variants} {params.max_MAF} {params.use_null_var_ratio}
             fi
