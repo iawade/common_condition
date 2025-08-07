@@ -7,7 +7,7 @@ import gzip
 def get_gene_coordinates(ensembl_id, file='data/all_genes.tsv.gz', is_gzipped=True):
 
     # Dynamically create the output filename
-    output_file = f"run_files/{ensembl_id}.bed"
+    output_file = f"run_files/start_end_{ensembl_id}.bed"
     open_input = gzip.open if is_gzipped else open
 
     with open_input(file, 'rt') as infile, open(output_file, 'wt') as output:
