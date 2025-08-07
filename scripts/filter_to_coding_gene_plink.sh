@@ -28,11 +28,21 @@ awk -v BP_DISTANCE="$BP_DISTANCE" 'BEGIN {OFS="\t"} {
 
 # Use plink to filter by the expanded BED regions and MAF threshold
 # Using --maf $MAF_COMMON and --mac 41, which is the same as max(MAC > 40, MAF > $MAF_COMMON)
-plink --bfile ${INPUT_PLINK} \
+plink2 --bfile ${INPUT_PLINK} \
   --extract range ${EXPANDED_BED} \
   --maf ${MAF_COMMON} \
   --mac 41 \
   --make-bed \
   --out ${OUTPUT_PLINK}
+
+TMPFILE=$(mktemp)
+awk '{
+  if ($1 ~ /^chr/) {
+    print  # already has "chr", leave it
+  } else {
+    $1 = "chr" $1
+    print
+  }
+}' OFS='\t' ${OUTPUT_PLINK}.bim > ${TMPFILE} && mv ${TMPFILE} ${OUTPUT_PLINK}.bim
 
 echo "Created plink fileset (.bim/.bed/.fam) for the gene ${ENSEMBL_ID}"

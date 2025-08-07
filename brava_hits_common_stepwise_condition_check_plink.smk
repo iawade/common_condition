@@ -132,7 +132,7 @@ rule identify_gene_start_stop:
 
 rule filter_to_coding_gene_plink:
     input:
-        vcf = lambda wildcards: plink_files,
+        plink = lambda wildcards: plink_files,
         bed = "run_files/{gene}.bed" 
     output:
         "run_files/{gene}_{distance}_{maf}.bim",
@@ -145,16 +145,16 @@ rule filter_to_coding_gene_plink:
         """
         chr=$(python scripts/extract_chromosome.py --ensembl_id \"{wildcards.gene}\")
         echo $chr
-        for vcf in {input.vcf}; do
-            if [[ "$vcf" =~ \\.($chr)\\. ]]; then
-                echo $vcf
-                matched_vcf=$vcf
-                bash scripts/filter_to_coding_gene_vcf.sh $vcf {wildcards.gene} {params.distance} {wildcards.maf} {params.threads}
+        for plink_fileset in {input.plink}; do
+            if [[ "$plink_fileset" =~ \\.($chr)\\. ]]; then
+                echo $plink_fileset
+                matched_plink=$plink_fileset
+                bash scripts/filter_to_coding_gene_plink.sh $plink_fileset {wildcards.gene} {params.distance} {wildcards.maf} {params.threads}
             fi
         done
 
-        if [[ -z "$matched_vcf" ]]; then
-            echo "ERROR: No matching VCF found for chromosome $chr"
+        if [[ -z "$matched_plink" ]]; then
+            echo "ERROR: No matching plink fileset (.bim/.bed/.fam) found for chromosome $chr"
         fi
         """
 
@@ -178,8 +178,9 @@ rule filter_group_file:
 
 rule spa_tests_stepwise_conditional:
     input:
-        vcf= "run_files/{gene}_{distance}_{maf}.vcf.bgz",
-        vcf_csi = "run_files/{gene}_{distance}_{maf}.vcf.bgz.csi",
+        plink_bim = "run_files/{gene}_{distance}_{maf}.bim",
+        plink_bed = "run_files/{gene}_{distance}_{maf}.bed",
+        plink_fam = "run_files/{gene}_{distance}_{maf}.fam",
         model_file=lambda wildcards: [
             mf for mf in model_files
             if re.search(rf'(?:^|[/_.\-]){re.escape(wildcards.trait)}(?=[/_.\-])', mf)
@@ -198,15 +199,15 @@ rule spa_tests_stepwise_conditional:
     shell:
         """
         chr=$(python scripts/extract_chromosome.py --ensembl_id \"{wildcards.gene}\")
-        for vcf in {input.vcf}; do
-            bash scripts/stepwise_conditional_SAIGE.sh \
-                $vcf {output} {input.model_file} {input.variance_file} {input.sparse_matrix} $chr {params.use_null_var_ratio}
+        for plink_fileset in {input.plink}; do
+            bash scripts/stepwise_conditional_SAIGE_plink.sh \
+                $plink_fileset {output} {input.model_file} {input.variance_file} {input.sparse_matrix} $chr {params.use_null_var_ratio}
         done
         """
 
 rule spa_tests_conditional:
     input:
-        vcf=lambda wildcards: vcf_files,
+        plink=lambda wildcards: plink_files,
         model_file=lambda wildcards: [
             mf for mf in model_files
             if re.search(rf'(?:^|[/_.\-]){re.escape(wildcards.trait)}(?=[/_.\-])', mf)
@@ -228,10 +229,10 @@ rule spa_tests_conditional:
     shell:
         """
         chr=$(python scripts/extract_chromosome.py --ensembl_id \"{wildcards.gene}\")
-        for vcf in {input.vcf}; do
-            if [[ "$vcf" =~ \\.($chr)\\. ]]; then
+        for plink_fileset in {input.plink}; do
+            if [[ "$plink_fileset" =~ \\.($chr)\\. ]]; then
                 bash scripts/saige_step2_conditioning_check.sh \
-                    $vcf {output} {params.min_mac} {input.model_file} {input.variance_file} {input.sparse_matrix} {input.group_file} {params.annotations_to_include} {input.conditioning_variants} {params.max_MAF} {params.use_null_var_ratio}
+                    $plink_fileset {output} {params.min_mac} {input.model_file} {input.variance_file} {input.sparse_matrix} {input.group_file} {params.annotations_to_include} {input.conditioning_variants} {params.max_MAF} {params.use_null_var_ratio}
             fi
         done
         """
