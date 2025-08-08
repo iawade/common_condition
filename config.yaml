@@ -2,6 +2,7 @@
 
 # Prerequisite
 list_of_plink_files: "plink_testing/afr_plink_file_list.txt"
+list_of_vcf_files: "plink_testing/afr_vcf_file_list.txt"
 list_of_model_files: "plink_testing/afr_model_file_list.txt"
 list_of_variance_ratio_files: "plink_testing/afr_variance_file_list.txt"
 sparse_matrix: "/home/jupyter/conditioning_test/afr/mtx/allofus_array_afr_snp_wise_relatednessCutoff_0.05_5000_randomMarkersUsed.sparseGRM.mtx"

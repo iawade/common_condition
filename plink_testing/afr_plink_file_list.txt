@@ -1,1 +1,1 @@
-/home/jupyter/conditioning_test/afr/plink/aou.exome_split.v8.qced.chr19.afr.af01.popmax01
+/home/jupyter/conditioning_test/afr/plink/aou.exome_split.v8.qced.chr19.afr
