@@ -113,7 +113,7 @@ rule all:
 
 rule identify_gene_start_stop:
     output:
-        "run_files/{gene}.bed"
+        "run_files/start_end_{gene}.bed"
     shell:
         "python scripts/start_end_query.py --ensembl_id \"{wildcards.gene}\""
 
