@@ -131,7 +131,7 @@ do
   echo "conditioning..."
   # Write a small R script to ensure that the conditioning SNPs are 
   # in order
-  CONDITION=$(Rscript scripts/sort_conditioning_snps.R --condition "${CONDITION}")
+  CONDITION=$(Rscript scripts/sort_conditioning_snps.R --condition "${CONDITION_unordered}")
   echo $CONDITION
 
   intFlag=$(awk -v P_top="${P_top}" -v P_T="${P_T}" 'BEGIN{print (P_top<P_T)?1:0}')
