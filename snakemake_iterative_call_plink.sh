@@ -3,7 +3,7 @@
 # Path to the Snakemake workflow file
 WORKFLOW_FILE="brava_hits_common_stepwise_condition_check_plink.smk"
 
-mkdir -p saige_outputs run_files
+mkdir -p saige_outputs run_files/bed
 
 CORES=$(nproc)
 

@@ -17,7 +17,7 @@ mv configs/${ANC}_config.yaml config.yaml
 
 WORKFLOW_FILE="brava_hits_common_stepwise_condition_check.smk"
 
-mkdir -p saige_outputs run_files
+mkdir -p saige_outputs run_files/bed
 
 CORES=$(nproc)
 
