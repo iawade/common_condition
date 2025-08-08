@@ -12,7 +12,7 @@ OUTPUT_PLINK="run_files/${ENSEMBL_ID}_${BP_DISTANCE}_${MAF_COMMON}"
 
 # Expand the BED regions for query and filter to coding regions
 ## include common variation within the gene of interest too 
-EXPANDED_BED="run_files/expanded_regions_${ENSEMBL_ID}.bed"
+EXPANDED_BED="run_files/bed/expanded_regions_${ENSEMBL_ID}.bed"
 awk -v BP_DISTANCE="$BP_DISTANCE" 'BEGIN {OFS="\t"} {
     start = $2 - BP_DISTANCE;
     end = $3 + BP_DISTANCE;
@@ -24,7 +24,7 @@ awk -v BP_DISTANCE="$BP_DISTANCE" 'BEGIN {OFS="\t"} {
 
     # Print the entire expanded region
     print $1, start, end;
-}' "run_files/start_end_${ENSEMBL_ID}.bed" | bedtools intersect -a stdin -b data/protein_coding_regions_hg38_no_padding_no_UTR_v39.bed > "$EXPANDED_BED"
+}' "run_files/bed/start_end_${ENSEMBL_ID}.bed" | bedtools intersect -a stdin -b data/protein_coding_regions_hg38_no_padding_no_UTR_v39.bed > "$EXPANDED_BED"
 
 # Use plink to filter by the expanded BED regions and MAF threshold
 # Using --maf $MAF_COMMON and --mac 41, which is the same as max(MAC > 40, MAF > $MAF_COMMON)

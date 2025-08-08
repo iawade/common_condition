@@ -104,7 +104,7 @@ rule all:
         expand("run_files/{gene}_{distance}_{maf}.vcf.bgz.csi", 
         gene=genes_in_valid_pairs, distance=config["distance"], maf=config["maf"]),
         expand("run_files/{gene}_group_file.txt", gene=genes_in_valid_pairs),
-        expand("run_files/start_end_{gene}.bed", gene=genes_in_valid_pairs),
+        expand("run_files/startend_{gene}.bed", gene=genes_in_valid_pairs),
         expand("saige_outputs/{gene_trait}_{distance}_saige_results_{maf}.txt",
                gene_trait=valid_gene_trait_pairs,
                distance=config["distance"],
@@ -113,7 +113,7 @@ rule all:
 
 rule identify_gene_start_stop:
     output:
-        "run_files/start_end_{gene}.bed"
+        "run_files/startend_{gene}.bed"
     shell:
         "python scripts/start_end_query.py --ensembl_id \"{wildcards.gene}\""
 
