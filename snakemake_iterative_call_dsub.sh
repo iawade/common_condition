@@ -13,8 +13,9 @@ mv ${MODEL_DIR} ${DATA_DIR}
 mv ${MATRIX_DIR} ${DATA_DIR}
 mv ${VARIANCE_DIR} ${DATA_DIR}
 mv ${GROUP_DIR} ${DATA_DIR}
-mv ${VCF} ${DATA_DIR}
-mv ${VCF_CSI} ${DATA_DIR}
+VCF_DIR="${DATA_DIR}/vcf/combined/"
+mv ${VCF} ${VCF_DIR}
+mv ${VCF_CSI} ${VCF_DIR}
 
 # move any already completed run information into the VM
 # mv ${RUN_DIR} run_files
