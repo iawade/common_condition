@@ -149,6 +149,7 @@ rule filter_to_coding_gene_plink:
     params:
         distance=distance,
         threads=config["threads"]
+    threads: config["threads"]
     shell:
         """
         chr=$(python scripts/extract_chromosome.py --ensembl_id \"{wildcards.gene}\")
@@ -237,6 +238,7 @@ rule spa_tests_conditional:
         annotations_to_include=annotations_to_include,
         max_MAF="{maf}",
         use_null_var_ratio=config["use_null_var_ratio"]
+    threads: 4
     shell:
         """
         chr=$(python scripts/extract_chromosome.py --ensembl_id \"{wildcards.gene}\")
