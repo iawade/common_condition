@@ -43,8 +43,10 @@ def combine_outputs(out):
         combined_df = pd.concat(dfs, ignore_index=True)
         # Save to a new file
         combined_df.to_csv(out, sep="\t", index=False)
+        print(f"results file is not empty: saved as {out}")
     else:
         open(out, 'a').close()
+        print(f"results file is empty: saved as {out}")
 
     # Process each file
     for file in files_single:
@@ -73,8 +75,10 @@ def combine_outputs(out):
         combined_df = pd.concat(df_singles, ignore_index=True)
         # Save to a new file
         combined_df.to_csv(out + ".singleAssoc.txt", sep="\t", index=False)
+        print(f"singleAssoc file is not empty: saved as {out}.singleAssoc.txt")
     else:
         open(out + ".singleAssoc.txt", 'a').close()
+        print(f"singleAssoc file is empty: saved as {out}.singleAssoc.txt")
 
     print(f"Files merged and sorted. Output saved as {out}")
 
