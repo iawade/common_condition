@@ -13,8 +13,8 @@ mv ${MODEL_DIR} ${DATA_DIR}
 mv ${MATRIX_DIR} ${DATA_DIR}
 mv ${VARIANCE_DIR} ${DATA_DIR}
 mv ${GROUP_DIR} ${DATA_DIR}
-VCF_DIR="${DATA_DIR}/vcf/combined/"
-mkdir ${VCF_DIR}
+VCF_DIR="${DATA_DIR}/vcf/combined"
+mkdir -p ${VCF_DIR}
 mv ${VCF} ${VCF_DIR}
 mv ${VCF_CSI} ${VCF_DIR}
 
