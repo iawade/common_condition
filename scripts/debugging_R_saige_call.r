@@ -72,6 +72,7 @@ option_list <- list(
     make_option("--subSampleFile", type="character",default="", help="Path to the file that contains one column for IDs of samples that are included in Step 1 and will be also included in Step 2. This option is used when any sample included in Step 1 but does not have dosages/genotypes for Step 2. Please make sure it contains one column of sample IDs that will be used for subsetting samples from the Step 1 results for Step 2 jobs. Note: Thi option has not been fully evaluated. If more than 5% of the samples in Step 1 are missing in Step 2, please consider re-run Step 1. ")
 )
 
+parser <- OptionParser(usage="%prog [options]", option_list=option_list)
 args <- parse_args(parser, positional_arguments = 0)
 opt <- args$options
 
