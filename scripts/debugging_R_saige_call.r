@@ -96,7 +96,7 @@ opt$pCutoffforFirth=0.10
 opt$is_output_moreDetails=TRUE
 opt$is_fastTest=TRUE
 opt$SAIGEOutputFile="test"
-opt$is_output_markerList_in_groupTest=TRUE
+# opt$is_output_markerList_in_groupTest=TRUE
 opt$is_single_in_groupTest=TRUE
 
 convertoNumeric <- function(x, stringOutput)
@@ -129,6 +129,11 @@ if (BLASctl_installed){
 }
 
 print(opt)
+
+debug(SPAGMMATtest)
+debug(SAIGE.Region)
+debug(mainRegionInCPP)
+
 
 SPAGMMATtest(
     vcfFile=opt$vcfFile,
