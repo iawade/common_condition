@@ -133,7 +133,8 @@ print(opt)
 debug(SPAGMMATtest)
 debug(SAIGE.Region)
 debug(mainRegionInCPP)
-
+debug(get_SKAT_pvalue)
+debug(SKAT:::Met_SKAT_Get_Pvalue)
 
 SPAGMMATtest(
     vcfFile=opt$vcfFile,
