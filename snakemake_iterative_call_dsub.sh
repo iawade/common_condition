@@ -19,8 +19,8 @@ mv ${VCF} ${VCF_DIR}
 mv ${VCF_CSI} ${VCF_DIR}
 
 # move any already completed run information into the VM
-# mv ${RUN_DIR} run_files
-# mv ${SAIGE_DIR} saige_outputs
+mv ${RUN_DIR} run_files
+mv ${SAIGE_DIR} saige_outputs
 
 mv configs/${ANC}_config.yaml config.yaml
 Rscript scripts/create_chr_specific_filepaths.r --chr ${CHR}
