@@ -88,6 +88,17 @@ opt$sparseGRMSampleIDFile="allofus_array_eas_snp_wise_relatednessCutoff_0.05_500
 opt$annotation_in_groupTest="pLoF,damaging_missense,pLoF:damaging_missense"
 opt$condition="chr17:50691125:A:G"
 
+opt$minMAF=0
+opt$vcfField="GT"
+opt$LOCO=FALSE
+opt$is_Firth_beta=TRUE
+opt$pCutoffforFirth=0.10
+opt$is_output_moreDetails=TRUE
+opt$is_fastTest=TRUE
+opt$SAIGEOutputFile="test"
+opt$is_output_markerList_in_groupTest=TRUE
+opt$is_single_in_groupTest=TRUE
+
 convertoNumeric <- function(x, stringOutput)
 {
     y <- tryCatch(expr = as.numeric(x), warning=function(w){ return(NULL) })
