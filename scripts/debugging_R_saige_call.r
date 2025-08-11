@@ -86,9 +86,35 @@ maxMAF_in_groupTest=0.001
 opt$sparseGRMFile="allofus_array_eas_snp_wise_relatednessCutoff_0.05_5000_randomMarkersUsed.sparseGRM.mtx"
 opt$sparseGRMSampleIDFile="allofus_array_eas_snp_wise_relatednessCutoff_0.05_5000_randomMarkersUsed.sparseGRM.mtx.sampleIDs.txt"
 opt$annotation_in_groupTest="pLoF,damaging_missense,pLoF:damaging_missense"
-annotation_in_groupTest = gsub(":",";",opt$annotation_in_groupTest)
-annotation_in_groupTest = unlist(strsplit(annotation_in_groupTest,",")[[1]])
 opt$condition="chr17:50691125:A:G"
+
+convertoNumeric <- function(x, stringOutput)
+{
+    y <- tryCatch(expr = as.numeric(x), warning=function(w){ return(NULL) })
+    if (is.null(y)) {
+        stop(stringOutput, " is not numeric\n")
+    }
+    return(y)   
+}
+
+weights.beta <- convertoNumeric(x=strsplit(opt$weights.beta,",")[[1]], "weights.beta")
+cateVarRatioMinMACVecExclude <- convertoNumeric(x=strsplit(opt$cateVarRatioMinMACVecExclude,",")[[1]], "cateVarRatioMinMACVecExclude")
+cateVarRatioMaxMACVecInclude <- convertoNumeric(x=strsplit(opt$cateVarRatioMaxMACVecInclude,",")[[1]], "cateVarRatioMaxMACVecInclude")
+
+if (is.null(opt$weights_for_condition)){
+    weights_for_condition=NULL
+} else {
+    weights_for_condition <- convertoNumeric(x=strsplit(opt$weights_for_condition,",")[[1]], "weights_for_condition")
+}
+
+annotation_in_groupTest <- gsub(":",";",opt$annotation_in_groupTest)
+annotation_in_groupTest <- unlist(strsplit(annotation_in_groupTest,",")[[1]])
+
+if (BLASctl_installed){
+  # Set number of threads for BLAS to 1, this step does not benefit from multithreading or multiprocessing
+  original_num_threads <- blas_get_num_procs()
+  blas_set_num_threads(1)
+}
 
 print(opt)
 
@@ -121,12 +147,12 @@ SPAGMMATtest(
     markers_per_chunk=opt$markers_per_chunk,
     groups_per_chunk=opt$groups_per_chunk,
     markers_per_chunk_in_groupTest=opt$markers_per_chunk_in_groupTest,
-    is_output_moreDetails =opt$is_output_moreDetails,
+    is_output_moreDetails=opt$is_output_moreDetails,
     is_overwrite_output=opt$is_overwrite_output,
-    maxMAF_in_groupTest = maxMAF_in_groupTest,
-    maxMAC_in_groupTest = maxMAC_in_groupTest,
+    maxMAF_in_groupTest=maxMAF_in_groupTest,
+    maxMAC_in_groupTest=maxMAC_in_groupTest,
     minGroupMAC_in_BurdenTest=opt$minGroupMAC_in_BurdenTest,
-    annotation_in_groupTest = annotation_in_groupTest,
+    annotation_in_groupTest=annotation_in_groupTest,
     groupFile=opt$groupFile,
     sparseGRMFile=opt$sparseGRMFile,
     sparseGRMSampleIDFile=opt$sparseGRMSampleIDFile,
@@ -135,12 +161,12 @@ SPAGMMATtest(
     is_rewrite_XnonPAR_forMales=opt$is_rewrite_XnonPAR_forMales,
     X_PARregion=opt$X_PARregion,
     MACCutoff_to_CollapseUltraRare=opt$MACCutoff_to_CollapseUltraRare,
-    cateVarRatioMinMACVecExclude = cateVarRatioMinMACVecExclude,
-    cateVarRatioMaxMACVecInclude = cateVarRatioMaxMACVecInclude,
-    weights.beta = weights.beta,
+    cateVarRatioMinMACVecExclude=cateVarRatioMinMACVecExclude,
+    cateVarRatioMaxMACVecInclude=cateVarRatioMaxMACVecInclude,
+    weights.beta=weights.beta,
     r.corr=opt$r.corr,
     condition=opt$condition,
-    weights_for_condition = weights_for_condition,
+    weights_for_condition=weights_for_condition,
     SPAcutoff=opt$SPAcutoff,
     dosage_zerod_cutoff=opt$dosage_zerod_cutoff,
     dosage_zerod_MAC_cutoff=opt$dosage_zerod_MAC_cutoff,
