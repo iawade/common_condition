@@ -107,6 +107,7 @@ if (is.null(opt$weights_for_condition)){
     weights_for_condition <- convertoNumeric(x=strsplit(opt$weights_for_condition,",")[[1]], "weights_for_condition")
 }
 
+maxMAC_in_groupTest <- convertoNumeric(x=strsplit(opt$maxMAC_in_groupTest,",")[[1]], "maxMAC_in_groupTest")
 annotation_in_groupTest <- gsub(":",";",opt$annotation_in_groupTest)
 annotation_in_groupTest <- unlist(strsplit(annotation_in_groupTest,",")[[1]])
 
