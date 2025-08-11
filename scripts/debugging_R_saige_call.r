@@ -151,6 +151,5 @@ SPAGMMATtest(
     is_output_markerList_in_groupTest=opt$is_output_markerList_in_groupTest,
     is_fastTest=opt$is_fastTest,
     max_MAC_use_ER=opt$max_MAC_for_ER,
-    subSampleFile=opt$subSampleFile,
-    is_noadjCov=opt$is_noadjCov
+    subSampleFile=opt$subSampleFile
 )
