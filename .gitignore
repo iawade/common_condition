@@ -152,3 +152,6 @@ snakemake_iterative_call_dsub.sh
 # Keep README and metadata
 !README.md
 !*.gitignore
+# pixi environments
+.pixi/*
+!.pixi/config.toml

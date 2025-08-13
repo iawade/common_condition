@@ -135,6 +135,7 @@ debug(SAIGE.Region)
 debug(mainRegionInCPP)
 debug(get_SKAT_pvalue)
 debug(SKAT:::Met_SKAT_Get_Pvalue)
+debug(SKAT:::Get_Davies_PVal)
 
 SPAGMMATtest(
     vcfFile=opt$vcfFile,
