@@ -141,6 +141,7 @@ rule filter_to_coding_gene_vcf:
     threads: config["threads"]
     shell:
         """
+        set -euo pipefail
         chr=$(python scripts/extract_chromosome.py --ensembl_id \"{wildcards.gene}\")
         echo $chr
         for vcf in {input.vcf}; do
@@ -163,6 +164,7 @@ rule filter_group_file:
         "run_files/{gene}_group_file.txt"
     shell:
         """
+        set -euo pipefail
         > {output}
         for group in {input.group}; do
             if [[ "$group" == *.gz ]]; then
@@ -226,6 +228,7 @@ rule spa_tests_conditional:
     threads: 8
     shell:
         """
+        set -euo pipefail
         chr=$(python scripts/extract_chromosome.py --ensembl_id \"{wildcards.gene}\")
         for vcf in {input.vcf}; do
             if [[ "$vcf" =~ \\.($chr)\\. ]]; then

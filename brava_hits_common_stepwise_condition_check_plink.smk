@@ -13,7 +13,7 @@ protein_coding_region_bed = config["protein_coding_region_bed"]
 phenotype_json = config["phenotype_json"]
 use_null_var_ratio = config["use_null_var_ratio"]
 
-# For debugging
+# # For debugging
 # list_of_plink_files="plink_testing/afr_plink_file_list.txt"
 # list_of_model_files="plink_testing/afr_model_file_list.txt"
 # list_of_variance_ratio_files="plink_testing/afr_variance_file_list.txt"
