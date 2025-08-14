@@ -152,6 +152,7 @@ rule filter_to_coding_gene_plink:
     threads: config["threads"]
     shell:
         """
+        set -euo pipefail
         chr=$(python scripts/extract_chromosome.py --ensembl_id \"{wildcards.gene}\")
         echo $chr
         for plink_bed in {input.plink_bed}; do
@@ -174,6 +175,7 @@ rule filter_group_file:
         "run_files/{gene}_group_file.txt"
     shell:
         """
+        set -euo pipefail
         > {output}
         for group in {input.group}; do
             if [[ "$group" == *.gz ]]; then
@@ -207,6 +209,7 @@ rule spa_tests_stepwise_conditional:
         use_null_var_ratio=config["use_null_var_ratio"]
     shell:
         """
+        set -euo pipefail
         chr=$(python scripts/extract_chromosome.py --ensembl_id \"{wildcards.gene}\")
         for plink_bed in {input.plink_bed}; do
             plink_fileset=$(echo "$plink_bed" | sed 's/\\.bed$//')
@@ -241,6 +244,7 @@ rule spa_tests_conditional:
     threads: 4
     shell:
         """
+        set -euo pipefail
         chr=$(python scripts/extract_chromosome.py --ensembl_id \"{wildcards.gene}\")
         for plink_bed in {input.plink_bed}; do
             if [[ "$plink_bed" =~ \\.($chr)\\. ]]; then
@@ -261,5 +265,6 @@ rule combine_results:
         "brava_stepwise_conditional_analysis_results.txt"
     shell:
         """
+        set -euo pipefail
         python scripts/combine_saige_outputs.py --out {output}
         """

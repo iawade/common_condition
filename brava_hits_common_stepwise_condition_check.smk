@@ -248,5 +248,6 @@ rule combine_results:
         "brava_stepwise_conditional_analysis_results.txt"
     shell:
         """
+        set -euo pipefail
         python scripts/combine_saige_outputs.py --out {output}
         """
