@@ -178,8 +178,8 @@ rule filter_group_file:
 
 rule spa_tests_stepwise_conditional:
     input:
-        vcf= "run_files/{gene}_{distance}_{maf}.vcf.bgz",
-        vcf_csi = "run_files/{gene}_{distance}_{maf}.vcf.bgz.csi",
+        vcf="run_files/{gene}_{distance}_{maf}.vcf.bgz",
+        vcf_csi="run_files/{gene}_{distance}_{maf}.vcf.bgz.csi",
         model_file=lambda wildcards: [
             mf for mf in model_files
             if re.search(rf'(?:^|[/_.\-]){re.escape(wildcards.trait)}(?=[/_.\-])', mf)
@@ -199,7 +199,7 @@ rule spa_tests_stepwise_conditional:
         """
         chr=$(python scripts/extract_chromosome.py --ensembl_id \"{wildcards.gene}\")
         for vcf in {input.vcf}; do
-            bash scripts/stepwise_conditional_SAIGE.sh \
+            conda run -n RSAIGE_vcf_version bash scripts/stepwise_conditional_SAIGE.sh \
                 $vcf {output} {input.model_file} {input.variance_file} {input.sparse_matrix} $chr {params.use_null_var_ratio}
         done
         """
@@ -232,7 +232,7 @@ rule spa_tests_conditional:
         chr=$(python scripts/extract_chromosome.py --ensembl_id \"{wildcards.gene}\")
         for vcf in {input.vcf}; do
             if [[ "$vcf" =~ \\.($chr)\\. ]]; then
-                bash scripts/saige_step2_conditioning_check.sh \
+                conda run -n RSAIGE_vcf_version bash scripts/saige_step2_conditioning_check.sh \
                     $vcf {output} {params.min_mac} {input.model_file} {input.variance_file} {input.sparse_matrix} {input.group_file} {params.annotations_to_include} {input.conditioning_variants} {params.max_MAF} {params.use_null_var_ratio}
             fi
         done
