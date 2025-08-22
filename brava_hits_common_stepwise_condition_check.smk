@@ -200,7 +200,7 @@ rule spa_tests_stepwise_conditional:
         """
         chr=$(python scripts/extract_chromosome.py --ensembl_id \"{wildcards.gene}\")
         for vcf in {input.vcf}; do
-            conda run --prefix SAIGE_{params.saige_version}/envs/RSAIGE_vcf_version bash scripts/stepwise_conditional_SAIGE.sh \
+            conda run --no-capture-output --prefix SAIGE_{params.saige_version}/envs/RSAIGE_vcf_version bash scripts/stepwise_conditional_SAIGE.sh \
                 $vcf {output} {input.model_file} {input.variance_file} {input.sparse_matrix} $chr {params.use_null_var_ratio}
         done
         """
@@ -234,7 +234,7 @@ rule spa_tests_conditional:
         chr=$(python scripts/extract_chromosome.py --ensembl_id \"{wildcards.gene}\")
         for vcf in {input.vcf}; do
             if [[ "$vcf" =~ \\.($chr)\\. ]]; then
-                conda run --prefix SAIGE_{params.saige_version}/envs/RSAIGE_vcf_version bash scripts/saige_step2_conditioning_check.sh \
+                conda run --no-capture-output --prefix SAIGE_{params.saige_version}/envs/RSAIGE_vcf_version bash scripts/saige_step2_conditioning_check.sh \
                     $vcf {output} {params.min_mac} {input.model_file} {input.variance_file} {input.sparse_matrix} {input.group_file} {params.annotations_to_include} {input.conditioning_variants} {params.max_MAF} {params.use_null_var_ratio}
             fi
         done
