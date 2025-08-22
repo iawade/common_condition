@@ -37,8 +37,9 @@ LOGFILE="snakemake_run_${TIMESTAMP}.log"
 
 # Run Snakemake with the specified options
 echo "Starting a run of Snakemake workflow..."
-snakemake --snakefile "$WORKFLOW_FILE" --cores $CORES --jobs 1 --max-status-checks-per-second 0.01 \
-    --keep-going --rerun-incomplete --printshellcmds --verbose --forcerun all \
+snakemake --snakefile "$WORKFLOW_FILE" --cores $CORES --jobs $CORES \
+    --max-status-checks-per-second 0.01 --keep-going --rerun-incomplete \
+    --printshellcmds --verbose --forcerun all \
      2>&1 | tee "$LOGFILE"
 
 echo "Run complete. Log saved to $LOGFILE"
