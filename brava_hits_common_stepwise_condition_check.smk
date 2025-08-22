@@ -194,7 +194,8 @@ rule spa_tests_stepwise_conditional:
         "run_files/{gene}_{trait}_{distance}_{maf}_string.txt" 
     params:
         maf_common="{maf}",
-        use_null_var_ratio=config["use_null_var_ratio"]
+        use_null_var_ratio=config["use_null_var_ratio"],
+        saige_version=config["saige_vcf_version"]
     shell:
         """
         chr=$(python scripts/extract_chromosome.py --ensembl_id \"{wildcards.gene}\")
@@ -224,7 +225,7 @@ rule spa_tests_conditional:
         min_mac=min_mac,
         annotations_to_include=annotations_to_include,
         max_MAF="{maf}",
-        use_null_var_ratio=config["use_null_var_ratio"]
+        use_null_var_ratio=config["use_null_var_ratio"],
         saige_version=config["saige_vcf_version"]
     threads: 8
     shell:
