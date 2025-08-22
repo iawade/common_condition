@@ -87,10 +87,10 @@ WORKDIR /SAIGE_${saige_vcf_version}
 RUN mkdir lib && \
     R CMD INSTALL --preclean . --library=lib
 
-RUN chmod a+x extdata/step1_fitNULLGLMM.R
-RUN chmod a+x extdata/step2_SPAtests.R
-RUN chmod a+x extdata/step3_LDmat.R
-RUN chmod a+x extdata/createSparseGRM.R
+RUN chmod a+x extdata/step1_fitNULLGLMM.R && \
+    chmod a+x extdata/step2_SPAtests.R && \
+    chmod a+x extdata/step3_LDmat.R && \
+    chmod a+x extdata/createSparseGRM.R
 
 RUN saige_path=$(realpath .) && \
     mkdir -p ${CONDA_PREFIX}/etc/conda/activate.d && \
@@ -102,10 +102,10 @@ RUN saige_path=$(realpath .) && \
     echo -e "export PATH_OLD=\$PATH\nexport PATH=\$PATH:${saige_path}/extdata\nexport R_LIBS_USER=${saige_path}/lib" >> ${CONDA_PREFIX}/etc/conda/activate.d/env_vars.sh && \
     echo -e "export PATH=\$PATH_OLD\nunset PATH_OLD\nunset R_LIBS_USER" >> ${CONDA_PREFIX}/etc/conda/deactivate.d/env_vars.sh
 
-RUN createSparseGRM.R  --help
-RUN step1_fitNULLGLMM.R --help
-RUN step2_SPAtests.R --help
-RUN step3_LDmat.R --help
+RUN createSparseGRM.R  --help && \
+    step1_fitNULLGLMM.R --help && \
+    step2_SPAtests.R --help && \
+    step3_LDmat.R --help
 
 SHELL ["/bin/bash", "-c"]
 WORKDIR /
@@ -156,12 +156,12 @@ RUN chmod a+x extdata/step1_fitNULLGLMM.R && \
 
 SHELL ["pixi", "run", "--", "bash", "-c"]
 RUN mkdir -p "${CONDA_PREFIX}/etc/conda/activate.d" && \
-    echo "export R_LIBS_USER=/SAIGE_${saige_pgen_version}/lib" > "${CONDA_PREFIX}/etc/conda/activate.d/env_vars.sh" && \
-    echo 'export PATH="$PATH:/SAIGE_'"${saige_pgen_version}"'/extdata"' >> "${CONDA_PREFIX}/etc/conda/activate.d/env_vars.sh"
+    echo "export R_LIBS_USER=${PWD}/SAIGE_${saige_pgen_version}/lib" > "${CONDA_PREFIX}/etc/conda/activate.d/env_vars.sh" && \
+    echo 'export PATH="$PATH:${PWD}/SAIGE_'"${saige_pgen_version}"'/extdata"' >> "${CONDA_PREFIX}/etc/conda/activate.d/env_vars.sh"
 
-RUN createSparseGRM.R  --help
-RUN step1_fitNULLGLMM.R --help
-RUN step2_SPAtests.R --help
-RUN step3_LDmat.R --help
+RUN createSparseGRM.R  --help && \
+    step1_fitNULLGLMM.R --help && \
+    step2_SPAtests.R --help && \
+    step3_LDmat.R --help
 
 WORKDIR /
