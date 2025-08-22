@@ -156,8 +156,8 @@ RUN chmod a+x extdata/step1_fitNULLGLMM.R && \
 
 SHELL ["pixi", "run", "--", "bash", "-c"]
 RUN mkdir -p "${CONDA_PREFIX}/etc/conda/activate.d" && \
-    echo "export R_LIBS_USER=${PWD}/SAIGE_${saige_pgen_version}/lib" > "${CONDA_PREFIX}/etc/conda/activate.d/env_vars.sh" && \
-    echo 'export PATH="$PATH:${PWD}/SAIGE_'"${saige_pgen_version}"'/extdata"' >> "${CONDA_PREFIX}/etc/conda/activate.d/env_vars.sh"
+    echo "export R_LIBS_USER=${PWD}/lib" > "${CONDA_PREFIX}/etc/conda/activate.d/env_vars.sh" && \
+    echo 'export PATH="$PATH:${PWD}/extdata"' >> "${CONDA_PREFIX}/etc/conda/activate.d/env_vars.sh"
 
 RUN createSparseGRM.R  --help && \
     step1_fitNULLGLMM.R --help && \
