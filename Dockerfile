@@ -63,7 +63,7 @@ ARG saige_vcf_version="1.3.6"
 
 RUN commit="854a1d0082e007f0a1cb315b24812f6d73e86d2d" && \
     src_branch=${saige_vcf_version} && \
-    repo_src_url=https://github.com/astheeggeggs/SAIGEgit \ &&
+    repo_src_url=https://github.com/astheeggeggs/SAIGEgit && \
     git init SAIGE_${saige_vcf_version} && \
     cd SAIGE_${saige_vcf_version} && \
     git remote add origin ${repo_src_url} && \
