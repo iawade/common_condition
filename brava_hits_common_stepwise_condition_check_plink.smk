@@ -13,19 +13,6 @@ protein_coding_region_bed = config["protein_coding_region_bed"]
 phenotype_json = config["phenotype_json"]
 use_null_var_ratio = config["use_null_var_ratio"]
 
-# # For debugging
-# list_of_plink_files="plink_testing/afr_plink_file_list.txt"
-# list_of_model_files="plink_testing/afr_model_file_list.txt"
-# list_of_variance_ratio_files="plink_testing/afr_variance_file_list.txt"
-# sparse_matrix="/home/jupyter/conditioning_test/afr/mtx/allofus_array_afr_snp_wise_relatednessCutoff_0.05_5000_randomMarkersUsed.sparseGRM.mtx"
-# list_of_group_files="plink_testing/afr_group_file_list.txt"
-# distance=500000
-# maf=[0.001, 0.0001]
-# min_mac=0.5
-# annotations_to_include="pLoF,damaging_missense,other_missense,synonymous,pLoF:damaging_missense,pLoF:damaging_missense:other_missense:synonymous"
-# gene_trait_pairs_to_test="gene_pheno_test.csv"
-# phenotype_json="pilot_phenotypes.json"
-
 # Load plink files
 with open(list_of_plink_files) as f:
     plink_files = [line.strip() for line in f]
@@ -213,7 +200,7 @@ rule spa_tests_stepwise_conditional:
         chr=$(python scripts/extract_chromosome.py --ensembl_id \"{wildcards.gene}\")
         for plink_bed in {input.plink_bed}; do
             plink_fileset=$(echo "$plink_bed" | sed 's/\\.bed$//')
-            bash scripts/stepwise_conditional_SAIGE_plink.sh \
+            conda run --no-capture-output --prefix SAIGE_{params.saige_version}/envs/RSAIGE_vcf_version bash scripts/stepwise_conditional_SAIGE.sh \
                 $plink_fileset {output} {input.model_file} {input.variance_file} {input.sparse_matrix} $chr {params.use_null_var_ratio}
         done
         """
@@ -249,7 +236,7 @@ rule spa_tests_conditional:
         for plink_bed in {input.plink_bed}; do
             if [[ "$plink_bed" =~ \\.($chr)\\. ]]; then
                 plink_fileset=$(echo "$plink_bed" | sed 's/\\.bed$//')
-                bash scripts/saige_step2_conditioning_check_plink.sh \
+                conda run --no-capture-output --prefix SAIGE_{params.saige_version}/envs/RSAIGE_vcf_version bash scripts/saige_step2_conditioning_check.sh \
                     $plink_fileset {output} {params.min_mac} {input.model_file} {input.variance_file} {input.sparse_matrix} {input.group_file} {params.annotations_to_include} {input.conditioning_variants} {params.max_MAF} {params.use_null_var_ratio}
             fi
         done
