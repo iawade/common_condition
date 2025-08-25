@@ -37,6 +37,10 @@ CORES=$(nproc)
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 LOGFILE="snakemake_run_${TIMESTAMP}.log"
 
+# Tidy up (just in case)
+rm brava_stepwise_conditional_analysis_results.txt
+rm brava_stepwise_conditional_analysis_results.txt.singleAssoc.txt
+
 # Run Snakemake with the specified options
 echo "Starting a run of Snakemake workflow..."
 snakemake --snakefile "$WORKFLOW_FILE" --cores $CORES --jobs $CORES \
