@@ -3,6 +3,9 @@
 source /opt/conda/etc/profile.d/conda.sh
 conda activate brava_hits_common_condition_check
 
+ln -s /SAIGE_1.3.6 ${SCRIPT_DIR}/SAIGE_1.3.6
+ln -s /SAIGE_1.5.0 ${SCRIPT_DIR}/SAIGE_1.5.0
+
 # Path to the Snakemake workflow file
 cd ${SCRIPT_DIR}
 # Make files present in same filepath, so that file locations
