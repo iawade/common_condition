@@ -165,3 +165,10 @@ RUN createSparseGRM.R  --help && \
     step3_LDmat.R --help
 
 WORKDIR /
+
+# Note that once this is completed, it is pushed to both docker.io and gcr.io using the following commands:
+# docker build -t brava-common-check -f Dockerfile .
+# docker tag brava-common-check astheeggeggs/brava-common-check:latest
+# docker push astheeggeggs/brava-common-check:latest
+# docker tag brava-common-check gcr.io/weighty-elf-452116-c7/brava-common-check:latest
+# docker push gcr.io/weighty-elf-452116-c7/brava-common-check:latest
