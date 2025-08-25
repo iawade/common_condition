@@ -200,7 +200,7 @@ rule spa_tests_stepwise_conditional:
         chr=$(python scripts/extract_chromosome.py --ensembl_id \"{wildcards.gene}\")
         for plink_bed in {input.plink_bed}; do
             plink_fileset=$(echo "$plink_bed" | sed 's/\\.bed$//')
-            conda run --no-capture-output --prefix SAIGE_{params.saige_version}/envs/RSAIGE_vcf_version bash scripts/stepwise_conditional_SAIGE.sh \
+            conda run --no-capture-output --prefix envs/RSAIGE_vcf_version bash scripts/stepwise_conditional_SAIGE.sh \
                 $plink_fileset {output} {input.model_file} {input.variance_file} {input.sparse_matrix} $chr {params.use_null_var_ratio}
         done
         """
@@ -236,7 +236,7 @@ rule spa_tests_conditional:
         for plink_bed in {input.plink_bed}; do
             if [[ "$plink_bed" =~ \\.($chr)\\. ]]; then
                 plink_fileset=$(echo "$plink_bed" | sed 's/\\.bed$//')
-                conda run --no-capture-output --prefix SAIGE_{params.saige_version}/envs/RSAIGE_vcf_version bash scripts/saige_step2_conditioning_check.sh \
+                conda run --no-capture-output --prefix envs/RSAIGE_vcf_version bash scripts/saige_step2_conditioning_check.sh \
                     $plink_fileset {output} {params.min_mac} {input.model_file} {input.variance_file} {input.sparse_matrix} {input.group_file} {params.annotations_to_include} {input.conditioning_variants} {params.max_MAF} {params.use_null_var_ratio}
             fi
         done
