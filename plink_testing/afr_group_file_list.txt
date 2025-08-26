@@ -1,0 +1,1 @@
+/home/jupyter/conditioning_test/afr/groupfile/aou.v8.chr19.afr.variants_only.spliceai=0.20_cadd=28.1_revel=0.773.canonical.txt.gz

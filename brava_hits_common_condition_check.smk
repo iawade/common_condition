@@ -119,6 +119,7 @@ rule id_variants_for_conditioning:
         prune=config["prune"]
     shell:
         """
+        set -euo pipefail
         for vcf in {input.vcf}; do
             bash scripts/id_variants_for_common_variant_conditioning.sh $vcf {wildcards.gene} {params.distance} {wildcards.maf} {params.threads} {params.prune}
         done
@@ -131,6 +132,7 @@ rule filter_group_file:
         "run_files/{gene}_group_file.txt"
     shell:
         """
+        set -euo pipefail
         > {output}
         for group in {input.group}; do
             if [[ "$group" == *.gz ]]; then
@@ -158,6 +160,7 @@ rule spa_tests_conditional:
         max_MAF="{maf}"
     shell:
         """
+        set -euo pipefail
         for vcf in {input.vcf}; do
             bash scripts/saige_step2_conditioning_check.sh \
                 $vcf {output} {params.min_mac} {input.model_file} {input.variance_file} {input.sparse_matrix} {input.group_file} {params.annotations_to_include} {input.conditioning_variants} {params.max_MAF}
@@ -174,5 +177,6 @@ rule combine_results:
         "brava_conditional_analysis_no_iter_results.txt",
     shell:
         """
+        set -euo pipefail
         python scripts/combine_saige_outputs.py --out {output}
         """

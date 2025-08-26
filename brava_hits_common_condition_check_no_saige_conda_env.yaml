@@ -255,7 +255,6 @@ dependencies:
   - r-rlang=1.1.5=r44h93ab643_0
   - r-rspectra=0.16_2=r44hb424bfc_0
   - r-rsqlite=2.3.9=r44h93ab643_0
-  - r-saige=1.3.1=r44h38d2662_2
   - r-skat=2.2.5=r44h93ab643_3
   - r-spatest=3.1.2=r44hc72bb7e_3
   - r-stringi=1.8.4=r44ha8ce623_2

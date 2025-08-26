@@ -1,0 +1,1 @@
+/home/jupyter/conditioning_test/afr/vcf/aou.exome_split.v8.qced.chr19.afr.vcf.bgz

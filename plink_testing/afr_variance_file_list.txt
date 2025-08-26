@@ -1,0 +1,2 @@
+/home/jupyter/conditioning_test/afr/variance/afr_snp_wise_pca_covariates_LDLC.varianceRatio.txt
+/home/jupyter/conditioning_test/afr/variance/afr_snp_wise_pca_covariates_TChol.varianceRatio.txt

@@ -1,0 +1,174 @@
+FROM continuumio/miniconda3
+
+ENV LC_ALL C.UTF-8
+ENV LANG C.UTF-8
+
+# Copy your environment definition
+COPY brava_hits_common_condition_check_no_saige_conda_env.yaml /tmp/environment.yaml
+
+# Create the environment and clean up
+RUN conda env create -f /tmp/environment.yaml && conda clean -afy
+
+RUN apt-get update -qq && \
+    apt-get -y install --no-install-recommends \
+    autoconf \
+    automake \
+    make \
+    gcc \
+    perl \
+    unzip \
+    bzip2 \
+    zlib1g-dev \
+    ca-certificates \
+    build-essential \
+    gfortran \
+    libreadline-dev \
+    xorg-dev \
+    libbz2-dev \
+    liblzma-dev \
+    curl \
+    libxml2-dev \
+    libcairo2-dev \
+    libsqlite3-dev \
+    libmariadbd-dev \
+    libpq-dev \
+    libssh2-1-dev \
+    unixodbc-dev \
+    libcurl4-openssl-dev \
+    libperl-dev \
+    libgsl-dev \
+    libssl-dev \
+    libsodium-dev \
+    libtool \
+    libfreetype6-dev \
+    libharfbuzz-dev \
+    libfribidi-dev \
+    libpng-dev \
+    libtiff5-dev \
+    libjpeg-dev \
+    libboost-all-dev \
+    pkg-config \
+    wget \
+    time \
+    git \
+    && \
+ rm -rf /var/lib/apt/lists/* && apt-get autoclean
+
+RUN FLAGPATH=$(which python | sed "s|/bin/python$||") && \
+    export LDFLAGS="-L${FLAGPATH}/lib" && \
+    export CPPFLAGS="-I${FLAGPATH}/include"
+
+# SAIGE 1.3.6
+ARG saige_vcf_version="1.3.6"
+
+RUN commit="854a1d0082e007f0a1cb315b24812f6d73e86d2d" && \
+    src_branch=${saige_vcf_version} && \
+    repo_src_url=https://github.com/astheeggeggs/SAIGEgit && \
+    git init SAIGE_${saige_vcf_version} && \
+    cd SAIGE_${saige_vcf_version} && \
+    git remote add origin ${repo_src_url} && \
+    git fetch --depth=1 origin ${commit} && \
+    git checkout FETCH_HEAD
+
+# Create a new env - use the SAIGE .yaml file for this
+# conda create -n RSAIGE -c conda-forge r-essentials r-base=4.1.2 python=3.10
+# conda activate RSAIGE
+# conda install -c conda-forge cmake lapack r-spatest r-rcppeigen r-devtools r-rcppparallel r-optparse boost openblas r-rhpcblasctl r-metaskat r-skat r-qlcmatrix r-rsqlite r-bh r-rcpparmadillo libgfortran=3
+# pip3 install cget click
+# conda env export > environment-RSAIGE-${saige_vcf_version}.yaml
+
+COPY environment-RSAIGE-${saige_vcf_version}.yaml /tmp/environment.yaml
+
+RUN conda env create -f /tmp/environment.yaml && conda clean -afy
+RUN conda rename -n RSAIGE_${saige_vcf_version} RSAIGE_vcf_version
+
+SHELL ["conda", "run", "--no-capture-output", "-n", "RSAIGE_vcf_version", "/bin/bash", "-c"]
+WORKDIR /SAIGE_${saige_vcf_version}
+RUN mkdir lib && \
+    R CMD INSTALL --preclean . --library=lib
+
+RUN chmod a+x extdata/step1_fitNULLGLMM.R && \
+    chmod a+x extdata/step2_SPAtests.R && \
+    chmod a+x extdata/step3_LDmat.R && \
+    chmod a+x extdata/createSparseGRM.R
+
+RUN saige_path=$(realpath .) && \
+    mkdir -p ${CONDA_PREFIX}/etc/conda/activate.d && \
+    mkdir -p ${CONDA_PREFIX}/etc/conda/deactivate.d && \
+    [ ! -s ${CONDA_PREFIX}/etc/conda/activate.d/env_vars.sh ] && \
+    echo '#!/bin/sh' > ${CONDA_PREFIX}/etc/conda/activate.d/env_vars.sh && \
+    [ ! -s ${CONDA_PREFIX}/etc/conda/deactivate.d/env_vars.sh ] && \
+    echo '#!/bin/sh' > ${CONDA_PREFIX}/etc/conda/deactivate.d/env_vars.sh && \
+    echo -e "export PATH_OLD=\$PATH\nexport PATH=\$PATH:${saige_path}/extdata\nexport R_LIBS_USER=${saige_path}/lib" >> ${CONDA_PREFIX}/etc/conda/activate.d/env_vars.sh && \
+    echo -e "export PATH=\$PATH_OLD\nunset PATH_OLD\nunset R_LIBS_USER" >> ${CONDA_PREFIX}/etc/conda/deactivate.d/env_vars.sh
+
+RUN createSparseGRM.R  --help && \
+    step1_fitNULLGLMM.R --help && \
+    step2_SPAtests.R --help && \
+    step3_LDmat.R --help
+
+SHELL ["/bin/bash", "-c"]
+WORKDIR /
+# for easy upgrade later. ARG variables only persist during build time
+ARG bcftoolsVer="1.12"
+
+RUN wget https://github.com/samtools/bcftools/releases/download/${bcftoolsVer}/bcftools-${bcftoolsVer}.tar.bz2 && \
+    tar -vxjf bcftools-${bcftoolsVer}.tar.bz2 && \
+    rm bcftools-${bcftoolsVer}.tar.bz2 && \
+    cd bcftools-${bcftoolsVer} && \
+    make && \
+    make install
+
+ARG plink2Ver="v2.0.0-a.6.21"
+RUN wget -O /tmp/plink2.zip https://github.com/chrchang/plink-ng/releases/download/${plink2Ver}/plink2_linux_x86_64.zip && unzip /tmp/plink2.zip
+
+# SAIGE 1.5.0
+ENV PIXI_NO_PATH_UPDATE=1
+ARG saige_pgen_version="1.5.0"
+
+RUN commit="a3a5e258255b87007ff5a140a3a0548980b87c44" && \ 
+    src_branch=main && \
+    repo_src_url=https://github.com/astheeggeggs/SAIGEgit && \
+    git init SAIGE_${saige_pgen_version} && \
+    cd SAIGE_${saige_pgen_version} && \
+    git remote add origin ${repo_src_url} && \
+    git fetch --depth=1 origin ${commit} && \
+    git checkout FETCH_HEAD
+
+WORKDIR /SAIGE_${saige_pgen_version}
+RUN curl -fsSL https://pixi.sh/install.sh | sh && \
+    mv /root/.pixi/bin/pixi /bin && pixi install && \
+    rm -rf /root/.cache && \
+    pixi run Rscript -e 'install.packages("lintools", repos="https://cloud.r-project.org")'
+
+RUN curl -L https://github.com/chrchang/plink-ng/archive/refs/tags/v2.0.0-a.6.16.tar.gz | tar -zx && \
+    mv plink-ng-2.0.0-a.6.16 plink-ng && \
+    pixi run x86_64-conda-linux-gnu-cc -std=c++14 -fPIC -O3 -I.pixi/envs/default/include -L.pixi/envs/default/lib -o plink2_includes.a plink-ng/2.0/include/*.cc -shared -lz -lzstd -lpthread -lm -ldeflate && \
+    mv plink2_includes.a .pixi/envs/default/lib
+
+RUN mkdir -p lib && \
+    pixi run R CMD INSTALL --preclean . --library=lib
+
+RUN chmod a+x extdata/step1_fitNULLGLMM.R && \
+    chmod a+x extdata/step2_SPAtests.R && \
+    chmod a+x extdata/step3_LDmat.R && \
+    chmod a+x extdata/createSparseGRM.R
+
+SHELL ["pixi", "run", "--", "bash", "-c"]
+RUN mkdir -p "${CONDA_PREFIX}/etc/conda/activate.d" && \
+    echo "export R_LIBS_USER=${PWD}/lib" > "${CONDA_PREFIX}/etc/conda/activate.d/env_vars.sh" && \
+    echo 'export PATH="$PATH:${PWD}/extdata"' >> "${CONDA_PREFIX}/etc/conda/activate.d/env_vars.sh"
+
+RUN createSparseGRM.R  --help && \
+    step1_fitNULLGLMM.R --help && \
+    step2_SPAtests.R --help && \
+    step3_LDmat.R --help
+
+WORKDIR /
+
+# Note that once this is completed, it is pushed to both docker.io and gcr.io using the following commands:
+# docker build -t brava-common-check -f Dockerfile .
+# docker tag brava-common-check astheeggeggs/brava-common-check:latest
+# docker push astheeggeggs/brava-common-check:latest
+# docker tag brava-common-check gcr.io/weighty-elf-452116-c7/brava-common-check:latest
+# docker push gcr.io/weighty-elf-452116-c7/brava-common-check:latest

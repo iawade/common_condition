@@ -1,0 +1,2 @@
+/home/jupyter/conditioning_test/afr/model/afr_snp_wise_pca_covariates_LDLC.rda
+/home/jupyter/conditioning_test/afr/model/afr_snp_wise_pca_covariates_TChol.rda
