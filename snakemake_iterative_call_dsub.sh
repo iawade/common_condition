@@ -43,6 +43,7 @@ rm brava_stepwise_conditional_analysis_results.txt.singleAssoc.txt
 
 # Run Snakemake with the specified options
 echo "Starting a run of Snakemake workflow..."
+snakemake --snakefile "$WORKFLOW_FILE" --cores $CORES --touch
 snakemake --snakefile "$WORKFLOW_FILE" --cores $CORES --jobs $CORES \
     --max-status-checks-per-second 0.01 --keep-going --rerun-incomplete \
     --printshellcmds --verbose --rerun-triggers code input params software-env \
