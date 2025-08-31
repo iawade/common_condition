@@ -220,7 +220,7 @@ rule spa_tests_conditional:
         group_file="run_files/{gene}_group_file.txt",
         conditioning_variants="run_files/{gene}_{trait}_{distance}_{maf}_string.txt"
     output:
-        "saige_outputs/{gene}_{trait}_{distance}_saige_results_{maf}.txt" 
+        "saige_outputs/{gene}_{trait}_{distance}_saige_results_{maf}.txt"
     params:
         min_mac=min_mac,
         annotations_to_include=annotations_to_include,
