@@ -55,3 +55,4 @@ mv saige_outputs ${OUTPUT}/${ANC}_${CHR}_saige_outputs
 mv run_files ${OUTPUT}/${ANC}_${CHR}_run_files
 mv brava_stepwise_conditional_analysis_results.txt ${OUTPUT}/brava_${ANC}_${CHR}_stepwise_conditional_analysis_results.txt
 mv brava_stepwise_conditional_analysis_results.txt.singleAssoc.txt ${OUTPUT}/brava_${ANC}_${CHR}_stepwise_conditional_analysis_results.txt.singleAssoc.txt
+mv brava_stepwise_conditional_analysis_results.txt.conditioning.variants.txt ${OUTPUT}/brava_${ANC}_${CHR}_stepwise_conditional_analysis_results.txt.conditioning.variants.txt
