@@ -126,9 +126,9 @@ rule filter_group_file:
 rule prune_to_independent_conditioning_variants:
     input:
         vcf = lambda wildcards: vcf_files,
-        conditioning_variants = "final_run_files/{gene}_{trait}_{maf}_extract.txt"
-        conditioning_variants_bed = "final_run_files/{gene}_{trait}_{maf}_extract.bed"
-        group_file="final_run_files/{gene}_group_file.txt",
+        conditioning_variants = "final_run_files/{gene}_{trait}_{maf}_extract.txt",
+        conditioning_variants_bed = "final_run_files/{gene}_{trait}_{maf}_extract.bed",
+        group_file="final_run_files/{gene}_group_file.txt"
     output:
         "final_run_files/{gene}_{trait}_{maf}_ld_pruned_string.prune.string.txt" 
     params:
