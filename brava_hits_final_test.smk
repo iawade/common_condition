@@ -174,7 +174,7 @@ rule spa_tests_conditional:
         ],
         sparse_matrix=sparse_matrix,
         group_file="final_run_files/{gene}_group_file.txt",
-        conditioning_variants="final_run_files/{gene}_{trait}_{maf}_ld_pruned_string.prune.string.txt"
+        conditioning_variants="final_run_files/{gene}_{trait}_{maf}_ld_pruned_string.txt"
     output:
         "final_saige_outputs/{gene}_{trait}_saige_conditioned_results_{maf}.txt"
     params:
