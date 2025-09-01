@@ -130,7 +130,7 @@ rule prune_to_independent_conditioning_variants:
         conditioning_variants_bed = "final_run_files/{gene}_{trait}_{maf}_extract.bed",
         group_file="final_run_files/{gene}_group_file.txt"
     output:
-        "final_run_files/{gene}_{trait}_{maf}_ld_pruned_string.prune.string.txt" 
+        "final_run_files/{gene}_{trait}_{maf}_ld_pruned_string.txt" 
     params:
         file="final_run_files/{gene}_{trait}_{maf}_ld_pruned_string"
     shell:
