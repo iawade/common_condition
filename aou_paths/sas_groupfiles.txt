@@ -1,1 +1,1 @@
-snakemake_sas/groupfile/aou.v8.chr11.sas.variants_only.spliceai=0.20_cadd=28.1_revel=0.773.canonical.txt.gz
+/home/jupyter/conditioning_test/sas/groupfile/aou.v8.chr11.sas.variants_only.spliceai=0.20_cadd=28.1_revel=0.773.canonical.txt.gz
