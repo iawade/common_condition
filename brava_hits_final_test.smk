@@ -134,7 +134,7 @@ rule prune_to_independent_conditioning_variants:
     params:
         file="final_run_files/{gene}_{trait}_{maf}_ld_pruned_string"
     shell:
-        r"""
+        """
         set -euo pipefail
         chr=$(python scripts/extract_chromosome.py --ensembl_id \"{wildcards.gene}\")
         for vcf in {input.vcf}; do
@@ -143,11 +143,11 @@ rule prune_to_independent_conditioning_variants:
                 matched_vcf=$vcf
                 TMPFILE=$(mktemp)
                 # Define a bed file first
-                plink2 --vcf --extract range {input.conditioning_variants_bed} --make-bed --out ${TMPFILE}
+                plink2 --vcf --extract range {input.conditioning_variants_bed} --make-bed --out ${{TMPFILE}}
                 # Sort the .bim file variant ID
-                awk 'BEGIN{OFS="\t"} { $2 = "chr" $1 ":" $4 ":" $6 ":" $5; print }' ${TMPFILE}.bim > ${TMPFILE}.bim.tmp
-                mv ${TMPFILE}.bim.tmp ${TMPFILE}.bim
-                plink2 --bfile ${TMPFILE} \
+                awk 'BEGIN{OFS="\t"} { $2 = "chr" $1 ":" $4 ":" $6 ":" $5; print }' ${{TMPFILE}}.bim > ${{TMPFILE}}.bim.tmp
+                mv ${{TMPFILE}}.bim.tmp ${{TMPFILE}}.bim
+                plink2 --bfile ${{TMPFILE}} \
                   --extract {input.conditioning_variants} \
                   --indep-pairwise 50 5 0.9 \
                   --out {params.file}
