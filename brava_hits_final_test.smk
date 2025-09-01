@@ -143,20 +143,25 @@ rule prune_to_independent_conditioning_variants:
                 matched_vcf=$vcf
                 TMPFILE=$(mktemp)
                 # Define a bed file first
-                plink2 --vcf $vcf --extract range {input.conditioning_variants_bed} --make-bed --out ${{TMPFILE}}
-                # Sort the .bim file variant ID
-                awk 'BEGIN{{OFS="\t"}} {{ $2 = "chr" $1 ":" $4 ":" $6 ":" $5; print }}' ${{TMPFILE}}.bim > ${{TMPFILE}}.bim.tmp
-                mv ${{TMPFILE}}.bim.tmp ${{TMPFILE}}.bim
-                plink2 --bfile ${{TMPFILE}} \
-                  --extract {input.conditioning_variants} \
-                  --indep-pairwise 50 5 0.9 \
-                  --out {params.file}
-                # Finally, create a comma separated string from this
-                # rm {params.file}.log
-                if [[ -f {params.file}.prune.in ]]; then
-                    paste -sd, {params.file}.prune.in > {output}
+                plink2 --vcf $vcf --extract range {input.conditioning_variants_bed} \
+                  --make-bed --out ${{TMPFILE}} || true
+                if [[ -f ${{TMPFILE}}.bim ]]; then
+                    # Sort the .bim file variant ID
+                    awk 'BEGIN{{OFS="\t"}} {{ $2 = "chr" $1 ":" $4 ":" $6 ":" $5; print }}' ${{TMPFILE}}.bim > ${{TMPFILE}}.bim.tmp
+                    mv ${{TMPFILE}}.bim.tmp ${{TMPFILE}}.bim
+                    plink2 --bfile ${{TMPFILE}} \
+                      --extract {input.conditioning_variants} \
+                      --indep-pairwise 50 5 0.9 \
+                      --out {params.file} || true
+                    # Finally, create a comma separated string from this
+                    if [[ -f {params.file}.prune.in ]]; then
+                        paste -sd, {params.file}.prune.in > {output}
+                    else
+                        # No variants to prune, create an empty output
+                        touch {output}
+                    fi
                 else
-                    # No variants to prune, create an empty output
+                    # No conditioning variants present in the vcf file
                     touch {output}
                 fi
             fi
