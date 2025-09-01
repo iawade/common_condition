@@ -152,7 +152,7 @@ rule prune_to_independent_conditioning_variants:
                   --indep-pairwise 50 5 0.9 \
                   --out {params.file}
                 # Finally, create a comma separated string from this
-                rm {params.file}.log
+                # rm {params.file}.log
                 if [[ -f {params.file}.prune.in ]]; then
                     paste -sd, {params.file}.prune.in > {output}
                 else
