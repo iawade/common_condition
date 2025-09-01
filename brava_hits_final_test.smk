@@ -134,7 +134,7 @@ rule prune_to_independent_conditioning_variants:
     params:
         file="final_run_files/{gene}_{trait}_{maf}_ld_pruned_string"
     shell:
-        """
+        r"""
         set -euo pipefail
         chr=$(python scripts/extract_chromosome.py --ensembl_id \"{wildcards.gene}\")
         for vcf in {input.vcf}; do
