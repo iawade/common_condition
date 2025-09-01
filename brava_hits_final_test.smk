@@ -23,21 +23,6 @@ with open(list_of_group_files) as f:
 min_mac = config["min_mac"]
 annotations_to_include = config["annotations_to_include"]
 
-vcf_files = ["/home/jupyter/conditioning_test/sas/vcf/aou.exome_split.v8.qced.chr11.sas.vcf.bgz"]
-model_files = [
-    "/home/jupyter/conditioning_test/sas/model/sas_snp_wise_pca_covariates_TG.rda",
-    "/home/jupyter/conditioning_test/sas/model/sas_snp_wise_pca_covariates_AST.rda"]
-variance_files = [
-    "/home/jupyter/conditioning_test/sas/variance/sas_snp_wise_pca_covariates_TG.varianceRatio.txt"
-    "/home/jupyter/conditioning_test/sas/variance/sas_snp_wise_pca_covariates_AST.varianceRatio.txt"]
-group_files = ["/home/jupyter/conditioning_test/sas/groupfile/aou.v8.chr11.sas.variants_only.spliceai=0.20_cadd=28.1_revel=0.773.canonical.txt.gz"]
-sparse_matrix = "/home/jupyter/conditioning_test/sas/mtx/allofus_array_sas_snp_wise_relatednessCutoff_0.05_5000_randomMarkersUsed.sparseGRM.mtx"
-gene_trait_pairs_to_test_with_conditioning_variants = "gene_phenotype_pairs_with_conditioning_variants.tsv"
-phenotype_json = "pilot_phenotypes.json"
-use_null_var_ratio = False
-min_mac = 0.5
-annotations_to_include = "pLoF,damaging_missense,pLoF:damaging_missense"
-
 import pandas as pd
 import json
 import re
