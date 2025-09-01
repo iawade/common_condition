@@ -31,3 +31,38 @@ step2_SPAtests.R \
     --is_single_in_groupTest=TRUE \
     --maxMAF_in_groupTest=${MAX_MAF} \
     --condition="${CONDITION}"
+
+# Latest, final(?) bug...
+VCF="aou.exome_split.v8.qced.chr17.eas.vcf.bgz"
+MIN_MAC="0.5"
+MODELFILE="eas_snp_wise_pca_covariates_Height.rda"
+VARIANCERATIO="eas_snp_wise_pca_covariates_Height.varianceRatio.txt"
+SPARSEGRM="allofus_array_eas_snp_wise_relatednessCutoff_0.05_5000_randomMarkersUsed.sparseGRM.mtx"
+SPARSEGRMID="allofus_array_eas_snp_wise_relatednessCutoff_0.05_5000_randomMarkersUsed.sparseGRM.mtx.sampleIDs.txt"
+GROUPFILE="ENSG00000108821_group_file.txt"
+ANNOTATIONS="pLoF,damaging_missense,pLoF:damaging_missens"
+MAX_MAF="0.001"
+CONDITION="chr17:50691125:A:G"
+
+step2_SPAtests.R \
+    --vcfFile=${VCF} \
+    --vcfFileIndex="${VCF}.csi" \
+    --vcfField="GT" \
+    --minMAF=0 \
+    --minMAC=${MIN_MAC} \
+    --GMMATmodelFile=${MODELFILE} \
+    --varianceRatioFile=${VARIANCERATIO} \
+    --sparseGRMFile=${SPARSEGRM} \
+    --sparseGRMSampleIDFile=${SPARSEGRMID} \
+    --LOCO=FALSE \
+    --is_Firth_beta=TRUE \
+    --pCutoffforFirth=0.10 \
+    --is_output_moreDetails=TRUE \
+    --is_fastTest=TRUE \
+    --SAIGEOutputFile="testing" \
+    --groupFile=${GROUPFILE} \
+    --annotation_in_groupTest=${ANNOTATIONS} \
+    --is_output_markerList_in_groupTest=TRUE \
+    --is_single_in_groupTest=TRUE \
+    --maxMAF_in_groupTest=${MAX_MAF} \
+    --condition="${CONDITION}"

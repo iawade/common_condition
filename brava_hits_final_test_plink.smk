@@ -8,8 +8,7 @@ list_of_model_files = config["list_of_model_files"]
 list_of_variance_ratio_files = config["list_of_variance_ratio_files"]
 list_of_group_files = config["list_of_group_files"]
 sparse_matrix = config["sparse_matrix"]
-gene_trait_pairs_to_test = config["gene_trait_pairs_to_test"]
-protein_coding_region_bed = config["protein_coding_region_bed"]
+gene_trait_pairs_to_test_with_conditioning_variants = config["gene_trait_pairs_to_test_with_conditioning_variants"]
 phenotype_json = config["phenotype_json"]
 use_null_var_ratio = config["use_null_var_ratio"]
 
@@ -25,9 +24,6 @@ plink_fam_files = [f"{p}.fam" for p in plink_files]
 with open(list_of_group_files) as f:
     group_files = [line.strip() for line in f]
 
-print("Plink Files Sample:", plink_files[:5])
-print("Group Files Sample:", group_files[:5])
-
 distance = config["distance"]
 maf = config["maf"]
 
@@ -38,21 +34,8 @@ import pandas as pd
 import json
 import re
 
-# Load gene-trait pairs from CSV
-gene_trait_pairs_df = pd.read_csv(gene_trait_pairs_to_test)
-
-# Extract unique genes and traits
-genes = set(gene_trait_pairs_df.iloc[:, 1])  # Second column is gene
-traits = set(gene_trait_pairs_df.iloc[:, 0])  # First column is trait
-
-# Convert to sorted lists for consistency
-genes = sorted(genes)
-traits = sorted(traits)
-
-print(f"Loaded {len(genes)} stable gene ID's.")
-
-# Debugging: Print phenotype IDs
-print(f"Stable gene IDs from JSON: {genes}")
+df = pd.read_csv("/Users/dpalmer/Repositories/BRaVa_curation/meta_analysis/conditional_results/data/gene_phenotype_pairs_with_conditioning_variants.tsv", sep='\t')
+conditioning_jobs = df.to_dict(orient='records')
 
 # Load the phenotype data from JSON and store phenotype_IDs
 with open(phenotype_json) as f:
@@ -88,78 +71,38 @@ for pid in phenotype_ids:  # phenotype IDs from JSON
     if trait_in_model and trait_in_variance:
         available_traits.add(pid)
 
-# Store valid gene-trait pairs as a list
-valid_gene_trait_pairs = [f"{gene}_{trait}" for gene, trait in zip(gene_trait_pairs_df.iloc[:, 1], gene_trait_pairs_df.iloc[:, 0]) if trait in available_traits]
+conditioning_jobs = [job for job in conditioning_jobs if job['Trait'] in available_traits]
+
+for job in conditioning_jobs:
+    filename = f"final_run_files/{job['Gene']}_{job['Trait']}_{job['MAF_cutoff_for_conditioning_variants']}_extract.txt"
+    with open(filename, "w") as f:
+        f.writelines(f"{v}\n" for v in job['cond'].split(","))
+
+genes = sorted(set(job['Gene'] for job in conditioning_jobs))
 
 # Debugging: Print valid gene-trait pairs
-print(f"Filtered {len(valid_gene_trait_pairs)} gene-trait pairs with available model/variance files.")
-print(f"Valid gene-trait pairs: {valid_gene_trait_pairs}")
-
-genes_in_valid_pairs = sorted({pair.split("_")[0] for pair in valid_gene_trait_pairs})
+print(f"Filtered {len(conditioning_jobs)} conditioning jobs with available model/variance files.")
 
 # Target Rule for Completion of Pipeline
 rule all:
     input:
-        expand("run_files/{gene_trait}_{distance}_{maf}_string.txt",
-        gene_trait=valid_gene_trait_pairs,
-        distance=config["distance"], maf=config["maf"]),
-        expand("run_files/{gene}_{distance}_{maf}.bim", 
-        gene=genes_in_valid_pairs, distance=config["distance"], maf=config["maf"]),
-        expand("run_files/{gene}_{distance}_{maf}.bed", 
-        gene=genes_in_valid_pairs, distance=config["distance"], maf=config["maf"]),
-        expand("run_files/{gene}_{distance}_{maf}.fam", 
-        gene=genes_in_valid_pairs, distance=config["distance"], maf=config["maf"]),
-        expand("run_files/{gene}_group_file.txt", gene=genes_in_valid_pairs),
-        expand("run_files/bed/{gene}.bed", gene=genes_in_valid_pairs),
-        expand("saige_outputs/{gene_trait}_{distance}_saige_results_{maf}.txt",
-               gene_trait=valid_gene_trait_pairs,
-               distance=config["distance"],
-               maf=config["maf"]),
-        "brava_stepwise_conditional_analysis_results.txt"
-
-rule identify_gene_start_stop:
-    output:
-        "run_files/bed/{gene}.bed"
-    shell:
-        "python scripts/start_end_query.py --ensembl_id \"{wildcards.gene}\""
-
-rule filter_to_coding_gene_plink:
-    input:
-        plink_bim = lambda wildcards: plink_bim_files,
-        plink_bed = lambda wildcards: plink_bed_files,
-        plink_fam = lambda wildcards: plink_fam_files,
-        bed = "run_files/bed/{gene}.bed" 
-    output:
-        "run_files/{gene}_{distance}_{maf}.bim",
-        "run_files/{gene}_{distance}_{maf}.bed",
-        "run_files/{gene}_{distance}_{maf}.fam"
-    params:
-        distance=distance,
-        threads=config["threads"]
-    threads: config["threads"]
-    shell:
-        """
-        set -euo pipefail
-        chr=$(python scripts/extract_chromosome.py --ensembl_id \"{wildcards.gene}\")
-        echo $chr
-        for plink_bed in {input.plink_bed}; do
-            if [[ "$plink_bed" =~ \\.($chr)\\. ]]; then
-                plink_fileset=$(echo "$plink_bed" | sed 's/\\.bed$//')
-                matched_plink=$plink_fileset
-                bash scripts/filter_to_coding_gene_plink.sh $plink_fileset {wildcards.gene} {params.distance} {wildcards.maf} {params.threads}
-            fi
-        done
-
-        if [[ -z "$matched_plink" ]]; then
-            echo "ERROR: No matching plink fileset (.bim/.bed/.fam) found for chromosome $chr"
-        fi
-        """
+        expand([
+            "final_run_files/{gene}_{trait}_{maf}_extract.txt"
+            "final_run_files/{gene}_{trait}_{maf}_ld_pruned_string.txt",
+            "final_saige_outputs/{gene}_{trait}_saige_conditioned_results_{maf}.txt"],
+        zip,
+        gene=[job['Gene'] for job in conditioning_jobs],
+        trait=[job['Trait'] for job in conditioning_jobs],
+        maf=[job['MAF_cutoff_for_conditioning_variants'] for job in conditioning_jobs]
+        ),
+        expand("final_run_files/{gene}_group_file.txt", gene=genes),
+        "brava_final_conditional_analysis_results.txt"
 
 rule filter_group_file:
     input:
         group = lambda wildcards: group_files
     output:
-        "run_files/{gene}_group_file.txt"
+        "final_run_files/{gene}_group_file.txt"
     shell:
         """
         set -euo pipefail
@@ -174,34 +117,29 @@ rule filter_group_file:
         touch {output}
         """
 
-rule spa_tests_stepwise_conditional:
+rule prune_to_independent_conditioning_variants:
     input:
-        plink_bim = "run_files/{gene}_{distance}_{maf}.bim",
-        plink_bed = "run_files/{gene}_{distance}_{maf}.bed",
-        plink_fam = "run_files/{gene}_{distance}_{maf}.fam",
-        model_file=lambda wildcards: [
-            mf for mf in model_files
-            if re.search(rf'(?:^|[/_.\-]){re.escape(wildcards.trait)}(?=[/_.\-])', mf)
-        ],
-        variance_file=lambda wildcards: [
-            vf for vf in variance_files
-            if re.search(rf'(?:^|[/_.\-]){re.escape(wildcards.trait)}(?=[/_.\-])', vf)
-        ],
-        sparse_matrix=sparse_matrix,
-        group_file="run_files/{gene}_group_file.txt",
+        plink_bim = lambda wildcards: plink_bim_files,
+        plink_bed = lambda wildcards: plink_bed_files,
+        plink_fam = lambda wildcards: plink_fam_files,
+        conditioning_variants = "final_run_files/{gene}_{trait}_{maf}_extract.txt"
+        group_file="final_run_files/{gene}_group_file.txt",
     output:
-        "run_files/{gene}_{trait}_{distance}_{maf}_string.txt" 
+        "final_run_files/{gene}_{trait}_{maf}_ld_pruned_string.prune.in" 
     params:
-        maf_common="{maf}",
-        use_null_var_ratio=config["use_null_var_ratio"]
+        file="final_run_files/{gene}_{trait}_{maf}_ld_pruned_string"
     shell:
         """
         set -euo pipefail
         chr=$(python scripts/extract_chromosome.py --ensembl_id \"{wildcards.gene}\")
         for plink_bed in {input.plink_bed}; do
-            plink_fileset=$(echo "$plink_bed" | sed 's/\\.bed$//')
-            conda run --no-capture-output --prefix envs/RSAIGE_vcf_version bash scripts/stepwise_conditional_SAIGE_plink.sh \
-                $plink_fileset {output} {input.model_file} {input.variance_file} {input.sparse_matrix} $chr {params.use_null_var_ratio}
+            if [[ "$plink_bed" =~ \\.($chr)\\. ]]; then
+                plink_fileset=$(echo "$plink_bed" | sed 's/\\.bed$//')
+                plink2 --bfile $plink_fileset \
+                  --extract {input.conditioning_variants} \
+                  --indep-pairwise 50 5 0.9 \
+                  --out {params.file}
+            fi
         done
         """
 
@@ -219,10 +157,10 @@ rule spa_tests_conditional:
             if re.search(rf'(?:^|[/_.\-]){re.escape(wildcards.trait)}(?=[/_.\-])', vf)
         ],
         sparse_matrix=sparse_matrix,
-        group_file="run_files/{gene}_group_file.txt",
-        conditioning_variants="run_files/{gene}_{trait}_{distance}_{maf}_string.txt"
+        group_file="final_run_files/{gene}_group_file.txt",
+        conditioning_variants="final_run_files/{gene}_{trait}_{distance}_{maf}_string.txt"
     output:
-        "saige_outputs/{gene}_{trait}_{distance}_saige_results_{maf}.txt" 
+        "final_saige_outputs/{gene}_{trait}_{distance}_saige_results_{maf}.txt" 
     params:
         min_mac=min_mac,
         annotations_to_include=annotations_to_include,
@@ -249,7 +187,7 @@ rule combine_results:
                distance=config["distance"],
                maf=config["maf"]),
     output:
-        "brava_stepwise_conditional_analysis_results.txt"
+        "brava_final_conditional_analysis_results.txt"
     shell:
         """
         set -euo pipefail
