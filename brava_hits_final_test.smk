@@ -145,7 +145,7 @@ rule prune_to_independent_conditioning_variants:
                 # Define a bed file first
                 plink2 --vcf --extract range {input.conditioning_variants_bed} --make-bed --out ${{TMPFILE}}
                 # Sort the .bim file variant ID
-                awk 'BEGIN{OFS="\t"} { $2 = "chr" $1 ":" $4 ":" $6 ":" $5; print }' ${{TMPFILE}}.bim > ${{TMPFILE}}.bim.tmp
+                awk 'BEGIN{OFS="\\t"} { $2 = "chr" $1 ":" $4 ":" $6 ":" $5; print }' ${{TMPFILE}}.bim > ${{TMPFILE}}.bim.tmp
                 mv ${{TMPFILE}}.bim.tmp ${{TMPFILE}}.bim
                 plink2 --bfile ${{TMPFILE}} \
                   --extract {input.conditioning_variants} \
