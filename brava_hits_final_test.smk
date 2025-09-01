@@ -94,15 +94,15 @@ rule all:
     input:
         expand([
             "final_run_files/{gene}_{trait}_{maf}_extract.txt",
-            "final_run_files/{gene}_{trait}_{maf}_ld_pruned_string.txt",
-            "final_saige_outputs/{gene}_{trait}_saige_conditioned_results_{maf}.txt"],
+            "final_run_files/{gene}_{trait}_{maf}_ld_pruned_string.txt"],
+            # "final_saige_outputs/{gene}_{trait}_saige_conditioned_results_{maf}.txt"],
         zip,
         gene=[job['Gene'] for job in conditioning_jobs],
         trait=[job['Trait'] for job in conditioning_jobs],
         maf=[job['MAF_cutoff_for_conditioning_variants'] for job in conditioning_jobs]
         ),
         expand("final_run_files/{gene}_group_file.txt", gene=genes),
-        "brava_final_conditional_analysis_results.txt"
+        # "brava_final_conditional_analysis_results.txt"
 
 rule filter_group_file:
     input:
@@ -167,52 +167,52 @@ rule prune_to_independent_conditioning_variants:
         fi
         """
 
-rule spa_tests_conditional:
-    input:
-        vcf=lambda wildcards: vcf_files,
-        model_file=lambda wildcards: [
-            mf for mf in model_files
-            if re.search(rf'(?:^|[/_.\-]){re.escape(wildcards.trait)}(?=[/_.\-])', mf)
-        ],
-        variance_file=lambda wildcards: [
-            vf for vf in variance_files
-            if re.search(rf'(?:^|[/_.\-]){re.escape(wildcards.trait)}(?=[/_.\-])', vf)
-        ],
-        sparse_matrix=sparse_matrix,
-        group_file="final_run_files/{gene}_group_file.txt",
-        conditioning_variants="final_run_files/{gene}_{trait}_{maf}_ld_pruned_string.txt"
-    output:
-        "final_saige_outputs/{gene}_{trait}_saige_conditioned_results_{maf}.txt"
-    params:
-        min_mac=min_mac,
-        annotations_to_include=annotations_to_include,
-        max_MAF="{maf}",
-        use_null_var_ratio=config["use_null_var_ratio"]
-    threads: 8
-    shell:
-        """
-        set -euo pipefail
-        chr=$(python scripts/extract_chromosome.py --ensembl_id \"{wildcards.gene}\")
-        for vcf in {input.vcf}; do
-            if [[ "$vcf" =~ \\.($chr)\\. ]]; then
-                conda run --no-capture-output --prefix envs/RSAIGE_vcf_version bash scripts/saige_step2_conditioning_check.sh \
-                    $vcf {output} {params.min_mac} {input.model_file} {input.variance_file} {input.sparse_matrix} {input.group_file} {params.annotations_to_include} {input.conditioning_variants} {params.max_MAF} {params.use_null_var_ratio}
-            fi
-        done
-        """
+# rule spa_tests_conditional:
+#     input:
+#         vcf=lambda wildcards: vcf_files,
+#         model_file=lambda wildcards: [
+#             mf for mf in model_files
+#             if re.search(rf'(?:^|[/_.\-]){re.escape(wildcards.trait)}(?=[/_.\-])', mf)
+#         ],
+#         variance_file=lambda wildcards: [
+#             vf for vf in variance_files
+#             if re.search(rf'(?:^|[/_.\-]){re.escape(wildcards.trait)}(?=[/_.\-])', vf)
+#         ],
+#         sparse_matrix=sparse_matrix,
+#         group_file="final_run_files/{gene}_group_file.txt",
+#         conditioning_variants="final_run_files/{gene}_{trait}_{maf}_ld_pruned_string.txt"
+#     output:
+#         "final_saige_outputs/{gene}_{trait}_saige_conditioned_results_{maf}.txt"
+#     params:
+#         min_mac=min_mac,
+#         annotations_to_include=annotations_to_include,
+#         max_MAF="{maf}",
+#         use_null_var_ratio=config["use_null_var_ratio"]
+#     threads: 8
+#     shell:
+#         """
+#         set -euo pipefail
+#         chr=$(python scripts/extract_chromosome.py --ensembl_id \"{wildcards.gene}\")
+#         for vcf in {input.vcf}; do
+#             if [[ "$vcf" =~ \\.($chr)\\. ]]; then
+#                 conda run --no-capture-output --prefix envs/RSAIGE_vcf_version bash scripts/saige_step2_conditioning_check.sh \
+#                     $vcf {output} {params.min_mac} {input.model_file} {input.variance_file} {input.sparse_matrix} {input.group_file} {params.annotations_to_include} {input.conditioning_variants} {params.max_MAF} {params.use_null_var_ratio}
+#             fi
+#         done
+#         """
 
-rule combine_results:
-    input:
-        expand("final_saige_outputs/{gene}_{trait}_saige_conditioned_results_{maf}.txt",
-        zip,
-        gene=[job['Gene'] for job in conditioning_jobs],
-        trait=[job['Trait'] for job in conditioning_jobs],
-        maf=[job['MAF_cutoff_for_conditioning_variants'] for job in conditioning_jobs]
-        ),
-    output:
-        "brava_final_conditional_analysis_results.txt"
-    shell:
-        """
-        set -euo pipefail
-        python scripts/combine_saige_outputs.py --out {output}
-        """
+# rule combine_results:
+#     input:
+#         expand("final_saige_outputs/{gene}_{trait}_saige_conditioned_results_{maf}.txt",
+#         zip,
+#         gene=[job['Gene'] for job in conditioning_jobs],
+#         trait=[job['Trait'] for job in conditioning_jobs],
+#         maf=[job['MAF_cutoff_for_conditioning_variants'] for job in conditioning_jobs]
+#         ),
+#     output:
+#         "brava_final_conditional_analysis_results.txt"
+#     shell:
+#         """
+#         set -euo pipefail
+#         python scripts/combine_saige_outputs.py --out {output}
+#         """
