@@ -153,7 +153,12 @@ rule prune_to_independent_conditioning_variants:
                   --out {params.file}
                 # Finally, create a comma separated string from this
                 rm {params.file}.log
-                paste -sd, {params.file}.prune.in > {output}
+                if [[ -f {params.file}.prune.in ]]; then
+                    paste -sd, {params.file}.prune.in > {output}
+                else
+                    # No variants to prune, create an empty output
+                    touch {output}
+                fi
             fi
         done
 
