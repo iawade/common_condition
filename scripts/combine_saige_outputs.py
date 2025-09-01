@@ -100,7 +100,7 @@ def combine_outputs(out):
             print("File is empty")
         else:
             # Read file
-            df = pd.read_csv(file, sep="\t", header=None, names=["cond"])
+            df = pd.read_csv(file, sep="\t", header=None, names=["conditioning_varaints"])
             # Add extracted metadata as new columns
             df["Gene"] = gene
             df["Trait"] = trait
@@ -115,7 +115,7 @@ def combine_outputs(out):
         print(f"conditioning variants file is not empty: saved as {out}.conditioning.variants.txt")
     else:
         open(out + ".conditioning.variants.txt", 'a').close()
-        print(f"conditioning variants file is empty: saved as {out},conditioning.variants.txt")
+        print(f"conditioning variants file is empty: saved as {out}.conditioning.variants.txt")
 
     print(f"Files merged and sorted. Output saved as {out}")
 
