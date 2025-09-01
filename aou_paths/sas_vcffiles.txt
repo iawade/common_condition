@@ -1,1 +1,1 @@
-/home/jupyter/conditioning_test/sas/vcf/combined/aou.exome_split.v8.qced.chr11.sas.vcf.bgz
+/home/jupyter/conditioning_test/sas/vcf/aou.exome_split.v8.qced.chr11.sas.vcf.bgz
