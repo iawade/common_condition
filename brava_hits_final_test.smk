@@ -94,15 +94,15 @@ rule all:
     input:
         expand([
             "final_run_files/{gene}_{trait}_{maf}_extract.txt",
-            "final_run_files/{gene}_{trait}_{maf}_ld_pruned_string.txt"],
-            # "final_saige_outputs/{gene}_{trait}_saige_conditioned_results_{maf}.txt"],
+            "final_run_files/{gene}_{trait}_{maf}_ld_pruned_string.txt",
+            "final_saige_outputs/{gene}_{trait}_saige_conditioned_results_{maf}.txt"],
         zip,
         gene=[job['Gene'] for job in conditioning_jobs],
         trait=[job['Trait'] for job in conditioning_jobs],
         maf=[job['MAF_cutoff_for_conditioning_variants'] for job in conditioning_jobs]
         ),
         expand("final_run_files/{gene}_group_file.txt", gene=genes),
-        # "brava_final_conditional_analysis_results.txt"
+        "brava_final_conditional_analysis_results.txt"
 
 rule filter_group_file:
     input:
