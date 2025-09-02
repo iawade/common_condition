@@ -24,17 +24,24 @@ plink_fam_files = [f"{p}.fam" for p in plink_files]
 with open(list_of_group_files) as f:
     group_files = [line.strip() for line in f]
 
-distance = config["distance"]
-maf = config["maf"]
-
 min_mac = config["min_mac"]
 annotations_to_include = config["annotations_to_include"]
 
 import pandas as pd
 import json
 import re
+from scripts.extract_chromosome import get_gene_chr
 
-df = pd.read_csv("/Users/dpalmer/Repositories/BRaVa_curation/meta_analysis/conditional_results/data/gene_phenotype_pairs_with_conditioning_variants.tsv", sep='\t')
+pattern = r'\.(chr[0-9X]+)\.'
+matches = [re.search(pattern, s) for s in plink_bim_files]
+chrs = set([m.group(1) if m else None for m in matches])
+
+print("Available chromosomes:", chrs)
+
+df = pd.read_csv(gene_trait_pairs_to_test_with_conditioning_variants, sep='\t')
+df['chr'] = df['Gene'].apply(get_gene_chr)
+df = df[df['chr'].isin(chrs)]
+
 conditioning_jobs = df.to_dict(orient='records')
 
 # Load the phenotype data from JSON and store phenotype_IDs
@@ -77,6 +84,12 @@ for job in conditioning_jobs:
     filename = f"final_run_files/{job['Gene']}_{job['Trait']}_{job['MAF_cutoff_for_conditioning_variants']}_extract.txt"
     with open(filename, "w") as f:
         f.writelines(f"{v}\n" for v in job['cond'].split(","))
+    filename = f"final_run_files/{job['Gene']}_{job['Trait']}_{job['MAF_cutoff_for_conditioning_variants']}_extract.bed"
+    with open(filename, "w") as f:
+        variants = job['cond'].split(",")
+        for v in variants:
+            chrom, pos, ref, alt = v.split(":")
+            _ = f.write(f"{chrom}\t{pos}\t{pos}\n")
 
 genes = sorted(set(job['Gene'] for job in conditioning_jobs))
 
@@ -125,7 +138,7 @@ rule prune_to_independent_conditioning_variants:
         conditioning_variants = "final_run_files/{gene}_{trait}_{maf}_extract.txt",
         group_file="final_run_files/{gene}_group_file.txt",
     output:
-        "final_run_files/{gene}_{trait}_{maf}_ld_pruned_string.prune.in" 
+        "final_run_files/{gene}_{trait}_{maf}_ld_pruned_string.txt" 
     params:
         file="final_run_files/{gene}_{trait}_{maf}_ld_pruned_string"
     shell:
@@ -135,12 +148,23 @@ rule prune_to_independent_conditioning_variants:
         for plink_bed in {input.plink_bed}; do
             if [[ "$plink_bed" =~ \\.($chr)\\. ]]; then
                 plink_fileset=$(echo "$plink_bed" | sed 's/\\.bed$//')
+                matched_plink=$plink_fileset
                 plink2 --bfile $plink_fileset \
                   --extract {input.conditioning_variants} \
                   --indep-pairwise 50 5 0.9 \
-                  --out {params.file}
+                  --out {params.file} || true
+                if [[ -f {params.file}.prune.in ]]; then
+                    paste -sd, {params.file}.prune.in > {output}
+                else
+                    # No variants to prune, create an empty output
+                    touch {output}
+                fi
             fi
         done
+
+        if [[ -z "$matched_plink" ]]; then
+            echo "ERROR: No matching plink fileset (.bim/.bed/.fam) found for chromosome $chr"
+        fi
         """
 
 rule spa_tests_conditional:
@@ -158,15 +182,15 @@ rule spa_tests_conditional:
         ],
         sparse_matrix=sparse_matrix,
         group_file="final_run_files/{gene}_group_file.txt",
-        conditioning_variants="final_run_files/{gene}_{trait}_{distance}_{maf}_string.txt"
+        conditioning_variants="final_run_files/{gene}_{trait}_{distance}_{maf}_ld_pruned_string.txt"
     output:
-        "final_saige_outputs/{gene}_{trait}_{distance}_saige_results_{maf}.txt" 
+        "final_saige_outputs/{gene}_{trait}_{distance}_saige_conditioned_results_{maf}.txt" 
     params:
         min_mac=min_mac,
         annotations_to_include=annotations_to_include,
         max_MAF="{maf}",
         use_null_var_ratio=config["use_null_var_ratio"]
-    threads: 4
+    threads: 8
     shell:
         """
         set -euo pipefail
@@ -182,10 +206,12 @@ rule spa_tests_conditional:
 
 rule combine_results:
     input:
-        expand("saige_outputs/{gene_trait}_{distance}_saige_results_{maf}.txt",
-               gene_trait=valid_gene_trait_pairs,
-               distance=config["distance"],
-               maf=config["maf"]),
+        expand("final_saige_outputs/{gene}_{trait}_saige_conditioned_results_{maf}.txt",
+        zip,
+        gene=[job['Gene'] for job in conditioning_jobs],
+        trait=[job['Trait'] for job in conditioning_jobs],
+        maf=[job['MAF_cutoff_for_conditioning_variants'] for job in conditioning_jobs]
+        ),
     output:
         "brava_final_conditional_analysis_results.txt"
     shell:
