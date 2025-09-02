@@ -97,7 +97,7 @@ print(f"Filtered {len(conditioning_jobs)} conditioning jobs with available model
 rule all:
     input:
         expand([
-            "final_run_files/{gene}_{trait}_{maf}_extract.txt"
+            "final_run_files/{gene}_{trait}_{maf}_extract.txt",
             "final_run_files/{gene}_{trait}_{maf}_ld_pruned_string.txt",
             "final_saige_outputs/{gene}_{trait}_saige_conditioned_results_{maf}.txt"],
         zip,
