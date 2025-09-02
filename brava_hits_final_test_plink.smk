@@ -133,9 +133,9 @@ rule prune_to_independent_conditioning_variants:
         plink_bed = lambda wildcards: plink_bed_files,
         plink_fam = lambda wildcards: plink_fam_files,
         conditioning_variants = "final_run_files/{gene}_{trait}_{maf}_extract.txt",
-        group_file="final_run_files/{gene}_group_file.txt",
+        group_file="final_run_files/{gene}_group_file.txt"
     output:
-        "final_run_files/{gene}_{trait}_{maf}_ld_pruned_string.txt" 
+        "final_run_files/{gene}_{trait}_{maf}_ld_pruned_string.txt"
     params:
         file="final_run_files/{gene}_{trait}_{maf}_ld_pruned_string"
     shell:
