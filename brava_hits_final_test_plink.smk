@@ -122,7 +122,7 @@ rule prune_to_independent_conditioning_variants:
         plink_bim = lambda wildcards: plink_bim_files,
         plink_bed = lambda wildcards: plink_bed_files,
         plink_fam = lambda wildcards: plink_fam_files,
-        conditioning_variants = "final_run_files/{gene}_{trait}_{maf}_extract.txt"
+        conditioning_variants = "final_run_files/{gene}_{trait}_{maf}_extract.txt",
         group_file="final_run_files/{gene}_group_file.txt",
     output:
         "final_run_files/{gene}_{trait}_{maf}_ld_pruned_string.prune.in" 

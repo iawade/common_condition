@@ -37,13 +37,24 @@ annotations_to_include = config["annotations_to_include"]
 import pandas as pd
 import json
 import re
+from scripts.extract_chromosome import get_gene_chr
+
+pattern = r'\.(chr[0-9X]+)\.'
+matches = [re.search(pattern, s) for s in plink_bim_files]
+chrs = set([m.group(1) if m else None for m in matches])
+
+print("Available chromosomes:", chrs)
 
 # Load gene-trait pairs from CSV
 gene_trait_pairs_df = pd.read_csv(gene_trait_pairs_to_test)
 
+# Filter to the collection that are in the listed vcfs
+gene_trait_pairs_df['chr'] = gene_trait_pairs_df['Region'].apply(get_gene_chr)
+gene_trait_pairs_df = gene_trait_pairs_df[gene_trait_pairs_df['chr'].isin(chrs)]
+
 # Extract unique genes and traits
-genes = set(gene_trait_pairs_df.iloc[:, 1])  # Second column is gene
-traits = set(gene_trait_pairs_df.iloc[:, 0])  # First column is trait
+genes = set(gene_trait_pairs_df['Region'])  # Second column is gene
+traits = set(gene_trait_pairs_df['phenotype']) # First column is trait
 
 # Convert to sorted lists for consistency
 genes = sorted(genes)
