@@ -65,9 +65,6 @@ with open(list_of_variance_ratio_files) as f:
 print("Model Files Sample:", model_files[:5])
 print("Variance Files Sample:", variance_files[:5])
 
-# Debugging: Print traits before filtering
-print(f"All traits before filtering: {traits}")
-
 # Filter traits based on presence in model and variance ratio files
 available_traits = set()
 for pid in phenotype_ids:  # phenotype IDs from JSON
