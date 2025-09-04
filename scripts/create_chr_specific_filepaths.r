@@ -34,15 +34,12 @@ if (is.null(opt$chr)) {
     if (path %in% names(config)) {
       if (!is.null(config[[path]])) {
         files <- fread(config[[path]], header=FALSE)$V1
-        print(files)
-        match <- grep(paste0("(^|\\.)", opt$chr, "($|\\.)"), files, perl = TRUE)
-        print(match)
+        match <- grep(paste0("(^|[._-])", opt$chr, "($|[._-])"), files, perl = TRUE)
         if (length(match) != 1) {
           stop(paste("Multiple or no chr matches in the", path, "paths"),
             call. = FALSE)
         }
         out <- paste0(gsub("list_of_", "", path), ".txt")
-        print(out)
         fwrite(data.table(files=files[match]), quote=FALSE, col.names=FALSE,
           file=out)
         config[[path]] <- out
