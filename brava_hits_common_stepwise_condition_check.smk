@@ -125,13 +125,20 @@ rule all:
 rule identify_gene_start_stop:
     output:
         "run_files/bed/{gene}.bed"
+        "run_files/bed/expanded_regions_{gene}.bed"
+    params:
+        distance=distance
     shell:
-        "python scripts/start_end_query.py --ensembl_id \"{wildcards.gene}\""
+        """
+        set -euo pipefail
+        python scripts/start_end_query.py --ensembl_id \"{wildcards.gene}\"
+        bash scripts/expand_coding_region.sh {wildcards.gene} {params.distance}
+        """
 
 rule filter_to_coding_gene_vcf:
     input:
         vcf = lambda wildcards: vcf_files,
-        bed = "run_files/bed/{gene}.bed" 
+        bed = "run_files/bed/expanded_regions_{gene}.bed" 
     output:
         "run_files/{gene}_{distance}_{maf}.vcf.bgz",
         "run_files/{gene}_{distance}_{maf}.vcf.bgz.csi"
