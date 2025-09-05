@@ -4,7 +4,7 @@
 list_of_vcf_files: "ukb_paths/amr/amr_vcf_file_list.txt"
 list_of_plink_files: "ukb_paths/amr/amr_plink_file_list.txt"
 list_of_model_files: "ukb_paths/amr/amr_model_file_list.txt"
-list_of_variance_ratio_files: "ukb_paths/amr/amr_variance_null_file_list.txt"
+list_of_variance_ratio_files: "ukb_paths/amr/amr_variance_file_list.txt"
 sparse_matrix: "snakemake_amr/mtx/brava_AMR_relatednessCutoff_0.05_5000_randomMarkersUsed.sparseGRM.mtx"
 list_of_group_files: "ukb_paths/amr/amr_group_file_list.txt"
 
