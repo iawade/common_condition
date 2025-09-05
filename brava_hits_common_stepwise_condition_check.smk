@@ -125,7 +125,7 @@ rule all:
 
 rule identify_gene_start_stop:
     output:
-        "run_files/bed/{gene}.bed"
+        "run_files/bed/{gene}.bed",
         "run_files/bed/expanded_regions_{gene}.bed"
     params:
         distance=distance
