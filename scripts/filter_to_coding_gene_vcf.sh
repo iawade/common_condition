@@ -12,7 +12,6 @@ EXPANDED_BED="run_files/bed/expanded_regions_${ENSEMBL_ID}.bed"
 # Output files
 OUTPUT_VCF="run_files/${ENSEMBL_ID}_${BP_DISTANCE}_${MAF_COMMON}.vcf.bgz"
 
-
 # Use bcftools to filter VCF by the expanded BED regions and MAF threshold
 # Using && which is the same as max(MAC > 40, MAF > $MAF_COMMON) ; unless I'm losing the plot
 bcftools view --threads "$THREADS" -R "$EXPANDED_BED" "$INPUT_VCF" |
