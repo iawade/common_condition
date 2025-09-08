@@ -122,6 +122,7 @@ rule all:
         gene=genes_in_valid_pairs, distance=config["distance"], maf=config["maf"]),
         expand("run_files/{gene}_group_file.txt", gene=genes_in_valid_pairs),
         expand("run_files/bed/{gene}.bed", gene=genes_in_valid_pairs),
+        expand("run_files/bed/expanded_regions_{gene}.bed", gene=genes_in_valid_pairs),
         expand("saige_outputs/{gene_trait}_{distance}_saige_results_{maf}.txt",
                gene_trait=valid_gene_trait_pairs,
                distance=config["distance"],
@@ -130,16 +131,21 @@ rule all:
 
 rule identify_gene_start_stop:
     output:
-        "run_files/bed/{gene}.bed"
+        "run_files/bed/{gene}.bed",
+        "run_files/bed/expanded_regions_{gene}.bed"
     shell:
-        "python scripts/start_end_query.py --ensembl_id \"{wildcards.gene}\""
+        """
+        set -euo pipefail
+        python scripts/start_end_query.py --ensembl_id \"{wildcards.gene}\"
+        bash scripts/expand_coding_region.sh {wildcards.gene} {params.distance}
+        """
 
 rule filter_to_coding_gene_plink:
     input:
         plink_bim = lambda wildcards: plink_bim_files,
         plink_bed = lambda wildcards: plink_bed_files,
         plink_fam = lambda wildcards: plink_fam_files,
-        bed = "run_files/bed/{gene}.bed" 
+        bed = "run_files/bed/expanded_regions_{gene}.bed"
     output:
         "run_files/{gene}_{distance}_{maf}.bim",
         "run_files/{gene}_{distance}_{maf}.bed",

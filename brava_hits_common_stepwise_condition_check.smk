@@ -154,7 +154,6 @@ rule filter_to_coding_gene_vcf:
         echo $chr
         for vcf in {input.vcf}; do
             if [[ "$vcf" =~ \\.($chr)\\. ]]; then
-                echo $vcf
                 matched_vcf=$vcf
                 bash scripts/filter_to_coding_gene_vcf.sh $vcf {wildcards.gene} {params.distance} {wildcards.maf} {params.threads}
             fi
