@@ -131,8 +131,8 @@ rule all:
 
 rule identify_gene_start_stop:
     output:
-        "run_files/bed/{gene}.bed",
-        "run_files/bed/expanded_regions_{gene}.bed"
+        r"run_files/bed/{gene,[^/]+}.bed",
+        r"run_files/bed/expanded_regions_{gene,[^/]+}.bed"
     shell:
         """
         set -euo pipefail
@@ -145,11 +145,11 @@ rule filter_to_coding_gene_plink:
         plink_bim = lambda wildcards: plink_bim_files,
         plink_bed = lambda wildcards: plink_bed_files,
         plink_fam = lambda wildcards: plink_fam_files,
-        regions = "run_files/bed/expanded_regions_{gene}.bed"
+        regions = r"run_files/bed/expanded_regions_{gene,[^/]+}.bed"
     output:
-        bim = "run_files/{gene}_{distance}_{maf}.bim",
-        bed = "run_files/{gene}_{distance}_{maf}.bed",
-        fam = "run_files/{gene}_{distance}_{maf}.fam"
+        bim = r"run_files/{gene,[^/]+}_{distance,\d+}_{maf,[0-9.]+}.bim",
+        bed = r"run_files/{gene,[^/]+}_{distance,\d+}_{maf,[0-9.]+}.bed",
+        fam = r"run_files/{gene,[^/]+}_{distance,\d+}_{maf,[0-9.]+}.fam"
     params:
         distance=distance,
         threads=config["threads"]
@@ -193,9 +193,9 @@ rule filter_group_file:
 
 rule spa_tests_stepwise_conditional:
     input:
-        plink_bim = "run_files/{gene}_{distance}_{maf}.bim",
-        plink_bed = "run_files/{gene}_{distance}_{maf}.bed",
-        plink_fam = "run_files/{gene}_{distance}_{maf}.fam",
+        plink_bim = r"run_files/{gene,[^/]+}_{distance,\d+}_{maf,[0-9.]+}.bim",
+        plink_bed = r"run_files/{gene,[^/]+}_{distance,\d+}_{maf,[0-9.]+}.bed",
+        plink_fam = r"run_files/{gene,[^/]+}_{distance,\d+}_{maf,[0-9.]+}.fam",
         model_file=lambda wildcards: [
             mf for mf in model_files
             if re.search(rf'(?:^|[/_.\-]){re.escape(wildcards.trait)}(?=[/_.\-])', mf)
@@ -272,3 +272,6 @@ rule combine_results:
         set -euo pipefail
         python scripts/combine_saige_outputs.py --out {output}
         """
+
+ruleorder:
+    identify_gene_start_stop > filter_to_coding_gene_plink
