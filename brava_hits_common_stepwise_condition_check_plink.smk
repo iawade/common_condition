@@ -145,11 +145,11 @@ rule filter_to_coding_gene_plink:
         plink_bim = lambda wildcards: plink_bim_files,
         plink_bed = lambda wildcards: plink_bed_files,
         plink_fam = lambda wildcards: plink_fam_files,
-        bed = "run_files/bed/expanded_regions_{gene}.bed"
+        regions = "run_files/bed/expanded_regions_{gene}.bed"
     output:
-        "run_files/{gene}_{distance}_{maf}.bim",
-        "run_files/{gene}_{distance}_{maf}.bed",
-        "run_files/{gene}_{distance}_{maf}.fam"
+        bim = "run_files/{gene}_{distance}_{maf}.bim",
+        bed = "run_files/{gene}_{distance}_{maf}.bed",
+        fam = "run_files/{gene}_{distance}_{maf}.fam"
     params:
         distance=distance,
         threads=config["threads"]
