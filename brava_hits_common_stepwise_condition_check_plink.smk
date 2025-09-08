@@ -133,6 +133,8 @@ rule identify_gene_start_stop:
     output:
         r"run_files/bed/{gene,[^/]+}.bed",
         r"run_files/bed/expanded_regions_{gene,[^/]+}.bed"
+    params:
+        distance=distance
     shell:
         """
         set -euo pipefail
