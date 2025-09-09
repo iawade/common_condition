@@ -1,10 +1,10 @@
 FROM continuumio/miniconda3
 
-ENV LC_ALL C.UTF-8
-ENV LANG C.UTF-8
+ENV LC_ALL=C.UTF-8
+ENV LANG=C.UTF-8
 
 # Copy your environment definition
-COPY brava_hits_common_condition_check_no_saige_conda_env.yaml /tmp/environment.yaml
+COPY base_environment.yaml /tmp/environment.yaml
 
 # Create the environment and clean up
 RUN conda env create -f /tmp/environment.yaml && conda clean -afy
@@ -165,6 +165,7 @@ RUN createSparseGRM.R  --help && \
     step3_LDmat.R --help
 
 WORKDIR /
+ENV PATH="/:${PATH}"
 
 # Note that once this is completed, it is pushed to both docker.io and gcr.io using the following commands:
 # docker build -t brava-common-check -f Dockerfile .
