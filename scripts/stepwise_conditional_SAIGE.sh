@@ -122,8 +122,8 @@ do
     # exit 1
   fi
 
-  echo 'Lowest Pvalue in the sumstats file'
-  echo ${P_top}
+  echo "Lowest Pvalue in the sumstats file"
+  echo "${cond_M}: ${P_top}"
   echo "Pvalue for significance for conditioning"
   echo ${P_T}
 

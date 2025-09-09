@@ -100,7 +100,7 @@ def combine_outputs(out):
             print("File is empty")
         else:
             # Read file
-            df = pd.read_csv(file, sep="\t", header=None, names=["conditioning_varaints"])
+            df = pd.read_csv(file, sep="\t", header=None, names=["conditioning_variants"])
             # Add extracted metadata as new columns
             df["Gene"] = gene
             df["Trait"] = trait
