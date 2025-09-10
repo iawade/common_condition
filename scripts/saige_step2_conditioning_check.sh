@@ -56,8 +56,6 @@ fi
 
 if [ -n "$CONDITION" ]; then
     cmd+=(--condition="${CONDITION}")
-else
-    echo "No conditioning required - no change in P-value"
 fi
 
 # Run the command

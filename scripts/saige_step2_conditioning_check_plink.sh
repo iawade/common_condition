@@ -49,14 +49,13 @@ cmd=(step2_SPAtests.R
     --is_single_in_groupTest=TRUE
     --maxMAF_in_groupTest=${MAX_MAF})
 
+if [ "${USE_NULL_VAR_RATIO,,}" = "false" ]; then
+    cmd+=(--sparseGRMFile="${SPARSEGRM}"
+    --sparseGRMSampleIDFile="${SPARSEGRMID}")
+fi
+
 if [ -n "$CONDITION" ]; then
     cmd+=(--condition="${CONDITION}")
-    if [ "${USE_NULL_VAR_RATIO,,}" = "false" ]; then
-        cmd+=(--sparseGRMFile="${SPARSEGRM}"
-        --sparseGRMSampleIDFile="${SPARSEGRMID}")
-    fi
-else
-    echo "No conditioning required - no change in P-value"
 fi
 
 # Run the command
