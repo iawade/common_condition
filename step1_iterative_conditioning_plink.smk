@@ -161,8 +161,8 @@ rule filter_to_coding_gene_plink:
         distance=distance,
         threads=config["threads"]
     log:
-        stdout=r"logs/filter_to_coding_gene_plink/{gene,[^/]+}.out",
-        stderr=r"logs/filter_to_coding_gene_plink/{gene,[^/]+}.err"
+        stdout=r"logs/filter_to_coding_gene_plink/{gene,[^/]+}_{distance,\d+}_{maf,[0-9.]+}.out",
+        stderr=r"logs/filter_to_coding_gene_plink/{gene,[^/]+}_{distance,\d+}_{maf,[0-9.]+}.err"
     threads: config["threads"]
     shell:
         """
