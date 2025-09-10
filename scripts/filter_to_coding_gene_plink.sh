@@ -31,9 +31,13 @@ else
       --keep ${SPARSEGRMID} \
       --maf ${MAF_COMMON} \
       --mac 41 \
+      --make-bed \
+      --out ${OUTPUT_PLINK}.tmp
+    plink2 --bfile ${OUTPUT_PLINK}.tmp \
       --set-all-var-ids @:#:\$r:\$a \
       --make-bed \
       --out ${OUTPUT_PLINK}
+    rm ${OUTPUT_PLINK}.tmp.*
 fi
 
 TMPFILE=$(mktemp)
