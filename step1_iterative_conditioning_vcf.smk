@@ -8,6 +8,7 @@ list_of_model_files = config["list_of_model_files"]
 list_of_variance_ratio_files = config["list_of_variance_ratio_files"]
 list_of_group_files = config["list_of_group_files"]
 sparse_matrix = config["sparse_matrix"]
+sparse_matrix_id = f"{sparse_matrix}.sampleIDs.txt"
 gene_trait_pairs_to_test = config["gene_trait_pairs_to_test"]
 protein_coding_region_bed = config["protein_coding_region_bed"]
 phenotype_json = config["phenotype_json"]
@@ -196,6 +197,7 @@ rule spa_tests_stepwise_conditional:
             if re.search(rf'(?:^|[/_.\-]){re.escape(wildcards.trait)}(?=[/_.\-])', vf)
         ],
         sparse_matrix=sparse_matrix,
+        sparse_matrix_id=sparse_matrix_id,
         group_file="run_files/{gene}_group_file.txt",
     output:
         "run_files/{gene}_{trait}_{distance}_{maf}_string.txt" 

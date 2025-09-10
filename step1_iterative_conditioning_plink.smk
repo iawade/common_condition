@@ -8,6 +8,7 @@ list_of_model_files = config["list_of_model_files"]
 list_of_variance_ratio_files = config["list_of_variance_ratio_files"]
 list_of_group_files = config["list_of_group_files"]
 sparse_matrix = config["sparse_matrix"]
+sparse_matrix_id = f"{sparse_matrix}.sampleIDs.txt"
 gene_trait_pairs_to_test = config["gene_trait_pairs_to_test"]
 protein_coding_region_bed = config["protein_coding_region_bed"]
 phenotype_json = config["phenotype_json"]
@@ -147,6 +148,7 @@ rule filter_to_coding_gene_plink:
         plink_bim = lambda wildcards: plink_bim_files,
         plink_bed = lambda wildcards: plink_bed_files,
         plink_fam = lambda wildcards: plink_fam_files,
+        sparse_matrix_id = sparse_matrix_id,
         regions = r"run_files/bed/expanded_regions_{gene,[^/]+}.bed"
     output:
         bim = r"run_files/{gene,[^/]+}_{distance,\d+}_{maf,[0-9.]+}.bim",
@@ -165,7 +167,7 @@ rule filter_to_coding_gene_plink:
             if [[ "$plink_bed" =~ \\.($chr)\\. ]]; then
                 plink_fileset=$(echo "$plink_bed" | sed 's/\\.bed$//')
                 matched_plink=$plink_fileset
-                bash scripts/filter_to_coding_gene_plink.sh $plink_fileset {wildcards.gene} {params.distance} {wildcards.maf} {params.threads}
+                bash scripts/filter_to_coding_gene_plink.sh $plink_fileset {wildcards.gene} {params.distance} {wildcards.maf} {params.threads} {input.sparse_matrix_id}
             fi
         done
 
@@ -207,6 +209,7 @@ rule spa_tests_stepwise_conditional:
             if re.search(rf'(?:^|[/_.\-]){re.escape(wildcards.trait)}(?=[/_.\-])', vf)
         ],
         sparse_matrix=sparse_matrix,
+        sparse_matrix_id=sparse_matrix_id,
         group_file="run_files/{gene}_group_file.txt",
     output:
         "run_files/{gene}_{trait}_{distance}_{maf}_string.txt" 
