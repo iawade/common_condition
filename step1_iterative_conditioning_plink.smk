@@ -136,6 +136,9 @@ rule identify_gene_start_stop:
         r"run_files/bed/expanded_regions_{gene,[^/]+}.bed"
     params:
         distance=distance
+    logs:
+        stdout=r"logs/identify_gene_start_stop/{gene,[^/]+}.out",
+        stderr=r"logs/identify_gene_start_stop/{gene,[^/]+}.err"
     shell:
         """
         set -euo pipefail
@@ -157,6 +160,9 @@ rule filter_to_coding_gene_plink:
     params:
         distance=distance,
         threads=config["threads"]
+    logs:
+        stdout=r"logs/filter_to_coding_gene_plink/{gene,[^/]+}.out",
+        stderr=r"logs/filter_to_coding_gene_plink/{gene,[^/]+}.err"
     threads: config["threads"]
     shell:
         """
@@ -181,6 +187,9 @@ rule filter_group_file:
         group = lambda wildcards: group_files
     output:
         "run_files/{gene}_group_file.txt"
+    logs:
+        stdout="logs/filter_group_file/{gene}.out",
+        stderr="logs/filter_group_file/{gene}.err"
     shell:
         """
         set -euo pipefail
@@ -212,10 +221,13 @@ rule spa_tests_stepwise_conditional:
         sparse_matrix_id=sparse_matrix_id,
         group_file="run_files/{gene}_group_file.txt",
     output:
-        "run_files/{gene}_{trait}_{distance}_{maf}_string.txt" 
+        "run_files/{gene}_{trait}_{distance}_{maf}_string.txt"
     params:
         maf_common="{maf}",
         use_null_var_ratio=config["use_null_var_ratio"]
+    logs:
+        stdout="logs/spa_tests_stepwise_conditional/{gene}_{trait}_{distance}_{maf}.out",
+        stderr="logs/spa_tests_stepwise_conditional/{gene}_{trait}_{distance}_{maf}.err"
     shell:
         """
         set -euo pipefail
@@ -250,6 +262,9 @@ rule spa_tests_conditional:
         annotations_to_include=annotations_to_include,
         max_MAF="{maf}",
         use_null_var_ratio=config["use_null_var_ratio"]
+    logs:
+        stdout="logs/spa_tests_conditional/{gene}_{trait}_{distance}_{maf}.out",
+        stderr="logs/spa_tests_conditional/{gene}_{trait}_{distance}_{maf}.err"
     threads: 4
     shell:
         """
@@ -272,6 +287,9 @@ rule combine_results:
                maf=config["maf"]),
     output:
         "brava_stepwise_conditional_analysis_results.txt"
+    logs:
+        stdout="logs/combine_results/final_output.out",
+        stderr="logs/combine_results/final_output.err"
     shell:
         """
         set -euo pipefail
