@@ -34,7 +34,7 @@ else
       --make-bed \
       --out ${OUTPUT_PLINK}.tmp
     plink2 --bfile ${OUTPUT_PLINK}.tmp \
-      --set-all-var-ids @:#:\$r:\$a \
+      --set-all-var-ids chr@:#:\$r:\$a \
       --make-bed \
       --out ${OUTPUT_PLINK}
     rm ${OUTPUT_PLINK}.tmp.*
