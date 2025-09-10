@@ -14,40 +14,28 @@ echo "${USE_NULL_VAR_RATIO}"
 
 TMPFILE=$(mktemp)
 
-if [ "${USE_NULL_VAR_RATIO,,}" = "true" ]; then
+cmd=(step2_SPAtests.R
+    --bimFile=${PLINK}.bim \
+    --bedFile=${PLINK}.bed \
+    --famFile=${PLINK}.fam \
+    --minMAF=0
+    --minMAC=10
+    --GMMATmodelFile=${MODELFILE}
+    --varianceRatioFile=${VARIANCERATIO}
+    --LOCO=FALSE
+    --is_Firth_beta=TRUE
+    --pCutoffforFirth=0.10
+    --is_output_moreDetails=TRUE
+    --is_fastTest=TRUE
+    --SAIGEOutputFile=${TMPFILE})
 
-  step2_SPAtests.R \
-        --bimFile=${PLINK}.bim \
-        --bedFile=${PLINK}.bed \
-        --famFile=${PLINK}.fam \
-        --minMAF=0 \
-        --minMAC=10 \
-        --GMMATmodelFile=${MODELFILE} \
-        --varianceRatioFile=${VARIANCERATIO} \
-        --LOCO=FALSE \
-        --is_Firth_beta=TRUE \
-        --pCutoffforFirth=0.01 \
-        --is_output_moreDetails=TRUE \
-        --is_fastTest=TRUE \
-        --SAIGEOutputFile="${TMPFILE}"
-else 
-  # Run the step2_SPAtests.R and redirect output to TMPFILE
-  step2_SPAtests.R \
-        --bimFile=${PLINK}.bim \
-        --bedFile=${PLINK}.bed \
-        --famFile=${PLINK}.fam \
-        --minMAF=0 \
-        --minMAC=10 \
-        --GMMATmodelFile="${MODELFILE}" \
-        --varianceRatioFile="${VARIANCERATIO}" \
-        --sparseGRMFile="${SPARSEGRM}" \
-        --sparseGRMSampleIDFile="${SPARSEGRMID}" \
-        --LOCO=FALSE \
-        --pCutoffforFirth=0.01 \
-        --is_output_moreDetails=TRUE \
-        --is_fastTest=TRUE \
-        --SAIGEOutputFile="${TMPFILE}"
+if [ "${USE_NULL_VAR_RATIO,,}" = "false" ]; then
+    cmd+=(--sparseGRMFile="${SPARSEGRM}"
+    --sparseGRMSampleIDFile="${SPARSEGRMID}")
 fi
+
+# Run the command
+"${cmd[@]}"
 
 # Signficant threshold for p-values
 P_T=1e-5
@@ -56,8 +44,8 @@ P_T=1e-5
 cond_M=$(sort -g -k13,13 ${TMPFILE} | head -n 2 | tail -1 | awk '{print $1":"$2":"$4":"$5}')
 P_top=$(sort -g -k13,13 ${TMPFILE} | head -n 2 | tail -1 | awk '{print $13}')
 
-echo 'Lowest Pvalue in the sumstats file'
-echo ${P_top}
+echo "Lowest Pvalue in the sumstats file"
+echo "${cond_M}: ${P_top}"
 echo "Pvalue for significance for conditioning"
 echo ${P_T}
 
@@ -69,44 +57,10 @@ rm -f "${TMPFILE}"
 while [ "${intFlag}" -eq 1 ]
 do
   # Run the step2_SPAtests.R and redirect output to TMPFILE
-
-  if [ "${USE_NULL_VAR_RATIO,,}" = "true" ]; then
-    step2_SPAtests.R \
-        --bimFile=${PLINK}.bim \
-        --bedFile=${PLINK}.bed \
-        --famFile=${PLINK}.fam \
-        --minMAF=0 \
-        --minMAC=10 \
-        --GMMATmodelFile=${MODELFILE} \
-        --varianceRatioFile=${VARIANCERATIO} \
-        --LOCO=FALSE \
-        --is_Firth_beta=TRUE \
-        --pCutoffforFirth=0.01 \
-        --is_output_moreDetails=TRUE \
-        --is_fastTest=TRUE \
-        --SAIGEOutputFile="${TMPFILE}" \
-        --condition="${CONDITION}"
-  else
-    step2_SPAtests.R \
-        --bimFile=${PLINK}.bim \
-        --bedFile=${PLINK}.bed \
-        --famFile=${PLINK}.fam \
-        --minMAF=0 \
-        --minMAC=10 \
-        --GMMATmodelFile="${MODELFILE}" \
-        --varianceRatioFile="${VARIANCERATIO}" \
-        --sparseGRMFile="${SPARSEGRM}" \
-        --sparseGRMSampleIDFile="${SPARSEGRMID}" \
-        --LOCO=FALSE \
-        --pCutoffforFirth=0.01 \
-        --is_output_moreDetails=TRUE \
-        --is_fastTest=TRUE \
-        --SAIGEOutputFile="${TMPFILE}" \
-        --condition="${CONDITION}"
-  fi
+  cond_cmd=("${cmd[@]}"--condition="${CONDITION}")
+  "${cond_cmd[@]}"
 
   ncol=$(awk '{print NF; exit}' "${TMPFILE}")
-
   if [ "$ncol" -eq 29 ]; then
     cond_M=$(sort -g -k20,20 ${TMPFILE} | head -n 2 | tail -1 | awk '{print $1":"$2":"$4":"$5}')
     P_top=$(sort -g -k20,20 ${TMPFILE} | head -n 2 | tail -1 | awk '{print $20}')
@@ -114,8 +68,8 @@ do
     cond_M=$(sort -g -k18,18 ${TMPFILE} | head -n 2 | tail -1 | awk '{print $1":"$2":"$4":"$5}')
     P_top=$(sort -g -k18,18 ${TMPFILE} | head -n 2 | tail -1 | awk '{print $18}')
   else
-    echo "Unexpected number of columns ($ncol) in $TMPFILE" #>&2
-    # exit 1
+    echo "Unexpected number of columns ($ncol) in $TMPFILE" >&2
+    exit 1
   fi
 
   echo "Lowest Pvalue in the sumstats file"
@@ -125,6 +79,7 @@ do
 
   CONDITION_unordered="${CONDITION},${cond_M}"
   echo "conditioning..."
+  
   # Write a small R script to ensure that the conditioning SNPs are 
   # in order
   CONDITION=$(Rscript scripts/sort_conditioning_snps.R --condition "${CONDITION_unordered}")

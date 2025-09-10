@@ -16,6 +16,7 @@ OUTPUT_VCF="run_files/${ENSEMBL_ID}_${BP_DISTANCE}_${MAF_COMMON}.vcf.bgz"
 # Using && which is the same as max(MAC > 40, MAF > $MAF_COMMON) ; unless I'm losing the plot
 bcftools view --threads "$THREADS" -R "$EXPANDED_BED" "$INPUT_VCF" |
   bcftools filter --threads "$THREADS" -i "MAC > 40 && MAF > $MAF_COMMON" |
+  bcftools annotate --set-id '%CHROM:%POS:%REF:%ALT' |
   bcftools view -Oz -o "${OUTPUT_VCF}"
 
 bcftools index --csi -f "${OUTPUT_VCF}"

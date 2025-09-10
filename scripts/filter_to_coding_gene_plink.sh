@@ -31,6 +31,7 @@ else
       --keep ${SPARSEGRMID} \
       --maf ${MAF_COMMON} \
       --mac 41 \
+      --set-all-var-ids @:#:\$r:\$a \
       --make-bed \
       --out ${OUTPUT_PLINK}
 fi
