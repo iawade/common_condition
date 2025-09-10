@@ -30,9 +30,9 @@ echo -e "PLINK=$PLINK
 TMPFILE=$(mktemp)
 
 cmd=(step2_SPAtests.R
-    --bimFile=${PLINK}.bim \
-    --bedFile=${PLINK}.bed \
-    --famFile=${PLINK}.fam \
+    --bimFile=${PLINK}.bim
+    --bedFile=${PLINK}.bed
+    --famFile=${PLINK}.fam
     --minMAF=0
     --minMAC=${MIN_MAC}
     --GMMATmodelFile=${MODELFILE}

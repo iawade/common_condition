@@ -57,7 +57,7 @@ rm -f "${TMPFILE}"
 while [ "${intFlag}" -eq 1 ]
 do
   # Run the step2_SPAtests.R and redirect output to TMPFILE
-  cond_cmd=("${cmd[@]}"--condition="${CONDITION}")
+  cond_cmd=("${cmd[@]}" --condition="${CONDITION}")
   "${cond_cmd[@]}"
 
   ncol=$(awk '{print NF; exit}' "${TMPFILE}")
