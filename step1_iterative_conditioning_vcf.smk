@@ -130,7 +130,7 @@ rule identify_gene_start_stop:
         "run_files/bed/expanded_regions_{gene}.bed"
     params:
         distance=distance
-    logs:
+    log:
         stdout="logs/identify_gene_start_stop/{gene}.out",
         stderr="logs/identify_gene_start_stop/{gene}.err"
     shell:
@@ -150,7 +150,7 @@ rule filter_to_coding_gene_vcf:
     params:
         distance=distance,
         threads=config["threads"]
-    logs:
+    log:
         stdout="logs/filter_to_coding_gene_plink/{gene}.out",
         stderr="logs/filter_to_coding_gene_plink/{gene}.err"
     threads: config["threads"]
@@ -176,7 +176,7 @@ rule filter_group_file:
         group = lambda wildcards: group_files
     output:
         "run_files/{gene}_group_file.txt"
-    logs:
+    log:
         stdout="logs/filter_group_file/{gene}.out",
         stderr="logs/filter_group_file/{gene}.err"
     shell:
@@ -214,7 +214,7 @@ rule spa_tests_stepwise_conditional:
         maf_common="{maf}",
         use_null_var_ratio=config["use_null_var_ratio"],
         saige_version=config["saige_vcf_version"]
-    logs:
+    log:
         stdout="logs/spa_tests_stepwise_conditional/{gene}_{trait}_{distance}_{maf}.out",
         stderr="logs/spa_tests_stepwise_conditional/{gene}_{trait}_{distance}_{maf}.err"
     shell:
@@ -248,7 +248,7 @@ rule spa_tests_conditional:
         max_MAF="{maf}",
         use_null_var_ratio=config["use_null_var_ratio"],
         saige_version=config["saige_vcf_version"]
-    logs:
+    log:
         stdout="logs/spa_tests_conditional/{gene}_{trait}_{distance}_{maf}.out",
         stderr="logs/spa_tests_conditional/{gene}_{trait}_{distance}_{maf}.err"
     threads: 8
@@ -272,7 +272,7 @@ rule combine_results:
                maf=config["maf"]),
     output:
         "brava_stepwise_conditional_analysis_results.txt"
-    logs:
+    log:
         stdout="logs/combine_results/final_output.out",
         stderr="logs/combine_results/final_output.err"
     shell:
