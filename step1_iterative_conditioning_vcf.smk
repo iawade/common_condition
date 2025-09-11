@@ -22,8 +22,8 @@ with open(list_of_vcf_files) as f:
 with open(list_of_group_files) as f:
     group_files = [line.strip() for line in f]
 
-print("VCF Files Sample:", vcf_files[:5])
-print("Group Files Sample:", group_files[:5])
+print("VCF files Sample:", vcf_files[:5])
+print("Group files Sample:", group_files[:5])
 
 distance = config["distance"]
 maf = config["maf"]
@@ -136,8 +136,8 @@ rule identify_gene_start_stop:
     shell:
         """
         set -euo pipefail
-        python scripts/start_end_query.py --ensembl_id \"{wildcards.gene}\"
-        bash scripts/expand_coding_region.sh {wildcards.gene} {params.distance}
+        python scripts/start_end_query.py --ensembl_id \"{wildcards.gene}\" > {log.stdout} 2> {log.stderr}
+        bash scripts/expand_coding_region.sh {wildcards.gene} {params.distance} >> {log.stdout} 2>> {log.stderr}
         """
 
 rule filter_to_coding_gene_vcf:
@@ -162,7 +162,7 @@ rule filter_to_coding_gene_vcf:
         for vcf in {input.vcf}; do
             if [[ "$vcf" =~ \\.($chr)\\. ]]; then
                 matched_vcf=$vcf
-                bash scripts/filter_to_coding_gene_vcf.sh $vcf {wildcards.gene} {params.distance} {wildcards.maf} {params.threads}
+                bash scripts/filter_to_coding_gene_vcf.sh $vcf {wildcards.gene} {params.distance} {wildcards.maf} {params.threads} >> {log.stdout} 2>> {log.stderr}
             fi
         done
 
@@ -181,6 +181,7 @@ rule filter_group_file:
         stderr="logs/filter_group_file/{gene}.err"
     shell:
         """
+        {{
         set -euo pipefail
         > {output}
         for group in {input.group}; do
@@ -191,6 +192,57 @@ rule filter_group_file:
             fi
         done
         touch {output}
+
+        # Validate number of lines
+        nlines=$(wc -l < {output})
+        if [[ "$nlines" -ne 2 ]]; then
+            echo "ERROR: Expected exactly 2 lines in {output}, found $nlines" >&2
+            exit 1
+        fi
+
+        # Read first line and second line
+        read -r first < {output}
+        read -r second < <(tail -n +2 {output})
+
+        # Split first line: first two columns, and the rest
+        set -- $first
+        gene=$1
+        col_var=$2
+        shift 2
+        first_var=$1
+        shift
+        rest="$*"
+
+        # Fix first variant with logging
+        fixed_first_var=$(echo "$first_var" | awk '{
+            n = split($0,p,/[^[:alnum:]]+/);
+            if(n==4){ chr=p[1]; pos=p[2]; ref=p[3]; alt=p[4]; if(chr!~ /^chr/) chr="chr"chr; printf("%s:%s:%s:%s\n",chr,pos,ref,alt) } else { print $0 }
+        }')
+        if [[ "$first_var" != "$fixed_first_var" ]]; then
+            echo "First variant reformatted: $first_var -> $fixed_first_var" >&2
+        else
+            echo "First variant format OK: $first_var" >&2
+        fi
+        
+        fixed_rest=$(echo "$rest" | awk '
+        {
+            for(i=1;i<=NF;i++) {
+                n = split($i, p, /[^[:alnum:]]+/)
+                if(n==4) {
+                    chr=p[1]; pos=p[2]; ref=p[3]; alt=p[4];
+                    if(chr !~ /^chr/) chr="chr" chr
+                    printf "%s:%s:%s:%s", chr,pos,ref,alt
+                } else {
+                    printf "%s", $i
+                }
+                if(i<NF) printf " "
+            }
+        }')
+
+        # Write output
+        echo "$gene $col_var $fixed_first_var $fixed_rest" > {output}
+        echo "$second" >> {output}
+        }} > {log.stdout} 2> {log.stderr}
         """
 
 rule spa_tests_stepwise_conditional:
@@ -222,7 +274,7 @@ rule spa_tests_stepwise_conditional:
         chr=$(python scripts/extract_chromosome.py --ensembl_id \"{wildcards.gene}\")
         for vcf in {input.vcf}; do
             conda run --no-capture-output --prefix envs/RSAIGE_vcf_version bash scripts/stepwise_conditional_SAIGE.sh \
-                $vcf {output} {input.model_file} {input.variance_file} {input.sparse_matrix} $chr {params.use_null_var_ratio}
+                $vcf {output} {input.model_file} {input.variance_file} {input.sparse_matrix} $chr {params.use_null_var_ratio} > {log.stdout} 2> {log.stderr}
         done
         """
 
@@ -259,7 +311,7 @@ rule spa_tests_conditional:
         for vcf in {input.vcf}; do
             if [[ "$vcf" =~ \\.($chr)\\. ]]; then
                 conda run --no-capture-output --prefix envs/RSAIGE_vcf_version bash scripts/saige_step2_conditioning_check.sh \
-                    $vcf {output} {params.min_mac} {input.model_file} {input.variance_file} {input.sparse_matrix} {input.group_file} {params.annotations_to_include} {input.conditioning_variants} {params.max_MAF} {params.use_null_var_ratio}
+                    $vcf {output} {params.min_mac} {input.model_file} {input.variance_file} {input.sparse_matrix} {input.group_file} {params.annotations_to_include} {input.conditioning_variants} {params.max_MAF} {params.use_null_var_ratio} > {log.stdout} 2> {log.stderr}
             fi
         done
         """
@@ -278,5 +330,5 @@ rule combine_results:
     shell:
         """
         set -euo pipefail
-        python scripts/combine_saige_outputs.py --out {output}
+        python scripts/combine_saige_outputs.py --out {output} > {log.stdout} 2> {log.stderr}
         """

@@ -26,8 +26,8 @@ plink_fam_files = [f"{p}.fam" for p in plink_files]
 with open(list_of_group_files) as f:
     group_files = [line.strip() for line in f]
 
-print("Plink Files Sample:", plink_files[:5])
-print("Group Files Sample:", group_files[:5])
+print("Plink files Sample:", plink_files[:5])
+print("Group files Sample:", group_files[:5])
 
 distance = config["distance"]
 maf = config["maf"]
@@ -143,7 +143,7 @@ rule identify_gene_start_stop:
         """
         set -euo pipefail
         python scripts/start_end_query.py --ensembl_id \"{wildcards.gene}\" > {log.stdout} 2> {log.stderr}
-        bash scripts/expand_coding_region.sh {wildcards.gene} {params.distance} > {log.stdout} 2> {log.stderr}
+        bash scripts/expand_coding_region.sh {wildcards.gene} {params.distance} >> {log.stdout} 2>> {log.stderr}
         """
 
 rule filter_to_coding_gene_plink:
@@ -173,7 +173,7 @@ rule filter_to_coding_gene_plink:
             if [[ "$plink_bed" =~ \\.($chr)\\. ]]; then
                 plink_fileset=$(echo "$plink_bed" | sed 's/\\.bed$//')
                 matched_plink=$plink_fileset
-                bash scripts/filter_to_coding_gene_plink.sh $plink_fileset {wildcards.gene} {params.distance} {wildcards.maf} {params.threads} {input.sparse_matrix_id} > {log.stdout} 2> {log.stderr}
+                bash scripts/filter_to_coding_gene_plink.sh $plink_fileset {wildcards.gene} {params.distance} {wildcards.maf} {params.threads} {input.sparse_matrix_id} >> {log.stdout} 2>> {log.stderr}
             fi
         done
 
@@ -203,6 +203,56 @@ rule filter_group_file:
             fi
         done
         touch {output}
+
+        # Validate number of lines
+        nlines=$(wc -l < {output})
+        if [[ "$nlines" -ne 2 ]]; then
+            echo "ERROR: Expected exactly 2 lines in {output}, found $nlines" >&2
+            exit 1
+        fi
+
+        # Read first line and second line
+        read -r first < {output}
+        read -r second < <(tail -n +2 {output})
+
+        # Split first line: first two columns, and the rest
+        set -- $first
+        gene=$1
+        col_var=$2
+        shift 2
+        first_var=$1
+        shift
+        rest="$*"
+
+        # Fix first variant with logging
+        fixed_first_var=$(echo "$first_var" | awk '{
+            n = split($0,p,/[^[:alnum:]]+/);
+            if(n==4){ chr=p[1]; pos=p[2]; ref=p[3]; alt=p[4]; if(chr!~ /^chr/) chr="chr"chr; printf("%s:%s:%s:%s\n",chr,pos,ref,alt) } else { print $0 }
+        }')
+        if [[ "$first_var" != "$fixed_first_var" ]]; then
+            echo "First variant reformatted: $first_var -> $fixed_first_var" >&2
+        else
+            echo "First variant format OK: $first_var" >&2
+        fi
+        
+        fixed_rest=$(echo "$rest" | awk '
+        {
+            for(i=1;i<=NF;i++) {
+                n = split($i, p, /[^[:alnum:]]+/)
+                if(n==4) {
+                    chr=p[1]; pos=p[2]; ref=p[3]; alt=p[4];
+                    if(chr !~ /^chr/) chr="chr" chr
+                    printf "%s:%s:%s:%s", chr,pos,ref,alt
+                } else {
+                    printf "%s", $i
+                }
+                if(i<NF) printf " "
+            }
+        }')
+
+        # Write output
+        echo "$gene $col_var $fixed_first_var $fixed_rest" > {output}
+        echo "$second" >> {output}
         }} > {log.stdout} 2> {log.stderr}
         """
 
