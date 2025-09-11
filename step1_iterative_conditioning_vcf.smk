@@ -220,6 +220,7 @@ rule filter_group_file:
         }')
         if [[ "$first_var" != "$fixed_first_var" ]]; then
             echo "First variant reformatted: $first_var -> $fixed_first_var" >&2
+            echo "Warning: please check that this reformatting makes sense. Note that if it is not, the result group based result will be different" >&2
         else
             echo "First variant format OK: $first_var" >&2
         fi
