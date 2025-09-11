@@ -192,7 +192,7 @@ rule filter_group_file:
         stderr="logs/filter_group_file/{gene}.err"
     shell:
         """
-        {
+        {{
         set -euo pipefail
         > {output}
         for group in {input.group}; do
@@ -203,7 +203,7 @@ rule filter_group_file:
             fi
         done
         touch {output}
-        } > {log.out} 2> {log.err}
+        }} > {log.out} 2> {log.err}
         """
 
 rule spa_tests_stepwise_conditional:
