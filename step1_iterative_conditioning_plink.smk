@@ -192,18 +192,7 @@ rule filter_group_file:
         stderr="logs/filter_group_file/{gene}.err"
     shell:
         """
-        {{
-        set -euo pipefail
-        > {output}
-        for group in {input.group}; do
-            if [[ "$group" == *.gz ]]; then
-                   zcat "$group" | grep -m1 -A1 "{wildcards.gene}" >> {output} || true
-            else
-                   grep -m1 -A1 "{wildcards.gene}" "$group" >> {output} || true
-            fi
-        done
-        touch {output}
-        }} > {log.stdout} 2> {log.stderr}
+            bash scripts/filter_group_file.sh {wildcards.gene} {output} {input.group} > {log.stdout} 2> {log.stderr}
         """
 
 rule spa_tests_stepwise_conditional:

@@ -272,6 +272,7 @@ rule spa_tests_stepwise_conditional:
         stderr="logs/spa_tests_stepwise_conditional/{gene}_{trait}_{distance}_{maf}.err"
     shell:
         """
+        set -euo pipefail
         chr=$(python scripts/extract_chromosome.py --ensembl_id \"{wildcards.gene}\")
         for vcf in {input.vcf}; do
             conda run --no-capture-output --prefix envs/RSAIGE_vcf_version bash scripts/stepwise_conditional_SAIGE.sh \
