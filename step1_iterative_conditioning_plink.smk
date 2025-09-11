@@ -203,7 +203,7 @@ rule filter_group_file:
             fi
         done
         touch {output}
-        }} > {log.out} 2> {log.err}
+        }} > {log.stdout} 2> {log.stderr}
         """
 
 rule spa_tests_stepwise_conditional:
