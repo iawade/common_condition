@@ -142,8 +142,8 @@ rule identify_gene_start_stop:
     shell:
         """
         set -euo pipefail
-        python scripts/start_end_query.py --ensembl_id \"{wildcards.gene}\"
-        bash scripts/expand_coding_region.sh {wildcards.gene} {params.distance}
+        python scripts/start_end_query.py --ensembl_id \"{wildcards.gene}\" > {log.stdout} 2> {log.stderr}
+        bash scripts/expand_coding_region.sh {wildcards.gene} {params.distance} > {log.stdout} 2> {log.stderr}
         """
 
 rule filter_to_coding_gene_plink:
@@ -173,7 +173,7 @@ rule filter_to_coding_gene_plink:
             if [[ "$plink_bed" =~ \\.($chr)\\. ]]; then
                 plink_fileset=$(echo "$plink_bed" | sed 's/\\.bed$//')
                 matched_plink=$plink_fileset
-                bash scripts/filter_to_coding_gene_plink.sh $plink_fileset {wildcards.gene} {params.distance} {wildcards.maf} {params.threads} {input.sparse_matrix_id}
+                bash scripts/filter_to_coding_gene_plink.sh $plink_fileset {wildcards.gene} {params.distance} {wildcards.maf} {params.threads} {input.sparse_matrix_id} > {log.stdout} 2> {log.stderr}
             fi
         done
 
@@ -192,6 +192,7 @@ rule filter_group_file:
         stderr="logs/filter_group_file/{gene}.err"
     shell:
         """
+        {
         set -euo pipefail
         > {output}
         for group in {input.group}; do
@@ -202,6 +203,7 @@ rule filter_group_file:
             fi
         done
         touch {output}
+        } > {log.out} 2> {log.err}
         """
 
 rule spa_tests_stepwise_conditional:
@@ -235,7 +237,7 @@ rule spa_tests_stepwise_conditional:
         for plink_bed in {input.plink_bed}; do
             plink_fileset=$(echo "$plink_bed" | sed 's/\\.bed$//')
             conda run --no-capture-output --prefix envs/RSAIGE_vcf_version bash scripts/stepwise_conditional_SAIGE_plink.sh \
-                $plink_fileset {output} {input.model_file} {input.variance_file} {input.sparse_matrix} $chr {params.use_null_var_ratio}
+                $plink_fileset {output} {input.model_file} {input.variance_file} {input.sparse_matrix} $chr {params.use_null_var_ratio} > {log.stdout} 2> {log.stderr}
         done
         """
 
@@ -274,7 +276,7 @@ rule spa_tests_conditional:
             if [[ "$plink_bed" =~ \\.($chr)\\. ]]; then
                 plink_fileset=$(echo "$plink_bed" | sed 's/\\.bed$//')
                 conda run --no-capture-output --prefix envs/RSAIGE_vcf_version bash scripts/saige_step2_conditioning_check_plink.sh \
-                    $plink_fileset {output} {params.min_mac} {input.model_file} {input.variance_file} {input.sparse_matrix} {input.group_file} {params.annotations_to_include} {input.conditioning_variants} {params.max_MAF} {params.use_null_var_ratio}
+                    $plink_fileset {output} {params.min_mac} {input.model_file} {input.variance_file} {input.sparse_matrix} {input.group_file} {params.annotations_to_include} {input.conditioning_variants} {params.max_MAF} {params.use_null_var_ratio} > {log.stdout} 2> {log.stderr}
             fi
         done
         """
@@ -293,7 +295,7 @@ rule combine_results:
     shell:
         """
         set -euo pipefail
-        python scripts/combine_saige_outputs.py --out {output}
+        python scripts/combine_saige_outputs.py --out {output} > {log.stdout} 2> {log.stderr}
         """
 
 ruleorder:
