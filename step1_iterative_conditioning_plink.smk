@@ -192,7 +192,6 @@ rule filter_group_file:
         stderr="logs/filter_group_file/{gene}.err"
     shell:
         """
-        {{
         set -euo pipefail
         > {output}
         for group in {input.group}; do
@@ -254,8 +253,7 @@ rule filter_group_file:
         # Write output
         echo "$gene $col_var $fixed_first_var $fixed_rest" > {output}
         echo "$second" >> {output}
-        }} > {log.stdout} 2> {log.stderr}
-        """
+        """ > {log.stdout} 2> {log.stderr}
 
 rule spa_tests_stepwise_conditional:
     input:
