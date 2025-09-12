@@ -1,0 +1,13 @@
+snakemake_amr/variance/WHRBMI_AMR.varianceRatio.txt
+snakemake_amr/variance/TG_AMR.varianceRatio.txt
+snakemake_amr/variance/TChol_AMR.varianceRatio.txt
+snakemake_amr/variance/LDLC_AMR.varianceRatio.txt
+snakemake_amr/variance/Height_AMR.varianceRatio.txt
+snakemake_amr/variance/HTN_AMR.varianceRatio.txt
+snakemake_amr/variance/HDLC_AMR.varianceRatio.txt
+snakemake_amr/variance/EFRMB_AMR_F.varianceRatio.txt
+snakemake_amr/variance/CRP_AMR.varianceRatio.txt
+snakemake_amr/variance/BMI_AMR.varianceRatio.txt
+snakemake_amr/variance/AlcCons_AMR.varianceRatio.txt
+snakemake_amr/variance/AST_AMR.varianceRatio.txt
+snakemake_amr/variance/ALT_AMR.varianceRatio.txt

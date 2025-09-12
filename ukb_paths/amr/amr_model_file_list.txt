@@ -1,0 +1,12 @@
+snakemake_amr/model/WHRBMI_AMR.rda
+snakemake_amr/model/TG_AMR.rda
+snakemake_amr/model/TChol_AMR.rda
+snakemake_amr/model/LDLC_AMR.rda
+snakemake_amr/model/Height_AMR.rda
+snakemake_amr/model/HTN_AMR.rda
+snakemake_amr/model/HDLC_AMR.rda
+snakemake_amr/model/CRP_AMR.rda
+snakemake_amr/model/BMI_AMR.rda
+snakemake_amr/model/AlcCons_AMR.rda
+snakemake_amr/model/AST_AMR.rda
+snakemake_amr/model/ALT_AMR.rda

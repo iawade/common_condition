@@ -6,34 +6,39 @@ ENSEMBL_ID="$2" # Prevents any potential issues with gene symbols
 BP_DISTANCE="$3" # TODO Error handling / kb vs just the number
 MAF_COMMON="$4" 
 THREADS="$5"
+SPARSEGRMID="$6"
+
+EXPANDED_BED="run_files/bed/expanded_regions_${ENSEMBL_ID}.bed"
+
+# First, check to see if this is a superset of the collection of samples
+# used to fit the model
+n_sprase=$(wc -l < "$SPARSEGRMID")
+n_fam=$(wc -l < "${INPUT_PLINK}.fam")
 
 # Output files
 OUTPUT_PLINK="run_files/${ENSEMBL_ID}_${BP_DISTANCE}_${MAF_COMMON}"
 
-# Expand the BED regions for query and filter to coding regions
-## include common variation within the gene of interest too 
-EXPANDED_BED="run_files/bed/expanded_regions_${ENSEMBL_ID}.bed"
-awk -v BP_DISTANCE="$BP_DISTANCE" 'BEGIN {OFS="\t"} {
-    start = $2 - BP_DISTANCE;
-    end = $3 + BP_DISTANCE;
-
-    if (start < 0) start = 0;
-    
-    # Add "chr" prefix if chromosome is numeric
-    if ($1 ~ /^[0-9X]+$/) $1 = "chr" $1;
-
-    # Print the entire expanded region
-    print $1, start, end;
-}' "run_files/bed/${ENSEMBL_ID}.bed" | bedtools intersect -a stdin -b data/protein_coding_regions_hg38_no_padding_no_UTR_v39.bed > "$EXPANDED_BED"
-
-# Use plink to filter by the expanded BED regions and MAF threshold
-# Using --maf $MAF_COMMON and --mac 41, which is the same as max(MAC > 40, MAF > $MAF_COMMON)
-plink2 --bfile ${INPUT_PLINK} \
-  --extract range ${EXPANDED_BED} \
-  --maf ${MAF_COMMON} \
-  --mac 41 \
-  --make-bed \
-  --out ${OUTPUT_PLINK}
+# Compare and raise error
+if (( n_fam < n_sparse )); then
+    echo "Error: .fam file ($n_fam samples) has fewer entries than sparse GRM ID file ($n_sparse samples)." >&2
+    exit 1
+else
+    # Use plink to filter by the expanded BED regions and MAF threshold
+    # Using --maf $MAF_COMMON and --mac 41, which is the same as max(MAC > 40, MAF > $MAF_COMMON)
+    echo "Filtering PLINK files (${INPUT_PLINK}.*) to match sparse GRM IDs ($n_sparse samples)..."
+    plink2 --bfile ${INPUT_PLINK} \
+      --extract bed0 ${EXPANDED_BED} \
+      --keep ${SPARSEGRMID} \
+      --maf ${MAF_COMMON} \
+      --mac 41 \
+      --make-bed \
+      --out ${OUTPUT_PLINK}.tmp
+    plink2 --bfile ${OUTPUT_PLINK}.tmp \
+      --set-all-var-ids chr@:#:\$r:\$a \
+      --make-bed \
+      --out ${OUTPUT_PLINK}
+    rm ${OUTPUT_PLINK}.tmp.*
+fi
 
 TMPFILE=$(mktemp)
 awk '{

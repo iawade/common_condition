@@ -1,0 +1,15 @@
+/home/jupyter/conditioning_test/sas/variance/sas_snp_wise_pca_covariates_ALT.varianceRatio.txt
+/home/jupyter/conditioning_test/sas/variance/sas_snp_wise_pca_covariates_AST.varianceRatio.txt
+/home/jupyter/conditioning_test/sas/variance/sas_snp_wise_pca_covariates_Asth.varianceRatio.txt
+/home/jupyter/conditioning_test/sas/variance/sas_snp_wise_pca_covariates_BMI.varianceRatio.txt
+/home/jupyter/conditioning_test/sas/variance/sas_snp_wise_pca_covariates_BenIntNeo.varianceRatio.txt
+/home/jupyter/conditioning_test/sas/variance/sas_snp_wise_pca_covariates_EFRMB.varianceRatio.txt
+/home/jupyter/conditioning_test/sas/variance/sas_snp_wise_pca_covariates_HTN.varianceRatio.txt
+/home/jupyter/conditioning_test/sas/variance/sas_snp_wise_pca_covariates_HbA1c.varianceRatio.txt
+/home/jupyter/conditioning_test/sas/variance/sas_snp_wise_pca_covariates_Height.varianceRatio.txt
+/home/jupyter/conditioning_test/sas/variance/sas_snp_wise_pca_covariates_LDLC.varianceRatio.txt
+/home/jupyter/conditioning_test/sas/variance/sas_snp_wise_pca_covariates_PAD.varianceRatio.txt
+/home/jupyter/conditioning_test/sas/variance/sas_snp_wise_pca_covariates_T2Diab.varianceRatio.txt
+/home/jupyter/conditioning_test/sas/variance/sas_snp_wise_pca_covariates_TChol.varianceRatio.txt
+/home/jupyter/conditioning_test/sas/variance/sas_snp_wise_pca_covariates_TG.varianceRatio.txt
+/home/jupyter/conditioning_test/sas/variance/sas_snp_wise_pca_covariates_WHRBMI.varianceRatio.txt

@@ -13,8 +13,13 @@ def combine_outputs(out):
     files_single = [f for f in glob.glob(file_single_pattern)]
     files = [item for item in files if item not in files_single]
 
+    # Conditioning variants
+    file_string_pattern = "run_files/*_*_*_*_string.txt"
+    files_string = [f for f in glob.glob(file_string_pattern)]
+
     dfs = []
     df_singles = []
+    df_conditionings = []
 
     # Process each file
     for file in files:
@@ -79,6 +84,38 @@ def combine_outputs(out):
     else:
         open(out + ".singleAssoc.txt", 'a').close()
         print(f"singleAssoc file is empty: saved as {out}.singleAssoc.txt")
+
+    # Process each file
+    for file in files_string:
+        # Extract ancestry, trait, variant class and mode from filename
+        match = re.search(r"run_files/(.*?)_(.*?)_(.*?)_(.*?)_string\.txt", file)
+
+        if not match:
+            continue
+        if os.stat(file).st_size == 0:
+            continue
+        gene, trait, distance, maf_cutoff = match.groups()
+
+        if os.path.getsize(file) == 0:
+            print("File is empty")
+        else:
+            # Read file
+            df = pd.read_csv(file, sep="\t", header=None, names=["conditioning_variants"])
+            # Add extracted metadata as new columns
+            df["Gene"] = gene
+            df["Trait"] = trait
+            df["MAF_cutoff_for_conditioning_variants"] = maf_cutoff
+            df_conditionings.append(df)
+
+    if (len(df_conditionings) > 0):
+        # Combine all dataframes
+        combined_df = pd.concat(df_conditionings, ignore_index=True)
+        # Save to a new file
+        combined_df.to_csv(out + ".conditioning.variants.txt", sep="\t", index=False)
+        print(f"conditioning variants file is not empty: saved as {out}.conditioning.variants.txt")
+    else:
+        open(out + ".conditioning.variants.txt", 'a').close()
+        print(f"conditioning variants file is empty: saved as {out}.conditioning.variants.txt")
 
     print(f"Files merged and sorted. Output saved as {out}")
 
