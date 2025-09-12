@@ -1,5 +1,7 @@
 # Config File for BRaVa Pilot Study Common Variant Conditional Analysis Pipeline on UK Biobank
 
+input_format: "vcf"  # or "plink"
+
 # Prerequisite
 list_of_vcf_files: "ukb_paths/afr/afr_vcf_file_list.txt"
 list_of_plink_files: "ukb_paths/afr/afr_plink_file_list.txt"

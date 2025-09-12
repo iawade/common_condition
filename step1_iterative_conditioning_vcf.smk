@@ -92,7 +92,7 @@ for pid in phenotype_ids:  # phenotype IDs from JSON
     # Match start of filename or bounded by separators (_ . -)
     pattern = rf'(?:^|[/_.\-]){re.escape(pid)}(?=[/_.\-])'
     trait_in_model = any(re.search(pattern, mf) for mf in model_files)
-    trait_in_variance = any(re.search(pattern, mf) for mf in model_files)
+    trait_in_variance = any(re.search(pattern, mf) for mf in variance_files)
     if trait_in_model and trait_in_variance:
         available_traits.add(pid)
 
