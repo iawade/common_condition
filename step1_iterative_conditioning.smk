@@ -185,8 +185,8 @@ rule filter_to_coding_gene_vcf:
         distance=distance,
         threads=config["threads"]
     log:
-        stdout="logs/filter_to_coding_gene_vcf/{gene}.out",
-        stderr="logs/filter_to_coding_gene_vcf/{gene}.err"
+        stdout="logs/filter_to_coding_gene_vcf/{gene}_{distance}_{maf}.out",
+        stderr="logs/filter_to_coding_gene_vcf/{gene}_{distance}_{maf}.err"
     threads: config["threads"]
     shell:
         """
