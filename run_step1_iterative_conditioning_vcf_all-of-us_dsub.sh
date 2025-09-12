@@ -3,8 +3,6 @@
 source /opt/conda/etc/profile.d/conda.sh
 conda activate brava_hits_common_condition_check
 
-ln -s /opt/conda/envs ${SCRIPT_DIR}/envs
-
 # Path to the Snakemake workflow file
 cd ${SCRIPT_DIR}
 # Make files present in same filepath, so that file locations
@@ -27,7 +25,7 @@ mv ${SAIGE_DIR} saige_outputs
 mv all-of-us_configs/${ANC}_config.yaml config.yaml
 Rscript scripts/create_chr_specific_filepaths.r --chr ${CHR}
 
-WORKFLOW_FILE="step1_iterative_conditioning_vcf.smk"
+WORKFLOW_FILE="step1_iterative_conditioning.smk"
 
 mkdir -p saige_outputs run_files/bed
 
@@ -51,6 +49,7 @@ snakemake --snakefile "$WORKFLOW_FILE" --cores $CORES --jobs $CORES \
 
 echo "Run complete. Log saved to $LOGFILE"
 mv ${LOGFILE} ${OUTPUT}/
+mv logs ${OUTPUT}/${ANC}_${CHR}_logs
 mv saige_outputs ${OUTPUT}/${ANC}_${CHR}_saige_outputs
 mv run_files ${OUTPUT}/${ANC}_${CHR}_run_files
 mv brava_stepwise_conditional_analysis_results.txt ${OUTPUT}/brava_${ANC}_${CHR}_stepwise_conditional_analysis_results.txt
