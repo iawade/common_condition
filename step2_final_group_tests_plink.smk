@@ -80,10 +80,10 @@ conditioning_jobs = [job for job in conditioning_jobs if job['Trait'] in availab
 for job in conditioning_jobs:
     filename = f"final_run_files/{job['Gene']}_{job['Trait']}_{job['MAF_cutoff_for_conditioning_variants']}_extract.txt"
     with open(filename, "w") as f:
-        f.writelines(f"{v}\n" for v in job['cond'].split(","))
+        f.writelines(f"{v}\n" for v in job['conditioning_variants'].split(","))
     filename = f"final_run_files/{job['Gene']}_{job['Trait']}_{job['MAF_cutoff_for_conditioning_variants']}_extract.bed"
     with open(filename, "w") as f:
-        variants = job['cond'].split(",")
+        variants = job['conditioning_variants'].split(",")
         for v in variants:
             chrom, pos, ref, alt = v.split(":")
             _ = f.write(f"{chrom}\t{pos}\t{pos}\n")
