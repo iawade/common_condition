@@ -195,7 +195,7 @@ rule spa_tests_conditional:
         for plink_bed in {input.plink_bed}; do
             if [[ "$plink_bed" =~ \\.($chr)\\. ]]; then
                 plink_fileset=$(echo "$plink_bed" | sed 's/\\.bed$//')
-                conda run --no-capture-output --prefix envs/RSAIGE_vcf_version bash scripts/saige_step2_conditioning_check_plink.sh \
+                conda run --no-capture-output -n RSAIGE_vcf_version bash scripts/saige_step2_conditioning_check_plink.sh \
                     $plink_fileset {output} {params.min_mac} {input.model_file} {input.variance_file} {input.sparse_matrix} {input.group_file} {params.annotations_to_include} {input.conditioning_variants} {params.max_MAF} {params.use_null_var_ratio}
             fi
         done
