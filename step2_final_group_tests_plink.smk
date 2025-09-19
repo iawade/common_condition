@@ -113,18 +113,12 @@ rule filter_group_file:
         group = lambda wildcards: group_files
     output:
         "final_run_files/{gene}_group_file.txt"
+    log:
+        stdout="logs/filter_group_file/{gene}.out",
+        stderr="logs/filter_group_file/{gene}.err"
     shell:
         """
-        set -euo pipefail
-        > {output}
-        for group in {input.group}; do
-            if [[ "$group" == *.gz ]]; then
-                   zcat "$group" | grep -m1 -A1 "{wildcards.gene}" >> {output} || true
-            else
-                   grep -m1 -A1 "{wildcards.gene}" "$group" >> {output} || true
-            fi
-        done
-        touch {output}
+        bash scripts/filter_group_file.sh {wildcards.gene} {output} {input.group} > {log.stdout} 2> {log.stderr}
         """
 
 rule prune_to_independent_conditioning_variants:
@@ -187,7 +181,10 @@ rule spa_tests_conditional:
         annotations_to_include=annotations_to_include,
         max_MAF="{maf}",
         use_null_var_ratio=config["use_null_var_ratio"]
-    threads: 8
+    log:
+        stdout="logs/spa_tests_stepwise_conditional/{gene}_{trait}_{maf}.out",
+        stderr="logs/spa_tests_stepwise_conditional/{gene}_{trait}_{maf}.err"
+    threads: 4
     shell:
         """
         set -euo pipefail
@@ -196,7 +193,7 @@ rule spa_tests_conditional:
             if [[ "$plink_bed" =~ \\.($chr)\\. ]]; then
                 plink_fileset=$(echo "$plink_bed" | sed 's/\\.bed$//')
                 conda run --no-capture-output -n RSAIGE_vcf_version bash scripts/saige_step2_conditioning_check_plink.sh \
-                    $plink_fileset {output} {params.min_mac} {input.model_file} {input.variance_file} {input.sparse_matrix} {input.group_file} {params.annotations_to_include} {input.conditioning_variants} {params.max_MAF} {params.use_null_var_ratio}
+                    $plink_fileset {output} {params.min_mac} {input.model_file} {input.variance_file} {input.sparse_matrix} {input.group_file} {params.annotations_to_include} {input.conditioning_variants} {params.max_MAF} {params.use_null_var_ratio} > {log.stdout} 2> {log.stderr}
             fi
         done
         """
@@ -211,8 +208,11 @@ rule combine_results:
         ),
     output:
         "brava_final_conditional_analysis_results.txt"
+    log:
+        stdout="logs/combine_results/final_output.out",
+        stderr="logs/combine_results/final_output.err"
     shell:
         """
         set -euo pipefail
-        python scripts/combine_saige_outputs.py --out {output}
+        python scripts/combine_saige_outputs.py --out {output} > {log.stdout} 2> {log.stderr}
         """
