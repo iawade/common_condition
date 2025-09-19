@@ -182,8 +182,8 @@ rule spa_tests_conditional:
         max_MAF="{maf}",
         use_null_var_ratio=config["use_null_var_ratio"]
     log:
-        stdout="logs/spa_tests_stepwise_conditional/{gene}_{trait}_{maf}.out",
-        stderr="logs/spa_tests_stepwise_conditional/{gene}_{trait}_{maf}.err"
+        stdout="logs/final_spa_tests_conditional/{gene}_{trait}_{maf}.out",
+        stderr="logs/final_spa_tests_conditional/{gene}_{trait}_{maf}.err"
     threads: 4
     shell:
         """

@@ -7,9 +7,9 @@ import argparse
 def combine_outputs(out):
 
     # Define the file pattern
-    file_pattern = "saige_outputs/*_*_saige_results_*.txt"
+    file_pattern = "saige_outputs/*_*_saige_*results_*.txt"
     files = [f for f in glob.glob(file_pattern)]
-    file_single_pattern = "saige_outputs/*_*_saige_results_*.singleAssoc.txt"
+    file_single_pattern = "saige_outputs/*_*_saige_*results_*.singleAssoc.txt"
     files_single = [f for f in glob.glob(file_single_pattern)]
     files = [item for item in files if item not in files_single]
 
@@ -24,7 +24,7 @@ def combine_outputs(out):
     # Process each file
     for file in files:
         # Extract ancestry, trait, variant class and mode from filename
-        match = re.search(r"saige_outputs/(.*?)_(.*?)_(.*?)_saige_results_(.*?)\.txt", file)
+        match = re.search(r"saige_outputs/(.*?)_(.*?)_(.*?)_saige_.*results_(.*?)\.txt", file)
 
         if not match:
             continue
@@ -56,7 +56,7 @@ def combine_outputs(out):
     # Process each file
     for file in files_single:
         # Extract ancestry, trait, variant class and mode from filename
-        match = re.search(r"saige_outputs/(.*?)_(.*?)_(.*?)_saige_results_(.*?)\.txt\.singleAssoc\.txt", file)
+        match = re.search(r"saige_outputs/(.*?)_(.*?)_(.*?)_saige_.*results_(.*?)\.txt\.singleAssoc\.txt", file)
 
         if not match:
             continue

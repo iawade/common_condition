@@ -111,16 +111,7 @@ rule filter_group_file:
         "final_run_files/{gene}_group_file.txt"
     shell:
         """
-        set -euo pipefail
-        > {output}
-        for group in {input.group}; do
-            if [[ "$group" == *.gz ]]; then
-                   zcat "$group" | grep -m1 -A1 "{wildcards.gene}" >> {output} || true
-            else
-                   grep -m1 -A1 "{wildcards.gene}" "$group" >> {output} || true
-            fi
-        done
-        touch {output}
+        bash scripts/filter_group_file.sh {wildcards.gene} {output} {input.group}
         """
 
 rule prune_to_independent_conditioning_variants:
@@ -193,7 +184,7 @@ rule spa_tests_conditional:
         annotations_to_include=annotations_to_include,
         max_MAF="{maf}",
         use_null_var_ratio=config["use_null_var_ratio"]
-    threads: 8
+    threads: 4
     shell:
         """
         set -euo pipefail
