@@ -76,10 +76,10 @@ conditioning_jobs = [job for job in conditioning_jobs if job['Trait'] in availab
 for job in conditioning_jobs:
     filename = f"final_run_files/{job['Gene']}_{job['Trait']}_{job['MAF_cutoff_for_conditioning_variants']}_extract.txt"
     with open(filename, "w") as f:
-        f.writelines(f"{v}\n" for v in job['cond'].split(","))
+        f.writelines(f"{v}\n" for v in job['conditioning_variants'].split(","))
     filename = f"final_run_files/{job['Gene']}_{job['Trait']}_{job['MAF_cutoff_for_conditioning_variants']}_extract.bed"
     with open(filename, "w") as f:
-        variants = job['cond'].split(",")
+        variants = job['conditioning_variants'].split(",")
         for v in variants:
             chrom, pos, ref, alt = v.split(":")
             _ = f.write(f"{chrom}\t{pos}\t{pos}\n")
@@ -200,7 +200,7 @@ rule spa_tests_conditional:
         chr=$(python scripts/extract_chromosome.py --ensembl_id \"{wildcards.gene}\")
         for vcf in {input.vcf}; do
             if [[ "$vcf" =~ \\.($chr)\\. ]]; then
-                conda run --no-capture-output --prefix envs/RSAIGE_vcf_version bash scripts/saige_step2_conditioning_check.sh \
+                conda run --no-capture-output -n RSAIGE_vcf_version bash scripts/saige_step2_conditioning_check.sh \
                     $vcf {output} {params.min_mac} {input.model_file} {input.variance_file} {input.sparse_matrix} {input.group_file} {params.annotations_to_include} {input.conditioning_variants} {params.max_MAF} {params.use_null_var_ratio}
             fi
         done

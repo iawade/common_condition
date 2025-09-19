@@ -3,8 +3,6 @@
 source /opt/conda/etc/profile.d/conda.sh
 conda activate brava_hits_common_condition_check
 
-ln -s /opt/conda/envs envs
-
 # Make files present in same filepath, so that file locations
 # in the list files are relative to the script directory
 mv uk-biobank_configs/${ANC}_config.yaml config.yaml
