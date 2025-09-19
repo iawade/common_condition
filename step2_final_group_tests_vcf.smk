@@ -109,9 +109,12 @@ rule filter_group_file:
         group = lambda wildcards: group_files
     output:
         "final_run_files/{gene}_group_file.txt"
+    log:
+        stdout="logs/final_filter_group_file/{gene}.out",
+        stderr="logs/final_filter_group_file/{gene}.err"
     shell:
         """
-        bash scripts/filter_group_file.sh {wildcards.gene} {output} {input.group}
+        bash scripts/filter_group_file.sh {wildcards.gene} {output} {input.group} > {log.stdout} 2> {log.stderr}
         """
 
 rule prune_to_independent_conditioning_variants:
@@ -184,6 +187,9 @@ rule spa_tests_conditional:
         annotations_to_include=annotations_to_include,
         max_MAF="{maf}",
         use_null_var_ratio=config["use_null_var_ratio"]
+    log:
+        stdout="logs/final_spa_tests_conditional/{gene}_{trait}_{maf}.out",
+        stderr="logs/final_spa_tests_conditional/{gene}_{trait}_{maf}.err"
     threads: 4
     shell:
         """
@@ -192,7 +198,7 @@ rule spa_tests_conditional:
         for vcf in {input.vcf}; do
             if [[ "$vcf" =~ \\.($chr)\\. ]]; then
                 conda run --no-capture-output -n RSAIGE_vcf_version bash scripts/saige_step2_conditioning_check.sh \
-                    $vcf {output} {params.min_mac} {input.model_file} {input.variance_file} {input.sparse_matrix} {input.group_file} {params.annotations_to_include} {input.conditioning_variants} {params.max_MAF} {params.use_null_var_ratio}
+                    $vcf {output} {params.min_mac} {input.model_file} {input.variance_file} {input.sparse_matrix} {input.group_file} {params.annotations_to_include} {input.conditioning_variants} {params.max_MAF} {params.use_null_var_ratio} > {log.stdout} 2> {log.stderr}
             fi
         done
         """
@@ -207,8 +213,11 @@ rule combine_results:
         ),
     output:
         "brava_final_conditional_analysis_results.txt"
+    log:
+        stdout="logs/final_combine_results/final_output.out",
+        stderr="logs/final_combine_results/final_output.err"
     shell:
         """
         set -euo pipefail
-        python scripts/combine_saige_outputs.py --out {output}
+        python scripts/combine_saige_outputs.py --out {output} > {log.stdout} 2> {log.stderr}
         """

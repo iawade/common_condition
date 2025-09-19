@@ -114,8 +114,8 @@ rule filter_group_file:
     output:
         "final_run_files/{gene}_group_file.txt"
     log:
-        stdout="logs/filter_group_file/{gene}.out",
-        stderr="logs/filter_group_file/{gene}.err"
+        stdout="logs/final_filter_group_file/{gene}.out",
+        stderr="logs/final_filter_group_file/{gene}.err"
     shell:
         """
         bash scripts/filter_group_file.sh {wildcards.gene} {output} {input.group} > {log.stdout} 2> {log.stderr}
@@ -209,8 +209,8 @@ rule combine_results:
     output:
         "brava_final_conditional_analysis_results.txt"
     log:
-        stdout="logs/combine_results/final_output.out",
-        stderr="logs/combine_results/final_output.err"
+        stdout="logs/final_combine_results/final_output.out",
+        stderr="logs/final_combine_results/final_output.err"
     shell:
         """
         set -euo pipefail
