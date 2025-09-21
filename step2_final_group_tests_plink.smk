@@ -214,5 +214,5 @@ rule combine_results:
     shell:
         """
         set -euo pipefail
-        python scripts/combine_saige_outputs.py --out {output} > {log.stdout} 2> {log.stderr}
+        python scripts/combine_saige_outputs.py --final --out {output} > {log.stdout} 2> {log.stderr}
         """

@@ -139,7 +139,9 @@ if __name__ == "__main__":
     # Parse command-line arguments
     parser = argparse.ArgumentParser(description='Combine all of the output files together.')
     parser.add_argument('--out', required=True, help='Name of the output file.')
+    parser.add_argument('--final', action='store_true',
+        help='Flag: include this if combining results from the final run.')
     args = parser.parse_args()
 
     # Run the function with provided arguments
-    combine_outputs(args.out)
+    combine_outputs(args.out, args.final)
