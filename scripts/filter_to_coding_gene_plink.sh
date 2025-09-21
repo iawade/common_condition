@@ -12,7 +12,7 @@ EXPANDED_BED="run_files/bed/expanded_regions_${ENSEMBL_ID}.bed"
 
 # First, check to see if this is a superset of the collection of samples
 # used to fit the model
-n_sprase=$(wc -l < "$SPARSEGRMID")
+n_sparse=$(wc -l < "$SPARSEGRMID")
 n_fam=$(wc -l < "${INPUT_PLINK}.fam")
 
 # Output files
