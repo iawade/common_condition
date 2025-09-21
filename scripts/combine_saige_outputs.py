@@ -4,17 +4,24 @@ import re
 import os
 import argparse
 
-def combine_outputs(out):
+def combine_outputs(out, final=False):
 
     # Define the file pattern
-    file_pattern = "*saige_outputs/*_*_saige_*results_*.txt"
+    if (final):
+        file_pattern = "final_saige_outputs/*_*_saige_*results_*.txt"
+        file_single_pattern = "final_saige_outputs/*_*_saige_*results_*.singleAssoc.txt"
+        file_string_pattern = "final_run_files/*_*_*_ld_pruned_string.txt"
+    else:
+        file_pattern = "saige_outputs/*_*_*_saige_results_*.txt"
+        file_single_pattern = "saige_outputs/*_*_*_saige_results_*.singleAssoc.txt"
+        file_string_pattern = "run_files/*_*_*_*_string.txt"
+    
+    # SAIGE outputs
     files = [f for f in glob.glob(file_pattern)]
-    file_single_pattern = "*saige_outputs/*_*_saige_*results_*.singleAssoc.txt"
     files_single = [f for f in glob.glob(file_single_pattern)]
     files = [item for item in files if item not in files_single]
 
     # Conditioning variants
-    file_string_pattern = "run_files/*_*_*_*_string.txt"
     files_string = [f for f in glob.glob(file_string_pattern)]
 
     dfs = []
@@ -24,13 +31,16 @@ def combine_outputs(out):
     # Process each file
     for file in files:
         # Extract ancestry, trait, variant class and mode from filename
-        match = re.search(r".*saige_outputs/(.*?)_(.*?)_(.*?)_saige_.*results_(.*?)\.txt", file)
+        if (final):
+            match = re.search(r"final_saige_outputs/(.*?)_(.*?)_saige_conditioned_results_(.*?)\.txt", file)
+        else:
+            match = re.search(r"saige_outputs/(.*?)_(.*?)_.*?_saige_results_(.*?)\.txt", file)
 
         if not match:
             continue
         if os.stat(file).st_size == 0:
             continue
-        gene, trait, distance, maf_cutoff = match.groups()
+        gene, trait, maf_cutoff = match.groups()
 
         if os.path.getsize(file) == 0:
             print("File is empty")
@@ -56,13 +66,16 @@ def combine_outputs(out):
     # Process each file
     for file in files_single:
         # Extract ancestry, trait, variant class and mode from filename
-        match = re.search(r".*saige_outputs/(.*?)_(.*?)_(.*?)_saige_.*results_(.*?)\.txt\.singleAssoc\.txt", file)
+        if (final):
+            match = re.search(r"final_saige_outputs/(.*?)_(.*?)_saige_conditioned_results_(.*?)\.txt\.singleAssoc\.txt", file)
+        else:
+            match = re.search(r"saige_outputs/(.*?)_(.*?)_.*?_saige_results_(.*?)\.txt\.singleAssoc\.txt", file)
 
         if not match:
             continue
         if os.stat(file).st_size == 0:
             continue
-        gene, trait, distance, maf_cutoff = match.groups()
+        gene, trait, maf_cutoff = match.groups()
 
         if os.path.getsize(file) == 0:
             print("File is empty")
@@ -88,13 +101,16 @@ def combine_outputs(out):
     # Process each file
     for file in files_string:
         # Extract ancestry, trait, variant class and mode from filename
-        match = re.search(r"run_files/(.*?)_(.*?)_(.*?)_(.*?)_string\.txt", file)
+        if (final):
+            match = re.search(r"final_run_files/(.*?)_(.*?)_(.*?)_ld_pruned_string\.txt", file)
+        else:
+            match = re.search(r"run_files/(.*?)_(.*?)_.*?_(.*?)_string\.txt", file)
 
         if not match:
             continue
         if os.stat(file).st_size == 0:
             continue
-        gene, trait, distance, maf_cutoff = match.groups()
+        gene, trait, maf_cutoff = match.groups()
 
         if os.path.getsize(file) == 0:
             print("File is empty")
