@@ -103,12 +103,12 @@ rule all:
         maf=[job['MAF_cutoff_for_conditioning_variants'] for job in conditioning_jobs]
         ),
         expand("final_run_files/{gene}_group_file.txt", gene=genes),
-        expand("final_run_files/bed/{gene}.bed", gene=genes_in_valid_pairs),
-        expand("final_run_files/bed/expanded_regions_{gene}.bed", gene=genes_in_valid_pairs),
+        expand("final_run_files/bed/{gene}.bed", gene=genes),
+        expand("final_run_files/bed/expanded_regions_{gene}.bed", gene=genes),
         expand("final_run_files/{gene}_{distance}.vcf.bgz", 
-            gene=genes_in_valid_pairs, distance=config["distance"]),
+            gene=genes, distance=config["distance"]),
         expand("run_files/{gene}_{distance}.vcf.bgz.csi", 
-            gene=genes_in_valid_pairs, distance=config["distance"]),
+            gene=genes, distance=config["distance"]),
         "brava_final_conditional_analysis_results.txt"
 
 rule filter_group_file:
