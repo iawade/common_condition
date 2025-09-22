@@ -138,7 +138,7 @@ rule identify_gene_start_stop:
     shell:
         """
         set -euo pipefail
-        python scripts/start_end_query.py --ensembl_id \"{wildcards.gene}\" > {log.stdout} 2> {log.stderr}
+        python scripts/start_end_query.py --ensembl_id \"{wildcards.gene}\" --folder {params.outfolder} > {log.stdout} 2> {log.stderr}
         bash scripts/expand_coding_region.sh {wildcards.gene} {params.distance} {params.outfolder} >> {log.stdout} 2>> {log.stderr}
         """
 
