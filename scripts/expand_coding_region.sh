@@ -20,7 +20,7 @@ awk -v BP_DISTANCE="$BP_DISTANCE" 'BEGIN {OFS="\t"} {
 
     # Print the entire expanded region
     print $1, start, end;
-}' "run_files/bed/${ENSEMBL_ID}.bed" > ${EXPANDED_BED}
+}' "${OUT_FOLDER}/${ENSEMBL_ID}.bed" > ${EXPANDED_BED}
 
 bedtools intersect -a ${EXPANDED_BED} -b data/protein_coding_regions_hg38_no_padding_no_UTR_v39.bed > "${EXPANDED_CODING_BED}"
 
