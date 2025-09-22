@@ -161,10 +161,11 @@ rule all:
 rule identify_gene_start_stop:
     output:
         "run_files/bed/{gene}.bed",
-        "run_files/bed/expanded_regions_{gene}.bed"
+        "run_files/bed/expanded_regions_{gene}.bed",
         "run_files/bed/expanded_coding_regions_{gene}.bed"
     params:
-        distance=distance
+        distance=distance,
+        outfolder="run_files/bed"
     log:
         stdout="logs/identify_gene_start_stop/{gene}.out",
         stderr="logs/identify_gene_start_stop/{gene}.err"
@@ -172,7 +173,7 @@ rule identify_gene_start_stop:
         """
         set -euo pipefail
         python scripts/start_end_query.py --ensembl_id \"{wildcards.gene}\" > {log.stdout} 2> {log.stderr}
-        bash scripts/expand_coding_region.sh {wildcards.gene} {params.distance} >> {log.stdout} 2>> {log.stderr}
+        bash scripts/expand_coding_region.sh {wildcards.gene} {params.distance} {params.outfolder} >> {log.stdout} 2>> {log.stderr}
         """
 
 # VCF-specific rules

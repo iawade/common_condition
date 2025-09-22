@@ -3,10 +3,11 @@
 # Input parameters
 ENSEMBL_ID="$1" # Prevents any potential issues with gene symbols
 BP_DISTANCE="$2" # TODO Error handling / kb vs just the number
+OUT_FOLDER="$3"
 
 # Output files
-EXPANDED_BED="run_files/bed/expanded_regions_${ENSEMBL_ID}.bed"
-EXPANDED_CODING_BED="run_files/bed/expanded_coding_regions_${ENSEMBL_ID}.bed"
+EXPANDED_BED="${OUT_FOLDER}/expanded_regions_${ENSEMBL_ID}.bed"
+EXPANDED_CODING_BED="${OUT_FOLDER}/expanded_coding_regions_${ENSEMBL_ID}.bed"
 
 awk -v BP_DISTANCE="$BP_DISTANCE" 'BEGIN {OFS="\t"} {
     start = $2 - BP_DISTANCE;
