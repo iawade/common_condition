@@ -68,7 +68,7 @@ for pid in phenotype_ids:  # phenotype IDs from JSON
     # Match start of filename or bounded by separators (_ . -)
     pattern = rf'(?:^|[/_.\-]){re.escape(pid)}(?=[/_.\-])'
     trait_in_model = any(re.search(pattern, mf) for mf in model_files)
-    trait_in_variance = any(re.search(pattern, mf) for mf in model_files)
+    trait_in_variance = any(re.search(pattern, vf) for vf in variance_files)
     if trait_in_model and trait_in_variance:
         available_traits.add(pid)
 
@@ -95,19 +95,20 @@ rule all:
     input:
         expand([
             "final_run_files/{gene}_{trait}_{maf}_extract.txt",
-            "final_run_files/{gene}_{trait}_{maf}_ld_pruned_string.txt",
+            "final_run_files/{gene}_{trait}_{maf}_{distance}_ld_pruned_string.txt",
             "final_saige_outputs/{gene}_{trait}_saige_conditioned_results_{maf}.txt"],
         zip,
         gene=[job['Gene'] for job in conditioning_jobs],
         trait=[job['Trait'] for job in conditioning_jobs],
-        maf=[job['MAF_cutoff_for_conditioning_variants'] for job in conditioning_jobs]
+        maf=[job['MAF_cutoff_for_conditioning_variants'] for job in conditioning_jobs],
+        distance=[config["distance"]] * len(conditioning_jobs)
         ),
         expand("final_run_files/{gene}_group_file.txt", gene=genes),
         expand("final_run_files/bed/{gene}.bed", gene=genes),
         expand("final_run_files/bed/expanded_regions_{gene}.bed", gene=genes),
         expand("final_run_files/{gene}_{distance}.vcf.bgz", 
             gene=genes, distance=config["distance"]),
-        expand("run_files/{gene}_{distance}.vcf.bgz.csi", 
+        expand("final_run_files/{gene}_{distance}.vcf.bgz.csi", 
             gene=genes, distance=config["distance"]),
         "brava_final_conditional_analysis_results.txt"
 
@@ -179,16 +180,16 @@ rule prune_to_independent_conditioning_variants:
         conditioning_variants_bed = "final_run_files/{gene}_{trait}_{maf}_extract.bed",
         group_file="final_run_files/{gene}_group_file.txt"
     output:
-        "final_run_files/{gene}_{trait}_{maf}_ld_pruned_string.txt" 
+        "final_run_files/{gene}_{trait}_{maf}_{distance}_ld_pruned_string.txt" 
     params:
-        file="final_run_files/{gene}_{trait}_{maf}_ld_pruned_string"
+        file="final_run_files/{gene}_{trait}_{maf}_{distance}_ld_pruned_string"
     shell:
         """
         set -euo pipefail
 
         TMPFILE=$(mktemp)
         # Define a bed file first
-        plink2 --vcf $vcf --extract range {input.conditioning_variants_bed} \
+        plink2 --vcf {input.vcf} --extract range {input.conditioning_variants_bed} \
           --make-bed --out ${{TMPFILE}} || true
         if [[ -f ${{TMPFILE}}.bim ]]; then
             # Sort the .bim file variant ID
@@ -225,7 +226,7 @@ rule spa_tests_conditional:
         ],
         sparse_matrix=sparse_matrix,
         group_file="final_run_files/{gene}_group_file.txt",
-        conditioning_variants="final_run_files/{gene}_{trait}_{maf}_ld_pruned_string.txt"
+        conditioning_variants="final_run_files/{gene}_{trait}_{maf}_{distance}_ld_pruned_string.txt"
     output:
         "final_saige_outputs/{gene}_{trait}_saige_conditioned_results_{maf}.txt"
     params:
