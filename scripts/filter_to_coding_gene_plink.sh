@@ -8,7 +8,7 @@ MAF_COMMON="$4"
 THREADS="$5"
 SPARSEGRMID="$6"
 
-EXPANDED_BED="run_files/bed/expanded_regions_${ENSEMBL_ID}.bed"
+EXPANDED_BED="run_files/bed/expanded_coding_regions_${ENSEMBL_ID}.bed"
 
 # First, check to see if this is a superset of the collection of samples
 # used to fit the model

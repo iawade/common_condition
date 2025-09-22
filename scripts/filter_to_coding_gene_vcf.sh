@@ -7,7 +7,7 @@ BP_DISTANCE="$3" # TODO Error handling / kb vs just the number
 MAF_COMMON="$4" 
 THREADS="$5"
 
-EXPANDED_BED="run_files/bed/expanded_regions_${ENSEMBL_ID}.bed"
+EXPANDED_BED="run_files/bed/expanded_coding_regions_${ENSEMBL_ID}.bed"
 
 # Output files
 OUTPUT_VCF="run_files/${ENSEMBL_ID}_${BP_DISTANCE}_${MAF_COMMON}.vcf.bgz"

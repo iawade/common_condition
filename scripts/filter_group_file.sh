@@ -54,7 +54,9 @@ fixed_first_var=$(echo "$first_var" | awk '{
     n = split($0,p,/[^[:alnum:]]+/); 
     if(n==4){ 
         chr=p[1]; pos=p[2]; ref=p[3]; alt=p[4]; 
-        if(chr!~ /^chr/) chr="chr"chr; 
+        if(chr!~ /^chr/) chr="chr"chr;
+        if(chr=="chr23") chr="chrX";
+        if(chr=="chr24") chr="chrY";  
         printf("%s:%s:%s:%s\n",chr,pos,ref,alt) 
     } else { 
         print $0 
@@ -75,6 +77,8 @@ fixed_rest=$(echo "$rest" | awk '{
         if(n==4) { 
             chr=p[1]; pos=p[2]; ref=p[3]; alt=p[4]; 
             if(chr !~ /^chr/) chr="chr" chr; 
+            if(chr=="chr23") chr="chrX";
+            if(chr=="chr24") chr="chrY";  
             printf "%s:%s:%s:%s", chr,pos,ref,alt 
         } else { 
             printf "%s", $i 

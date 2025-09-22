@@ -20,6 +20,7 @@ with open(list_of_vcf_files) as f:
 with open(list_of_group_files) as f:
     group_files = [line.strip() for line in f]
 
+distance = config["distance"]
 min_mac = config["min_mac"]
 annotations_to_include = config["annotations_to_include"]
 
@@ -102,6 +103,12 @@ rule all:
         maf=[job['MAF_cutoff_for_conditioning_variants'] for job in conditioning_jobs]
         ),
         expand("final_run_files/{gene}_group_file.txt", gene=genes),
+        expand("final_run_files/bed/{gene}.bed", gene=genes_in_valid_pairs),
+        expand("final_run_files/bed/expanded_regions_{gene}.bed", gene=genes_in_valid_pairs),
+        expand("final_run_files/{gene}_{distance}.vcf.bgz", 
+            gene=genes_in_valid_pairs, distance=config["distance"]),
+        expand("run_files/{gene}_{distance}.vcf.bgz.csi", 
+            gene=genes_in_valid_pairs, distance=config["distance"]),
         "brava_final_conditional_analysis_results.txt"
 
 rule filter_group_file:
@@ -117,9 +124,57 @@ rule filter_group_file:
         bash scripts/filter_group_file.sh {wildcards.gene} {output} {input.group} > {log.stdout} 2> {log.stderr}
         """
 
-rule prune_to_independent_conditioning_variants:
+rule identify_gene_start_stop:
+    output:
+        "final_run_files/bed/{gene}.bed",
+        "final_run_files/bed/expanded_regions_{gene}.bed"
+    params:
+        distance=distance
+    log:
+        stdout="logs/identify_gene_start_stop/{gene}.out",
+        stderr="logs/identify_gene_start_stop/{gene}.err"
+    shell:
+        """
+        set -euo pipefail
+        python scripts/start_end_query.py --ensembl_id \"{wildcards.gene}\" > {log.stdout} 2> {log.stderr}
+        bash scripts/expand_coding_region.sh {wildcards.gene} {params.distance} >> {log.stdout} 2>> {log.stderr}
+        """
+
+rule filter_to_gene_vcf:
     input:
         vcf = lambda wildcards: vcf_files,
+        bed = "final_run_files/bed/expanded_regions_{gene}.bed"
+    output:
+        "final_run_files/{gene}_{distance}.vcf.bgz",
+        "final_run_files/{gene}_{distance}.vcf.bgz.csi"
+    params:
+        distance=distance,
+        threads=config["threads"]
+    log:
+        stdout="logs/filter_to_gene_vcf/{gene}_{distance}.out",
+        stderr="logs/filter_to_gene_vcf/{gene}_{distance}.err"
+    threads: config["threads"]
+    shell:
+        """
+        set -euo pipefail
+        chr=$(python scripts/extract_chromosome.py --ensembl_id \"{wildcards.gene}\")
+        echo $chr
+        for vcf in {input.vcf}; do
+            if [[ "$vcf" =~ \\.($chr)\\. ]]; then
+                matched_vcf=$vcf
+                bash scripts/filter_to_gene_vcf.sh $vcf {wildcards.gene} {params.distance} {params.threads} >> {log.stdout} 2>> {log.stderr}
+            fi
+        done
+
+        if [[ -z "$matched_vcf" ]]; then
+            echo "ERROR: No matching VCF found for chromosome $chr"
+        fi
+        """
+
+rule prune_to_independent_conditioning_variants:
+    input:
+        vcf = "final_run_files/{gene}_{distance}.vcf.bgz",
+        vcf_csi = "final_run_files/{gene}_{distance}.vcf.bgz.csi",
         conditioning_variants = "final_run_files/{gene}_{trait}_{maf}_extract.txt",
         conditioning_variants_bed = "final_run_files/{gene}_{trait}_{maf}_extract.bed",
         group_file="final_run_files/{gene}_group_file.txt"
@@ -130,45 +185,36 @@ rule prune_to_independent_conditioning_variants:
     shell:
         """
         set -euo pipefail
-        chr=$(python scripts/extract_chromosome.py --ensembl_id \"{wildcards.gene}\")
-        for vcf in {input.vcf}; do
-            if [[ "$vcf" =~ \\.($chr)\\. ]]; then
-                echo $vcf
-                matched_vcf=$vcf
-                TMPFILE=$(mktemp)
-                # Define a bed file first
-                plink2 --vcf $vcf --extract range {input.conditioning_variants_bed} \
-                  --make-bed --out ${{TMPFILE}} || true
-                if [[ -f ${{TMPFILE}}.bim ]]; then
-                    # Sort the .bim file variant ID
-                    awk 'BEGIN{{OFS="\t"}} {{ $2 = "chr" $1 ":" $4 ":" $6 ":" $5; print }}' ${{TMPFILE}}.bim > ${{TMPFILE}}.bim.tmp
-                    mv ${{TMPFILE}}.bim.tmp ${{TMPFILE}}.bim
-                    plink2 --bfile ${{TMPFILE}} \
-                      --extract {input.conditioning_variants} \
-                      --indep-pairwise 50 5 0.9 \
-                      --out {params.file} || true
-                    # Finally, create a comma separated string from this
-                    if [[ -f {params.file}.prune.in ]]; then
-                        paste -sd, {params.file}.prune.in > {output}
-                    else
-                        # No variants to prune, create an empty output
-                        touch {output}
-                    fi
-                else
-                    # No conditioning variants present in the vcf file
-                    touch {output}
-                fi
-            fi
-        done
 
-        if [[ -z "$matched_vcf" ]]; then
-            echo "ERROR: No matching VCF found for chromosome $chr"
+        TMPFILE=$(mktemp)
+        # Define a bed file first
+        plink2 --vcf $vcf --extract range {input.conditioning_variants_bed} \
+          --make-bed --out ${{TMPFILE}} || true
+        if [[ -f ${{TMPFILE}}.bim ]]; then
+            # Sort the .bim file variant ID
+            awk 'BEGIN{{OFS="\t"}} {{ $2 = "chr" $1 ":" $4 ":" $6 ":" $5; print }}' ${{TMPFILE}}.bim > ${{TMPFILE}}.bim.tmp
+            mv ${{TMPFILE}}.bim.tmp ${{TMPFILE}}.bim
+            plink2 --bfile ${{TMPFILE}} \
+              --extract {input.conditioning_variants} \
+              --indep-pairwise 50 5 0.9 \
+              --out {params.file} || true
+            # Finally, create a comma separated string from this
+            if [[ -f {params.file}.prune.in ]]; then
+                paste -sd, {params.file}.prune.in > {output}
+            else
+                # No variants to prune, create an empty output
+                touch {output}
+            fi
+        else
+            # No conditioning variants present in the vcf file
+            touch {output}
         fi
         """
 
 rule spa_tests_conditional:
     input:
-        vcf=lambda wildcards: vcf_files,
+        vcf = "final_run_files/{gene}_{distance}.vcf.bgz",
+        vcf_csi = "final_run_files/{gene}_{distance}.vcf.bgz.csi",
         model_file=lambda wildcards: [
             mf for mf in model_files
             if re.search(rf'(?:^|[/_.\-]){re.escape(wildcards.trait)}(?=[/_.\-])', mf)
