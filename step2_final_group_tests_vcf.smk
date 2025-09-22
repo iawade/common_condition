@@ -96,7 +96,7 @@ rule all:
         expand([
             "final_run_files/{gene}_{trait}_{maf}_extract.txt",
             "final_run_files/{gene}_{trait}_{maf}_{distance}_ld_pruned_string.txt",
-            "final_saige_outputs/{gene}_{trait}_saige_conditioned_results_{maf}.txt"],
+            "final_saige_outputs/{gene}_{trait}_saige_conditioned_results_{maf}_{distance}.txt"],
         zip,
         gene=[job['Gene'] for job in conditioning_jobs],
         trait=[job['Trait'] for job in conditioning_jobs],
@@ -228,15 +228,15 @@ rule spa_tests_conditional:
         group_file="final_run_files/{gene}_group_file.txt",
         conditioning_variants="final_run_files/{gene}_{trait}_{maf}_{distance}_ld_pruned_string.txt"
     output:
-        "final_saige_outputs/{gene}_{trait}_saige_conditioned_results_{maf}.txt"
+        "final_saige_outputs/{gene}_{trait}_saige_conditioned_results_{maf}_{distance}.txt"
     params:
         min_mac=min_mac,
         annotations_to_include=annotations_to_include,
         max_MAF="{maf}",
         use_null_var_ratio=config["use_null_var_ratio"]
     log:
-        stdout="logs/final_spa_tests_conditional/{gene}_{trait}_{maf}.out",
-        stderr="logs/final_spa_tests_conditional/{gene}_{trait}_{maf}.err"
+        stdout="logs/final_spa_tests_conditional/{gene}_{trait}_{maf}_{distance}.out",
+        stderr="logs/final_spa_tests_conditional/{gene}_{trait}_{maf}_{distance}.err"
     threads: 4
     shell:
         """
@@ -252,11 +252,12 @@ rule spa_tests_conditional:
 
 rule combine_results:
     input:
-        expand("final_saige_outputs/{gene}_{trait}_saige_conditioned_results_{maf}.txt",
+        expand("final_saige_outputs/{gene}_{trait}_saige_conditioned_results_{maf}_{distance}.txt",
         zip,
         gene=[job['Gene'] for job in conditioning_jobs],
         trait=[job['Trait'] for job in conditioning_jobs],
-        maf=[job['MAF_cutoff_for_conditioning_variants'] for job in conditioning_jobs]
+        maf=[job['MAF_cutoff_for_conditioning_variants'] for job in conditioning_jobs],
+        distance=[config["distance"]] * len(conditioning_jobs)
         ),
     output:
         "brava_final_conditional_analysis_results.txt"
