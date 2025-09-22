@@ -34,7 +34,7 @@ else
       --make-bed \
       --out ${OUTPUT_PLINK}.tmp
     plink2 --bfile ${OUTPUT_PLINK}.tmp \
-      --set-all-var-ids chr@:#:\$r:\$a \
+      --set-all-var-ids @:#:\$r:\$a \
       --make-bed \
       --out ${OUTPUT_PLINK}
     rm ${OUTPUT_PLINK}.tmp.*
@@ -43,9 +43,16 @@ fi
 TMPFILE=$(mktemp)
 awk '{
   if ($1 ~ /^chr/) {
-    print  # already has "chr", leave it
+    # already has "chr"
+    if ($1 == "chr23") {
+      $1 = "chrX"
+    }
+    print  
   } else {
     $1 = "chr" $1
+    if ($1 == "chr23") {
+      $1 = "chrX"
+    }
     print
   }
 }' OFS='\t' ${OUTPUT_PLINK}.bim > ${TMPFILE} && mv ${TMPFILE} ${OUTPUT_PLINK}.bim
