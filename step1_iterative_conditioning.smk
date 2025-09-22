@@ -179,8 +179,10 @@ rule filter_to_coding_gene_vcf:
         vcf = lambda wildcards: input_files if input_format == "vcf" else [],
         bed = "run_files/bed/expanded_regions_{gene}.bed" 
     output:
-        "run_files/{gene}_{distance}_{maf}.vcf.bgz",
-        "run_files/{gene}_{distance}_{maf}.vcf.bgz.csi"
+        vcf_maf_out = "run_files/{gene}_{distance}_{maf}.vcf.bgz",
+        vcf_maf_csi_out = "run_files/{gene}_{distance}_{maf}.vcf.bgz.csi"
+        vcf_out = "run_files/{gene}_{distance}.vcf.bgz"
+        vcf_csi_out = "run_files/{gene}_{distance}.vcf.bgz.csi"
     params:
         distance=distance,
         threads=config["threads"]
@@ -214,9 +216,12 @@ rule filter_to_coding_gene_plink:
         sparse_matrix_id = sparse_matrix_id,
         regions = "run_files/bed/expanded_regions_{gene}.bed"
     output:
-        bim = "run_files/{gene}_{distance}_{maf}.bim",
-        bed = "run_files/{gene}_{distance}_{maf}.bed",
-        fam = "run_files/{gene}_{distance}_{maf}.fam"
+        bim_maf = "run_files/{gene}_{distance}_{maf}.bim",
+        bed_maf = "run_files/{gene}_{distance}_{maf}.bed",
+        fam_maf = "run_files/{gene}_{distance}_{maf}.fam",
+        bim = "run_files/{gene}_{distance}.bim",
+        bed = "run_files/{gene}_{distance}.bed",
+        fam = "run_files/{gene}_{distance}.fam"
     params:
         distance=distance,
         threads=config["threads"]
@@ -327,7 +332,9 @@ rule spa_tests_stepwise_conditional_plink:
 # Format-specific conditional analysis rules
 rule spa_tests_conditional_vcf:
     input:
-        vcf=lambda wildcards: input_files,
+        # vcf=lambda wildcards: input_files,
+        vcf = "run_files/{gene}_{distance}.vcf.bgz",
+        vcf_csi = "run_files/{gene}_{distance}.vcg.bgz.csi",
         model_file=lambda wildcards: [
             mf for mf in model_files
             if re.search(rf'(?:^|[/_.\-]){re.escape(wildcards.trait)}(?=[/_.\-])', mf)
@@ -364,9 +371,12 @@ rule spa_tests_conditional_vcf:
 
 rule spa_tests_conditional_plink:
     input:
-        plink_bim = lambda wildcards: plink_bim_files,
-        plink_bed = lambda wildcards: plink_bed_files,
-        plink_fam = lambda wildcards: plink_fam_files,
+        # plink_bim = lambda wildcards: plink_bim_files,
+        # plink_bed = lambda wildcards: plink_bed_files,
+        # plink_fam = lambda wildcards: plink_fam_files,
+        plink_bim = "run_files/{gene}_{distance}.bim",
+        plink_bed = "run_files/{gene}_{distance}.bed",
+        plink_fam = "run_files/{gene}_{distance}.fam",
         model_file=lambda wildcards: [
             mf for mf in model_files
             if re.search(rf'(?:^|[/_.\-]){re.escape(wildcards.trait)}(?=[/_.\-])', mf)
