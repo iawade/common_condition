@@ -9,7 +9,7 @@ mv uk-biobank_configs/${ANC}_config.yaml config.yaml
 Rscript scripts/create_chr_specific_filepaths.r --chr ${CHR}
 
 # Path to the Snakemake workflow file
-WORKFLOW_FILE="step2_final_group_tests_vcf.smk"
+WORKFLOW_FILE="step2_final_group_tests_plink.smk"
 
 mkdir -p final_saige_outputs final_run_files
 

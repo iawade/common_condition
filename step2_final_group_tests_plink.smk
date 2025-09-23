@@ -24,6 +24,7 @@ plink_fam_files = [f"{p}.fam" for p in plink_files]
 with open(list_of_group_files) as f:
     group_files = [line.strip() for line in f]
 
+distance = config["distance"]
 min_mac = config["min_mac"]
 annotations_to_include = config["annotations_to_include"]
 
