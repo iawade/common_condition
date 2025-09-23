@@ -203,10 +203,10 @@ rule prune_to_independent_conditioning_variants:
                 --extract {input.conditioning_variants} \
                 --out ${{TMPFILE}}.tmp || true
 
-            nvar=$(wc -l < ${TMPFILE}.tmp.bim)
+            nvar=$(wc -l < ${{TMPFILE}}.tmp.bim)
 
             if [[ $nvar -eq 1 ]]; then
-                cut -f2 ${TMPFILE}.tmp.bim > {output}
+                cut -f2 ${{TMPFILE}}.tmp.bim > {output}
             else
                 plink2 --bfile ${{TMPFILE}}.tmp \
                   --indep-pairwise 50 5 0.9 \
