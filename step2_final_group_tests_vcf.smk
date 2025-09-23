@@ -201,7 +201,7 @@ rule prune_to_independent_conditioning_variants:
             # Extract the exact variants
             plink2 --bfile ${{TMPFILE}} \
                 --extract {input.conditioning_variants} \
-                --out ${{TMPFILE}}.tmp || true
+                --make-bed --out ${{TMPFILE}}.tmp || true
 
             nvar=$(wc -l < ${{TMPFILE}}.tmp.bim)
 
