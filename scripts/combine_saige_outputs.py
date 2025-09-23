@@ -8,9 +8,9 @@ def combine_outputs(out, final=False):
 
     # Define the file pattern
     if (final):
-        file_pattern = "final_saige_outputs/*_*_saige_*results_*.txt"
-        file_single_pattern = "final_saige_outputs/*_*_saige_*results_*.singleAssoc.txt"
-        file_string_pattern = "final_run_files/*_*_*_ld_pruned_string.txt"
+        file_pattern = "final_saige_outputs/*_*_saige_*results_*_*.txt"
+        file_single_pattern = "final_saige_outputs/*_*_saige_*results_*_*.singleAssoc.txt"
+        file_string_pattern = "final_run_files/*_*_*_*_ld_pruned_string.txt"
     else:
         file_pattern = "saige_outputs/*_*_*_saige_results_*.txt"
         file_single_pattern = "saige_outputs/*_*_*_saige_results_*.singleAssoc.txt"
@@ -32,7 +32,7 @@ def combine_outputs(out, final=False):
     for file in files:
         # Extract ancestry, trait, variant class and mode from filename
         if (final):
-            match = re.search(r"final_saige_outputs/(.*?)_(.*?)_saige_conditioned_results_(.*?)\.txt", file)
+            match = re.search(r"final_saige_outputs/(.*?)_(.*?)_saige_conditioned_results_(.*?)_.*?\.txt", file)
         else:
             match = re.search(r"saige_outputs/(.*?)_(.*?)_.*?_saige_results_(.*?)\.txt", file)
 
@@ -67,7 +67,7 @@ def combine_outputs(out, final=False):
     for file in files_single:
         # Extract ancestry, trait, variant class and mode from filename
         if (final):
-            match = re.search(r"final_saige_outputs/(.*?)_(.*?)_saige_conditioned_results_(.*?)\.txt\.singleAssoc\.txt", file)
+            match = re.search(r"final_saige_outputs/(.*?)_(.*?)_saige_conditioned_results_(.*?)_.*?\.txt\.singleAssoc\.txt", file)
         else:
             match = re.search(r"saige_outputs/(.*?)_(.*?)_.*?_saige_results_(.*?)\.txt\.singleAssoc\.txt", file)
 
@@ -102,7 +102,7 @@ def combine_outputs(out, final=False):
     for file in files_string:
         # Extract ancestry, trait, variant class and mode from filename
         if (final):
-            match = re.search(r"final_run_files/(.*?)_(.*?)_(.*?)_ld_pruned_string\.txt", file)
+            match = re.search(r"final_run_files/(.*?)_(.*?)_(.*?)_.*?_ld_pruned_string\.txt", file)
         else:
             match = re.search(r"run_files/(.*?)_(.*?)_.*?_(.*?)_string\.txt", file)
 
