@@ -98,14 +98,23 @@ rule all:
     input:
         expand([
             "final_run_files/{gene}_{trait}_{maf}_extract.txt",
-            "final_run_files/{gene}_{trait}_{maf}_ld_pruned_string.txt",
-            "final_saige_outputs/{gene}_{trait}_saige_conditioned_results_{maf}.txt"],
+            "final_run_files/{gene}_{trait}_{maf}_{distance}_ld_pruned_string.txt",
+            "final_saige_outputs/{gene}_{trait}_saige_conditioned_results_{maf}_{distance}.txt"],
         zip,
         gene=[job['Gene'] for job in conditioning_jobs],
         trait=[job['Trait'] for job in conditioning_jobs],
-        maf=[job['MAF_cutoff_for_conditioning_variants'] for job in conditioning_jobs]
+        maf=[job['MAF_cutoff_for_conditioning_variants'] for job in conditioning_jobs],
+        distance=[config["distance"]] * len(conditioning_jobs)
         ),
         expand("final_run_files/{gene}_group_file.txt", gene=genes),
+        expand("final_run_files/bed/{gene}.bed", gene=genes),
+        expand("final_run_files/bed/expanded_regions_{gene}.bed", gene=genes),
+        expand("final_run_files/{gene}_{distance}.bim", 
+            gene=genes, distance=config["distance"]),
+        expand("final_run_files/{gene}_{distance}.bed", 
+            gene=genes, distance=config["distance"]),
+        expand("final_run_files/{gene}_{distance}.fam", 
+            gene=genes, distance=config["distance"]),
         "brava_final_conditional_analysis_results.txt"
 
 rule filter_group_file:
@@ -121,40 +130,96 @@ rule filter_group_file:
         bash scripts/filter_group_file.sh {wildcards.gene} {output} {input.group} > {log.stdout} 2> {log.stderr}
         """
 
-rule prune_to_independent_conditioning_variants:
+rule identify_gene_start_stop:
+    output:
+        "final_run_files/bed/{gene}.bed",
+        "final_run_files/bed/expanded_regions_{gene}.bed"
+    params:
+        distance=distance,
+        outfolder="final_run_files/bed"
+    log:
+        stdout="logs/identify_gene_start_stop/{gene}.out",
+        stderr="logs/identify_gene_start_stop/{gene}.err"
+    shell:
+        """
+        set -euo pipefail
+        python scripts/start_end_query.py --ensembl_id \"{wildcards.gene}\" --folder {params.outfolder} > {log.stdout} 2> {log.stderr}
+        bash scripts/expand_coding_region.sh {wildcards.gene} {params.distance} {params.outfolder} >> {log.stdout} 2>> {log.stderr}
+        """
+
+rule filter_to_gene_plink:
     input:
         plink_bim = lambda wildcards: plink_bim_files,
         plink_bed = lambda wildcards: plink_bed_files,
         plink_fam = lambda wildcards: plink_fam_files,
-        conditioning_variants = "final_run_files/{gene}_{trait}_{maf}_extract.txt",
-        group_file="final_run_files/{gene}_group_file.txt"
+        sparse_matrix_id = sparse_matrix_id,
+        bed = "final_run_files/bed/expanded_regions_{gene}.bed"
     output:
-        "final_run_files/{gene}_{trait}_{maf}_ld_pruned_string.txt"
+        "final_run_files/{gene}_{distance}.bim",
+        "final_run_files/{gene}_{distance}.bed",
+        "final_run_files/{gene}_{distance}.fam"
     params:
-        file="final_run_files/{gene}_{trait}_{maf}_ld_pruned_string"
+        distance=distance,
+        threads=config["threads"]
+    log:
+        stdout="logs/filter_to_gene_plink/{gene}_{distance}.out",
+        stderr="logs/filter_to_gene_plink/{gene}_{distance}.err"
+    threads: config["threads"]
     shell:
         """
         set -euo pipefail
         chr=$(python scripts/extract_chromosome.py --ensembl_id \"{wildcards.gene}\")
+        echo $chr
         for plink_bed in {input.plink_bed}; do
             if [[ "$plink_bed" =~ \\.($chr)\\. ]]; then
                 plink_fileset=$(echo "$plink_bed" | sed 's/\\.bed$//')
                 matched_plink=$plink_fileset
-                plink2 --bfile $plink_fileset \
-                  --extract {input.conditioning_variants} \
-                  --indep-pairwise 50 5 0.9 \
-                  --out {params.file} || true
-                if [[ -f {params.file}.prune.in ]]; then
-                    paste -sd, {params.file}.prune.in > {output}
-                else
-                    # No variants to prune, create an empty output
-                    touch {output}
-                fi
+                bash scripts/filter_to_gene_vcf.sh $vcf {wildcards.gene} {params.distance} {params.threads} {input.sparse_matrix_id} >> {log.stdout} 2>> {log.stderr}
             fi
         done
 
         if [[ -z "$matched_plink" ]]; then
             echo "ERROR: No matching plink fileset (.bim/.bed/.fam) found for chromosome $chr"
+        fi
+        """
+
+rule prune_to_independent_conditioning_variants:
+    input:
+        plink_bim = "final_run_files/{gene}_{distance}.bim",
+        plink_bed = "final_run_files/{gene}_{distance}.bed",
+        plink_fam = "final_run_files/{gene}_{distance}.fam",
+        conditioning_variants = "final_run_files/{gene}_{trait}_{maf}_extract.txt",
+        group_file="final_run_files/{gene}_group_file.txt"
+    output:
+        "final_run_files/{gene}_{trait}_{maf}_{distance}_ld_pruned_string.txt"
+    params:
+        file="final_run_files/{gene}_{trait}_{maf}_{distance}_ld_pruned_string"
+    shell:
+        """
+        set -euo pipefail
+
+        TMPFILE=$(mktemp)
+        plink_fileset=$(echo "$plink_bed" | sed 's/\\.bed$//')
+        plink2 --bfile $plink_fileset \
+            --extract {input.conditioning_variants} \
+            --out ${{TMPFILE}} || true
+        
+        if [[ -f ${{TMPFILE}}.bim ]]; then
+            nvar=$(wc -l < ${{TMPFILE}}.tmp.bim)
+            if [[ $nvar -eq 1 ]]; then
+                cut -f2 ${{TMPFILE}}.bim > {output}
+            else
+                plink2 --bfile ${{TMPFILE}} \
+                  --indep-pairwise 50 5 0.9 \
+                  --out {params.file} || true
+                # Finally, create a comma separated string from this
+                if [[ -f {params.file}.prune.in ]]; then
+                    paste -sd, {params.file}.prune.in > {output}
+                fi
+            fi
+        else
+            # No variants to prune, create an empty output
+            touch {output}
         fi
         """
 
@@ -188,19 +253,18 @@ rule spa_tests_conditional:
     shell:
         """
         set -euo pipefail
-        chr=$(python scripts/extract_chromosome.py --ensembl_id \"{wildcards.gene}\")
-        for plink_bed in {input.plink_bed}; do
-            if [[ "$plink_bed" =~ \\.($chr)\\. ]]; then
-                plink_fileset=$(echo "$plink_bed" | sed 's/\\.bed$//')
-                conda run --no-capture-output -n RSAIGE_vcf_version bash scripts/saige_step2_conditioning_check_plink.sh \
-                    $plink_fileset {output} {params.min_mac} {input.model_file} {input.variance_file} {input.sparse_matrix} {input.group_file} {params.annotations_to_include} {input.conditioning_variants} {params.max_MAF} {params.use_null_var_ratio} > {log.stdout} 2> {log.stderr}
-            fi
-        done
+        plink_fileset=$(echo "$plink_bed" | sed 's/\\.bed$//')
+        conda run --no-capture-output -n RSAIGE_vcf_version \
+            bash scripts/saige_step2_conditioning_check_plink.sh \
+            $plink_fileset {output} {params.min_mac} {input.model_file} \
+            {input.variance_file} {input.sparse_matrix} {input.group_file} \
+            {params.annotations_to_include} {input.conditioning_variants} \
+            {params.max_MAF} {params.use_null_var_ratio} > {log.stdout} 2> {log.stderr}
         """
 
 rule combine_results:
     input:
-        expand("final_saige_outputs/{gene}_{trait}_saige_conditioned_results_{maf}.txt",
+        expand("final_saige_outputs/{gene}_{trait}_saige_conditioned_results_{maf}_{distance}.txt",
         zip,
         gene=[job['Gene'] for job in conditioning_jobs],
         trait=[job['Trait'] for job in conditioning_jobs],

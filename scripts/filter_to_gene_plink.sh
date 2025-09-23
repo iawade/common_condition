@@ -4,11 +4,10 @@
 INPUT_PLINK="$1" # QC'd, needs GT's; single ancestry-group
 ENSEMBL_ID="$2" # Prevents any potential issues with gene symbols
 BP_DISTANCE="$3" # TODO Error handling / kb vs just the number
-MAF_COMMON="$4" 
-THREADS="$5"
-SPARSEGRMID="$6"
+THREADS="$4"
+SPARSEGRMID="$5"
 
-EXPANDED_BED="run_files/bed/expanded_coding_regions_${ENSEMBL_ID}.bed"
+EXPANDED_BED="final_run_files/bed/expanded_regions_${ENSEMBL_ID}.bed"
 
 # First, check to see if this is a superset of the collection of samples
 # used to fit the model
@@ -16,7 +15,7 @@ n_sparse=$(wc -l < "$SPARSEGRMID")
 n_fam=$(wc -l < "${INPUT_PLINK}.fam")
 
 # Output files
-OUTPUT_PLINK="run_files/${ENSEMBL_ID}_${BP_DISTANCE}_${MAF_COMMON}"
+OUTPUT_PLINK="final_run_files/${ENSEMBL_ID}_${BP_DISTANCE}"
 
 # Compare and raise error
 if (( n_fam < n_sparse )); then
@@ -26,26 +25,21 @@ else
     chr_bed=$(head -n1 ${EXPANDED_BED} | cut -f1)
     chr_plink=$(head -n1 ${INPUT_PLINK}.bim | cut -f1)
 
-    # If the plink chromosome column does not match the format in the bed interval file, change it to match.
+    # If the VCF chromosome column does not match the format in the bed interval, change the bed to match.
     if [[ "$chr_plink" != "$chr_bed" ]]; then
         awk -v chr="$chr_plink" 'BEGIN{OFS="\t"}{$1=chr; print}' "$EXPANDED_BED" > "${EXPANDED_BED}.tmp"
         mv "${EXPANDED_BED}.tmp" "$EXPANDED_BED"
     fi
 
-    # Use plink to filter by the expanded BED regions and MAF threshold
-    # Using --maf $MAF_COMMON and --mac 41, which is the same as max(MAC > 40, MAF > $MAF_COMMON)
-    echo "Filtering PLINK files (${INPUT_PLINK}.*) to match sparse GRM IDs ($n_sparse samples)..."
     plink2 --bfile ${INPUT_PLINK} \
-      --extract bed0 ${EXPANDED_BED} \
-      --keep ${SPARSEGRMID} \
-      --maf ${MAF_COMMON} \
-      --mac 41 \
-      --make-bed \
-      --out ${OUTPUT_PLINK}.tmp
+          --extract bed0 ${EXPANDED_BED} \
+          --keep ${SPARSEGRMID} \
+          --make-bed \
+          --out ${OUTPUT_PLINK}.tmp
     plink2 --bfile ${OUTPUT_PLINK}.tmp \
-      --set-all-var-ids @:#:\$r:\$a \
-      --make-bed \
-      --out ${OUTPUT_PLINK}
+          --set-all-var-ids @:#:\$r:\$a \
+          --make-bed \
+          --out ${OUTPUT_PLINK}
     rm ${OUTPUT_PLINK}.tmp.*
 fi
 
