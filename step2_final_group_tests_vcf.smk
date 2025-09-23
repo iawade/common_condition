@@ -193,19 +193,28 @@ rule prune_to_independent_conditioning_variants:
         plink2 --vcf {input.vcf} --extract range {input.conditioning_variants_bed} \
           --make-bed --out ${{TMPFILE}} || true
         if [[ -f ${{TMPFILE}}.bim ]]; then
+
             # Sort the .bim file variant ID
             awk 'BEGIN{{OFS="\t"}} {{ $2 = "chr" $1 ":" $4 ":" $6 ":" $5; print }}' ${{TMPFILE}}.bim > ${{TMPFILE}}.bim.tmp
             mv ${{TMPFILE}}.bim.tmp ${{TMPFILE}}.bim
+
+            # Extract the exact variants
             plink2 --bfile ${{TMPFILE}} \
-              --extract {input.conditioning_variants} \
-              --indep-pairwise 50 5 0.9 \
-              --out {params.file} || true
-            # Finally, create a comma separated string from this
-            if [[ -f {params.file}.prune.in ]]; then
-                paste -sd, {params.file}.prune.in > {output}
+                --extract {input.conditioning_variants} \
+                --out ${{TMPFILE}}.tmp || true
+
+            nvar=$(wc -l < ${TMPFILE}.tmp.bim)
+
+            if [[ $nvar -eq 1 ]]; then
+                cut -f2 ${TMPFILE}.tmp.bim > {output}
             else
-                # No variants to prune, create an empty output
-                touch {output}
+                plink2 --bfile ${{TMPFILE}}.tmp \
+                  --indep-pairwise 50 5 0.9 \
+                  --out {params.file} || true
+                # Finally, create a comma separated string from this
+                if [[ -f {params.file}.prune.in ]]; then
+                    paste -sd, {params.file}.prune.in > {output}
+                fi
             fi
         else
             # No conditioning variants present in the vcf file
@@ -267,5 +276,5 @@ rule combine_results:
     shell:
         """
         set -euo pipefail
-        python scripts/combine_saige_outputs.py --out {output} > {log.stdout} 2> {log.stderr}
+        python scripts/combine_saige_outputs.py --final --out {output} > {log.stdout} 2> {log.stderr}
         """
