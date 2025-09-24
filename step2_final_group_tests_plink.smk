@@ -8,6 +8,7 @@ list_of_model_files = config["list_of_model_files"]
 list_of_variance_ratio_files = config["list_of_variance_ratio_files"]
 list_of_group_files = config["list_of_group_files"]
 sparse_matrix = config["sparse_matrix"]
+sparse_matrix_id = f"{sparse_matrix}.sampleIDs.txt"
 gene_trait_pairs_to_test_with_conditioning_variants = config["gene_trait_pairs_to_test_with_conditioning_variants"]
 phenotype_json = config["phenotype_json"]
 use_null_var_ratio = config["use_null_var_ratio"]
