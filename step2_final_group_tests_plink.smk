@@ -207,7 +207,7 @@ rule prune_to_independent_conditioning_variants:
             --make-bed --out ${{TMPFILE}} || true
         
         if [[ -f ${{TMPFILE}}.bim ]]; then
-            nvar=$(wc -l < ${{TMPFILE}}.tmp.bim)
+            nvar=$(wc -l < ${{TMPFILE}}.bim)
             if [[ $nvar -eq 1 ]]; then
                 cut -f2 ${{TMPFILE}}.bim > {output}
             else
