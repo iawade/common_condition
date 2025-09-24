@@ -192,7 +192,7 @@ rule identify_gene_start_stop:
 rule filter_to_gene_vcf:
     input:
         vcf = lambda wildcards: input_files if input_format == "vcf" else [],
-        bed = "final_run_files/bed/expanded_regions_{gene}.bed"
+        bed = "run_files/bed/expanded_regions_{gene}.bed"
     output:
         "run_files/{gene}_{distance}.vcf.bgz",
         "run_files/{gene}_{distance}.vcf.bgz.csi"
@@ -264,7 +264,7 @@ rule filter_to_gene_plink:
         plink_bed = lambda wildcards: plink_bed_files if input_format == "plink" else [],
         plink_fam = lambda wildcards: plink_fam_files if input_format == "plink" else [],
         sparse_matrix_id = sparse_matrix_id,
-        regions = "final_run_files/bed/expanded_regions_{gene}.bed"
+        regions = "run_files/bed/expanded_regions_{gene}.bed"
     output:
         bim = "run_files/{gene}_{distance}.bim",
         bed = "run_files/{gene}_{distance}.bed",
