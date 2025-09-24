@@ -227,9 +227,9 @@ rule prune_to_independent_conditioning_variants:
 
 rule spa_tests_conditional:
     input:
-        plink_bim = lambda wildcards: plink_bim_files,
-        plink_bed = lambda wildcards: plink_bed_files,
-        plink_fam = lambda wildcards: plink_fam_files,
+        plink_bim = "final_run_files/{gene}_{distance}.bim",
+        plink_bed = "final_run_files/{gene}_{distance}.bed",
+        plink_fam = "final_run_files/{gene}_{distance}.fam",
         model_file = lambda wildcards: [
             mf for mf in model_files
             if re.search(rf'(?:^|[/_.\-]){re.escape(wildcards.trait)}(?=[/_.\-])', mf)
@@ -255,7 +255,7 @@ rule spa_tests_conditional:
     shell:
         """
         set -euo pipefail
-        plink_fileset=$(echo "$plink_bed" | sed 's/\\.bed$//')
+        plink_fileset=$(echo {input.plink_bed} | sed 's/\\.bed$//')
         conda run --no-capture-output -n RSAIGE_vcf_version \
             bash scripts/saige_step2_conditioning_check_plink.sh \
             $plink_fileset {output} {params.min_mac} {input.model_file} \
