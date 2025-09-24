@@ -3,6 +3,14 @@
 
 configfile: "config.yaml"
 
+wildcard_constraints:
+    gene="[A-Za-z0-9]+",
+    trait="[A-Za-z0-9]+",
+    gene_trait="[A-Za-z0-9]+_[A-Za-z0-9]+",  # For concatenated gene_trait wildcards
+    distance="[0-9]+",
+    maf="[0-9.]+",
+    chr="chr[0-9XY]+"
+
 # Read inputs from config file
 input_format = config["input_format"]  # "vcf" or "plink"
 sparse_matrix = config["sparse_matrix"]

@@ -3,6 +3,12 @@
 
 configfile: "config.yaml"
 
+wildcard_constraints:
+    gene="[A-Za-z0-9]+",
+    trait="[A-Za-z0-9]+",
+    distance="[0-9]+",
+    maf="[0-9.]+"
+
 input_format = config["input_format"]  # "vcf" or "plink"
 sparse_matrix = config["sparse_matrix"]
 sparse_matrix_id = f"{sparse_matrix}.sampleIDs.txt"
