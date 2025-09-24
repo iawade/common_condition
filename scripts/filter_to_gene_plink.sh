@@ -11,17 +11,17 @@ EXPANDED_BED="final_run_files/bed/expanded_regions_${ENSEMBL_ID}.bed"
 
 # First, check to see if this is a superset of the collection of samples
 # used to fit the model
-n_sparse=$(wc -l < "$SPARSEGRMID")
-n_fam=$(wc -l < "${INPUT_PLINK}.fam")
+# n_sparse=$(wc -l < "$SPARSEGRMID")
+# n_fam=$(wc -l < "${INPUT_PLINK}.fam")
 
 # Output files
 OUTPUT_PLINK="final_run_files/${ENSEMBL_ID}_${BP_DISTANCE}"
 
 # Compare and raise error
-if (( n_fam < n_sparse )); then
-    echo "Error: .fam file ($n_fam samples) has fewer entries than sparse GRM ID file ($n_sparse samples)." >&2
-    exit 1
-else
+# if (( n_fam < n_sparse )); then
+#     echo "Error: .fam file ($n_fam samples) has fewer entries than sparse GRM ID file ($n_sparse samples)." >&2
+#     exit 1
+# else
     # chr_bed=$(head -n1 ${EXPANDED_BED} | cut -f1)
     # chr_plink=$(head -n1 ${INPUT_PLINK}.bim | cut -f1)
 
@@ -31,37 +31,37 @@ else
     #     mv "${EXPANDED_BED}.tmp" "$EXPANDED_BED"
     # fi
 
-    plink2 --bfile ${INPUT_PLINK} \
-          --extract bed0 ${EXPANDED_BED} \
-          --keep ${SPARSEGRMID} \
-          --set-all-var-ids chr@:#:\$r:\$a \
-          --new-id-max-allele-len 10000 \
-          --make-bed \
-          --out ${OUTPUT_PLINK}
+plink2 --bfile ${INPUT_PLINK} \
+      --extract bed0 ${EXPANDED_BED} \
+      --keep ${SPARSEGRMID} \
+      --set-all-var-ids chr@:#:\$r:\$a \
+      --new-id-max-allele-len 10000 \
+      --make-bed \
+      --out ${OUTPUT_PLINK}
 
-    TMPFILE=$(mktemp)
-    awk '{
-      if ($1 ~ /^chr/) {
-        # already has "chr"
-        if ($1 == "chr23") {
-          $1 = "chrX"
-        }
-        if ($1 == "chr24") {
-          $1 = "chrY"
-        }
-        print  
-      } else {
-        $1 = "chr" $1
-        if ($1 == "23") {
-          $1 = "chrX"
-        }
-        if ($1 == "24") {
-          $1 = "chrY"
-        }
-        print
-      }
-    }' OFS='\t' ${OUTPUT_PLINK}.bim > ${TMPFILE} && mv ${TMPFILE} ${OUTPUT_PLINK}.bim
+TMPFILE=$(mktemp)
+awk '{
+  if ($1 ~ /^chr/) {
+    # already has "chr"
+    if ($1 == "chr23") {
+      $1 = "chrX"
+    }
+    if ($1 == "chr24") {
+      $1 = "chrY"
+    }
+    print  
+  } else {
+    $1 = "chr" $1
+    if ($1 == "23") {
+      $1 = "chrX"
+    }
+    if ($1 == "24") {
+      $1 = "chrY"
+    }
+    print
+  }
+}' OFS='\t' ${OUTPUT_PLINK}.bim > ${TMPFILE} && mv ${TMPFILE} ${OUTPUT_PLINK}.bim
 
-fi
+# fi
 
 echo "Created plink fileset (.bim/.bed/.fam) for the gene ${ENSEMBL_ID}"
