@@ -204,7 +204,7 @@ rule prune_to_independent_conditioning_variants:
         plink_fileset=$(echo "{input.plink_bed}" | sed 's/\\.bed$//')
         plink2 --bfile $plink_fileset \
             --extract {input.conditioning_variants} \
-            --out ${{TMPFILE}} || true
+            --make-bed --out ${{TMPFILE}} || true
         
         if [[ -f ${{TMPFILE}}.bim ]]; then
             nvar=$(wc -l < ${{TMPFILE}}.tmp.bim)
