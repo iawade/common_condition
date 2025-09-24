@@ -522,5 +522,5 @@ else:  # plink
 
 ruleorder: identify_gene_start_stop > filter_to_coding_gene_plink
 ruleorder: identify_gene_start_stop > filter_to_coding_gene_vcf
-ruleorder: filter_to_gene_vcf > filter_to_coding_gene_vcf
-ruleorder: filter_to_gene_plink > filter_to_coding_gene_plink
+ruleorder: spa_tests_stepwise_conditional_vcf > filter_to_gene_vcf
+ruleorder: spa_tests_stepwise_conditional_plink > filter_to_gene_plink
