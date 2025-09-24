@@ -283,3 +283,5 @@ rule combine_results:
         set -euo pipefail
         python scripts/combine_saige_outputs.py --final --out {output} > {log.stdout} 2> {log.stderr}
         """
+
+ruleorder: identify_gene_start_stop > filter_to_gene_plink
