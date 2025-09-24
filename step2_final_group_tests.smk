@@ -199,7 +199,8 @@ rule filter_to_gene_vcf:
         "final_run_files/{gene}_{distance}.vcf.bgz.csi"
     params:
         distance=distance,
-        threads=config["threads"]
+        threads=config["threads"],
+        outfolder="final_run_files"
     log:
         stdout="logs/filter_to_gene_vcf/{gene}_{distance}.out",
         stderr="logs/filter_to_gene_vcf/{gene}_{distance}.err"
@@ -235,7 +236,8 @@ rule filter_to_gene_plink:
         fam = "final_run_files/{gene}_{distance}.fam"
     params:
         distance=distance,
-        threads=config["threads"]
+        threads=config["threads"],
+        outfolder="final_run_files"
     log:
         stdout="logs/filter_to_gene_plink/{gene}_{distance}.out",
         stderr="logs/filter_to_gene_plink/{gene}_{distance}.err"

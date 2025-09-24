@@ -6,11 +6,12 @@ ENSEMBL_ID="$2" # Prevents any potential issues with gene symbols
 BP_DISTANCE="$3" # TODO Error handling / kb vs just the number
 THREADS="$4"
 SPARSEGRMID="$5"
+OUT_FOLDER="$6"
 
-EXPANDED_BED="final_run_files/bed/expanded_regions_${ENSEMBL_ID}.bed"
+EXPANDED_BED="${OUT_FOLDER}/bed/expanded_regions_${ENSEMBL_ID}.bed"
 
 # Output files
-OUTPUT_PLINK="final_run_files/${ENSEMBL_ID}_${BP_DISTANCE}"
+OUTPUT_PLINK="${OUT_FOLDER}/${ENSEMBL_ID}_${BP_DISTANCE}"
 
 plink2 --bfile ${INPUT_PLINK} \
       --extract bed0 ${EXPANDED_BED} \
