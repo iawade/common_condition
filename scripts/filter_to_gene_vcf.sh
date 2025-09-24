@@ -23,7 +23,8 @@ fi
 
 # Note that here, we ensure the correct naming when constructing the gene-specific vcf.
 bcftools view --threads "$THREADS" -R "$EXPANDED_BED" "$INPUT_VCF" |
-  bcftools annotate --set-id '%CHROM:%POS:%REF:%ALT' --rename-chrs data/chr_map.tsv |
+  bcftools annotate  --rename-chrs data/chr_map.tsv |
+  bcftools annotate --set-id '%CHROM:%POS:%REF:%ALT' |
   bcftools view -Oz -o "${OUTPUT_VCF}"
 
 bcftools index --csi -f "${OUTPUT_VCF}"

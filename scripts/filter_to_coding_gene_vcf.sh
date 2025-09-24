@@ -25,7 +25,8 @@ fi
 
 bcftools view --threads "$THREADS" -R "$EXPANDED_BED" "$INPUT_VCF" |
   bcftools filter --threads "$THREADS" -i "MAC > 40 && MAF > $MAF_COMMON" |
-  bcftools annotate --set-id '%CHROM:%POS:%REF:%ALT' --rename-chrs data/chr_map.tsv |
+  bcftools annotate --rename-chrs data/chr_map.tsv |
+  bcftools annotate --set-id '%CHROM:%POS:%REF:%ALT' |
   bcftools view -Oz -o "${OUTPUT_VCF}"
 
 bcftools index --csi -f "${OUTPUT_VCF}"

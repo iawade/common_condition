@@ -36,6 +36,30 @@ else
           --keep ${SPARSEGRMID} \
           --make-bed \
           --out ${OUTPUT_PLINK}.tmp
+
+    TMPFILE=$(mktemp)
+    awk '{
+      if ($1 ~ /^chr/) {
+        # already has "chr"
+        if ($1 == "chr23") {
+          $1 = "chrX"
+        }
+        if ($1 == "chr24") {
+          $1 = "chrY"
+        }
+        print  
+      } else {
+        $1 = "chr" $1
+        if ($1 == "chr23") {
+          $1 = "chrX"
+        }
+        if ($1 == "chr24") {
+          $1 = "chrY"
+        }
+        print
+      }
+    }' OFS='\t' ${OUTPUT_PLINK}.tmp.bim > ${TMPFILE} && mv ${TMPFILE} ${OUTPUT_PLINK}.tmp.bim
+
     plink2 --bfile ${OUTPUT_PLINK}.tmp \
           --set-all-var-ids @:#:\$r:\$a \
           --new-id-max-allele-len 10000 \
@@ -43,28 +67,5 @@ else
           --out ${OUTPUT_PLINK}
     rm ${OUTPUT_PLINK}.tmp.*
 fi
-
-TMPFILE=$(mktemp)
-awk '{
-  if ($1 ~ /^chr/) {
-    # already has "chr"
-    if ($1 == "chr23") {
-      $1 = "chrX"
-    }
-    if ($1 == "chr24") {
-      $1 = "chrY"
-    }
-    print  
-  } else {
-    $1 = "chr" $1
-    if ($1 == "chr23") {
-      $1 = "chrX"
-    }
-    if ($1 == "chr24") {
-      $1 = "chrY"
-    }
-    print
-  }
-}' OFS='\t' ${OUTPUT_PLINK}.bim > ${TMPFILE} && mv ${TMPFILE} ${OUTPUT_PLINK}.bim
 
 echo "Created plink fileset (.bim/.bed/.fam) for the gene ${ENSEMBL_ID}"
