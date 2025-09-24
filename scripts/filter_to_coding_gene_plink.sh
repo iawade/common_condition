@@ -10,19 +10,9 @@ SPARSEGRMID="$6"
 
 EXPANDED_BED="run_files/bed/expanded_coding_regions_${ENSEMBL_ID}.bed"
 
-# First, check to see if this is a superset of the collection of samples
-# used to fit the model
-# n_sparse=$(wc -l < "$SPARSEGRMID")
-# n_fam=$(wc -l < "${INPUT_PLINK}.fam")
-
 # Output files
 OUTPUT_PLINK="run_files/${ENSEMBL_ID}_${BP_DISTANCE}_${MAF_COMMON}"
 
-# Compare and raise error
-# if (( n_fam < n_sparse )); then
-    # echo "Error: .fam file ($n_fam samples) has fewer entries than sparse GRM ID file ($n_sparse samples)." >&2
-    # exit 1
-# else
 chr_bed=$(head -n1 ${EXPANDED_BED} | cut -f1)
 chr_plink=$(head -n1 ${INPUT_PLINK}.bim | cut -f1)
 
@@ -43,12 +33,11 @@ plink2 --bfile ${INPUT_PLINK} \
   --make-bed \
   --out ${OUTPUT_PLINK}.tmp
 plink2 --bfile ${OUTPUT_PLINK}.tmp \
-  --set-all-var-ids @:#:\$r:\$a \
+  --set-all-var-ids chr@:#:\$r:\$a \
   --new-id-max-allele-len 10000 \
   --make-bed \
   --out ${OUTPUT_PLINK}
 rm ${OUTPUT_PLINK}.tmp.*
-# fi
 
 TMPFILE=$(mktemp)
 awk '{
