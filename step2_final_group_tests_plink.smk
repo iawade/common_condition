@@ -230,7 +230,7 @@ rule spa_tests_conditional:
         plink_bim = lambda wildcards: plink_bim_files,
         plink_bed = lambda wildcards: plink_bed_files,
         plink_fam = lambda wildcards: plink_fam_files,
-        model_file=lambda wildcards: [
+        model_file = lambda wildcards: [
             mf for mf in model_files
             if re.search(rf'(?:^|[/_.\-]){re.escape(wildcards.trait)}(?=[/_.\-])', mf)
         ],
@@ -270,7 +270,8 @@ rule combine_results:
         zip,
         gene=[job['Gene'] for job in conditioning_jobs],
         trait=[job['Trait'] for job in conditioning_jobs],
-        maf=[job['MAF_cutoff_for_conditioning_variants'] for job in conditioning_jobs]
+        maf=[job['MAF_cutoff_for_conditioning_variants'] for job in conditioning_jobs],
+        distance=[config["distance"]] * len(conditioning_jobs)
         ),
     output:
         "brava_final_conditional_analysis_results.txt"
