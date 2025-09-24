@@ -176,7 +176,7 @@ rule filter_to_gene_plink:
             if [[ "$plink_bed" =~ \\.($chr)\\. ]]; then
                 plink_fileset=$(echo "$plink_bed" | sed 's/\\.bed$//')
                 matched_plink=$plink_fileset
-                bash scripts/filter_to_gene_vcf.sh $vcf {wildcards.gene} {params.distance} {params.threads} {input.sparse_matrix_id} >> {log.stdout} 2>> {log.stderr}
+                bash scripts/filter_to_gene_plink.sh $plink_fileset {wildcards.gene} {params.distance} {params.threads} {input.sparse_matrix_id} >> {log.stdout} 2>> {log.stderr}
             fi
         done
 
@@ -240,17 +240,17 @@ rule spa_tests_conditional:
         ],
         sparse_matrix=sparse_matrix,
         group_file="final_run_files/{gene}_group_file.txt",
-        conditioning_variants="final_run_files/{gene}_{trait}_{maf}_ld_pruned_string.txt"
+        conditioning_variants="final_run_files/{gene}_{trait}_{maf}_{distance}_ld_pruned_string.txt"
     output:
-        "final_saige_outputs/{gene}_{trait}_saige_conditioned_results_{maf}.txt" 
+        "final_saige_outputs/{gene}_{trait}_saige_conditioned_results_{maf}_{distance}.txt" 
     params:
         min_mac=min_mac,
         annotations_to_include=annotations_to_include,
         max_MAF="{maf}",
         use_null_var_ratio=config["use_null_var_ratio"]
     log:
-        stdout="logs/final_spa_tests_conditional/{gene}_{trait}_{maf}.out",
-        stderr="logs/final_spa_tests_conditional/{gene}_{trait}_{maf}.err"
+        stdout="logs/final_spa_tests_conditional/{gene}_{trait}_{maf}_{distance}.out",
+        stderr="logs/final_spa_tests_conditional/{gene}_{trait}_{maf}_{distance}.err"
     threads: 4
     shell:
         """
