@@ -73,7 +73,7 @@ for pid in phenotype_ids:  # phenotype IDs from JSON
     # Match start of filename or bounded by separators (_ . -)
     pattern = rf'(?:^|[/_.\-]){re.escape(pid)}(?=[/_.\-])'
     trait_in_model = any(re.search(pattern, mf) for mf in model_files)
-    trait_in_variance = any(re.search(pattern, mf) for mf in model_files)
+    trait_in_variance = any(re.search(pattern, mf) for mf in variance_files)
     if trait_in_model and trait_in_variance:
         available_traits.add(pid)
 
@@ -155,11 +155,11 @@ rule filter_to_gene_plink:
         plink_bed = lambda wildcards: plink_bed_files,
         plink_fam = lambda wildcards: plink_fam_files,
         sparse_matrix_id = sparse_matrix_id,
-        bed = "final_run_files/bed/expanded_regions_{gene}.bed"
+        regions = "final_run_files/bed/expanded_regions_{gene}.bed"
     output:
-        "final_run_files/{gene}_{distance}.bim",
-        "final_run_files/{gene}_{distance}.bed",
-        "final_run_files/{gene}_{distance}.fam"
+        bim = "final_run_files/{gene}_{distance}.bim",
+        bed = "final_run_files/{gene}_{distance}.bed",
+        fam = "final_run_files/{gene}_{distance}.fam"
     params:
         distance=distance,
         threads=config["threads"]
@@ -201,7 +201,7 @@ rule prune_to_independent_conditioning_variants:
         set -euo pipefail
 
         TMPFILE=$(mktemp)
-        plink_fileset=$(echo "$plink_bed" | sed 's/\\.bed$//')
+        plink_fileset=$(echo "{input.plink_bed}" | sed 's/\\.bed$//')
         plink2 --bfile $plink_fileset \
             --extract {input.conditioning_variants} \
             --out ${{TMPFILE}} || true
