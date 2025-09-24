@@ -63,10 +63,10 @@ awk '{
     print  
   } else {
     $1 = "chr" $1
-    if ($1 == "chr23") {
+    if ($1 == "23") {
       $1 = "chrX"
     }
-    if ($1 == "chr24") {
+    if ($1 == "24") {
       $1 = "chrY"
     }
     print

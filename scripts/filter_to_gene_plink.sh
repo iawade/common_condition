@@ -22,20 +22,22 @@ if (( n_fam < n_sparse )); then
     echo "Error: .fam file ($n_fam samples) has fewer entries than sparse GRM ID file ($n_sparse samples)." >&2
     exit 1
 else
-    chr_bed=$(head -n1 ${EXPANDED_BED} | cut -f1)
-    chr_plink=$(head -n1 ${INPUT_PLINK}.bim | cut -f1)
+    # chr_bed=$(head -n1 ${EXPANDED_BED} | cut -f1)
+    # chr_plink=$(head -n1 ${INPUT_PLINK}.bim | cut -f1)
 
-    # If the VCF chromosome column does not match the format in the bed interval, change the bed to match.
-    if [[ "$chr_plink" != "$chr_bed" ]]; then
-        awk -v chr="$chr_plink" 'BEGIN{OFS="\t"}{$1=chr; print}' "$EXPANDED_BED" > "${EXPANDED_BED}.tmp"
-        mv "${EXPANDED_BED}.tmp" "$EXPANDED_BED"
-    fi
+    # # If the VCF chromosome column does not match the format in the bed interval, change the bed to match.
+    # if [[ "$chr_plink" != "$chr_bed" ]]; then
+    #     awk -v chr="$chr_plink" 'BEGIN{OFS="\t"}{$1=chr; print}' "$EXPANDED_BED" > "${EXPANDED_BED}.tmp"
+    #     mv "${EXPANDED_BED}.tmp" "$EXPANDED_BED"
+    # fi
 
     plink2 --bfile ${INPUT_PLINK} \
           --extract bed0 ${EXPANDED_BED} \
           --keep ${SPARSEGRMID} \
+          --set-all-var-ids chr@:#:\$r:\$a \
+          --new-id-max-allele-len 10000 \
           --make-bed \
-          --out ${OUTPUT_PLINK}.tmp
+          --out ${OUTPUT_PLINK}
 
     TMPFILE=$(mktemp)
     awk '{
@@ -50,22 +52,16 @@ else
         print  
       } else {
         $1 = "chr" $1
-        if ($1 == "chr23") {
+        if ($1 == "23") {
           $1 = "chrX"
         }
-        if ($1 == "chr24") {
+        if ($1 == "24") {
           $1 = "chrY"
         }
         print
       }
-    }' OFS='\t' ${OUTPUT_PLINK}.tmp.bim > ${TMPFILE} && mv ${TMPFILE} ${OUTPUT_PLINK}.tmp.bim
+    }' OFS='\t' ${OUTPUT_PLINK}.bim > ${TMPFILE} && mv ${TMPFILE} ${OUTPUT_PLINK}.bim
 
-    plink2 --bfile ${OUTPUT_PLINK}.tmp \
-          --set-all-var-ids @:#:\$r:\$a \
-          --new-id-max-allele-len 10000 \
-          --make-bed \
-          --out ${OUTPUT_PLINK}
-    rm ${OUTPUT_PLINK}.tmp.*
 fi
 
 echo "Created plink fileset (.bim/.bed/.fam) for the gene ${ENSEMBL_ID}"
