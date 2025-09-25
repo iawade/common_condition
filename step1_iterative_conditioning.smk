@@ -3,6 +3,13 @@
 
 configfile: "config.yaml"
 
+wildcard_constraints:
+    gene="[A-Za-z0-9]+",
+    trait="[A-Za-z0-9]+",
+    gene_trait="[A-Za-z0-9]+_[A-Za-z0-9]+",  # For concatenated gene_trait wildcards
+    distance="[0-9]+",
+    maf="[0-9.]+"
+
 # Read inputs from config file
 input_format = config["input_format"]  # "vcf" or "plink"
 sparse_matrix = config["sparse_matrix"]
@@ -126,6 +133,7 @@ def get_format_outputs():
         expand("run_files/{gene}_group_file.txt", gene=genes_in_valid_pairs),
         expand("run_files/bed/{gene}.bed", gene=genes_in_valid_pairs),
         expand("run_files/bed/expanded_regions_{gene}.bed", gene=genes_in_valid_pairs),
+        expand("run_files/bed/expanded_coding_regions_{gene}.bed", gene=genes_in_valid_pairs),
         expand("saige_outputs/{gene_trait}_{distance}_saige_results_{maf}.txt",
                gene_trait=valid_gene_trait_pairs,
                distance=config["distance"],
@@ -135,6 +143,12 @@ def get_format_outputs():
     
     if input_format == "plink":
         base_outputs.extend([
+            expand("run_files/{gene}_{distance}.bim", 
+                   gene=genes_in_valid_pairs, distance=config["distance"]),
+            expand("run_files/{gene}_{distance}.bed", 
+                   gene=genes_in_valid_pairs, distance=config["distance"]),
+            expand("run_files/{gene}_{distance}.fam", 
+                   gene=genes_in_valid_pairs, distance=config["distance"]),
             expand("run_files/{gene}_{distance}_{maf}.bim", 
                    gene=genes_in_valid_pairs, distance=config["distance"], maf=config["maf"]),
             expand("run_files/{gene}_{distance}_{maf}.bed", 
@@ -144,6 +158,10 @@ def get_format_outputs():
         ])
     else:  # vcf
         base_outputs.extend([
+            expand("run_files/{gene}_{distance}.vcf.bgz", 
+                   gene=genes_in_valid_pairs, distance=config["distance"]),
+            expand("run_files/{gene}_{distance}.vcf.bgz.csi", 
+                   gene=genes_in_valid_pairs, distance=config["distance"]),
             expand("run_files/{gene}_{distance}_{maf}.vcf.bgz", 
                    gene=genes_in_valid_pairs, distance=config["distance"], maf=config["maf"]),
             expand("run_files/{gene}_{distance}_{maf}.vcf.bgz.csi", 
@@ -160,30 +178,69 @@ rule all:
 rule identify_gene_start_stop:
     output:
         "run_files/bed/{gene}.bed",
-        "run_files/bed/expanded_regions_{gene}.bed"
+        "run_files/bed/expanded_regions_{gene}.bed",
+        "run_files/bed/expanded_coding_regions_{gene}.bed"
     params:
-        distance=distance
+        distance=distance,
+        outfolder="run_files/bed"
     log:
         stdout="logs/identify_gene_start_stop/{gene}.out",
         stderr="logs/identify_gene_start_stop/{gene}.err"
     shell:
         """
         set -euo pipefail
-        python scripts/start_end_query.py --ensembl_id \"{wildcards.gene}\" > {log.stdout} 2> {log.stderr}
-        bash scripts/expand_coding_region.sh {wildcards.gene} {params.distance} >> {log.stdout} 2>> {log.stderr}
+        python scripts/start_end_query.py \
+            --ensembl_id \"{wildcards.gene}\" > {log.stdout} 2> {log.stderr}
+        bash scripts/expand_coding_region.sh {wildcards.gene} \
+            {params.distance} {params.outfolder} >> {log.stdout} 2>> {log.stderr}
         """
 
 # VCF-specific rules
+rule filter_to_gene_vcf:
+    input:
+        vcf = lambda wildcards: input_files if input_format == "vcf" else [],
+        bed = "run_files/bed/expanded_regions_{gene}.bed"
+    output:
+        "run_files/{gene}_{distance}.vcf.bgz",
+        "run_files/{gene}_{distance}.vcf.bgz.csi"
+    params:
+        distance=distance,
+        threads=config["threads"],
+        outfolder="run_files"
+    log:
+        stdout="logs/filter_to_gene_vcf/{gene}_{distance}.out",
+        stderr="logs/filter_to_gene_vcf/{gene}_{distance}.err"
+    threads: config["threads"]
+    shell:
+        """
+        set -euo pipefail
+        chr=$(python scripts/extract_chromosome.py --ensembl_id \"{wildcards.gene}\")
+        echo $chr
+        for vcf in {input.vcf}; do
+            if [[ "$vcf" =~ \\.($chr)\\. ]]; then
+                matched_vcf=$vcf
+                bash scripts/filter_to_gene_vcf.sh $vcf {wildcards.gene} \
+                    {params.distance} {params.threads} \
+                    {params.outfolder} >> {log.stdout} 2>> {log.stderr}
+            fi
+        done
+
+        if [[ -z "$matched_vcf" ]]; then
+            echo "ERROR: No matching VCF found for chromosome $chr"
+        fi
+        """
+
 rule filter_to_coding_gene_vcf:
     input:
         vcf = lambda wildcards: input_files if input_format == "vcf" else [],
-        bed = "run_files/bed/expanded_regions_{gene}.bed" 
+        bed = "run_files/bed/expanded_coding_regions_{gene}.bed" 
     output:
         "run_files/{gene}_{distance}_{maf}.vcf.bgz",
         "run_files/{gene}_{distance}_{maf}.vcf.bgz.csi"
     params:
         distance=distance,
-        threads=config["threads"]
+        threads=config["threads"],
+        outfolder="run_files"
     log:
         stdout="logs/filter_to_coding_gene_vcf/{gene}_{distance}_{maf}.out",
         stderr="logs/filter_to_coding_gene_vcf/{gene}_{distance}_{maf}.err"
@@ -196,7 +253,9 @@ rule filter_to_coding_gene_vcf:
         for vcf in {input.vcf}; do
             if [[ "$vcf" =~ \\.($chr)\\. ]]; then
                 matched_vcf=$vcf
-                bash scripts/filter_to_coding_gene_vcf.sh $vcf {wildcards.gene} {params.distance} {wildcards.maf} {params.threads} >> {log.stdout} 2>> {log.stderr}
+                bash scripts/filter_to_coding_gene_vcf.sh $vcf {wildcards.gene} \
+                    {params.distance} {wildcards.maf} \
+                    {params.threads} >> {log.stdout} 2>> {log.stderr}
             fi
         done
 
@@ -205,14 +264,53 @@ rule filter_to_coding_gene_vcf:
         fi
         """
 
-# PLINK-specific rules  
-rule filter_to_coding_gene_plink:
+# PLINK-specific rules 
+rule filter_to_gene_plink:
     input:
         plink_bim = lambda wildcards: plink_bim_files if input_format == "plink" else [],
         plink_bed = lambda wildcards: plink_bed_files if input_format == "plink" else [],
         plink_fam = lambda wildcards: plink_fam_files if input_format == "plink" else [],
         sparse_matrix_id = sparse_matrix_id,
         regions = "run_files/bed/expanded_regions_{gene}.bed"
+    output:
+        bim = "run_files/{gene}_{distance}.bim",
+        bed = "run_files/{gene}_{distance}.bed",
+        fam = "run_files/{gene}_{distance}.fam"
+    params:
+        distance=distance,
+        threads=config["threads"],
+        outfolder="run_files"
+    log:
+        stdout="logs/filter_to_gene_plink/{gene}_{distance}.out",
+        stderr="logs/filter_to_gene_plink/{gene}_{distance}.err"
+    threads: config["threads"]
+    shell:
+        """
+        set -euo pipefail
+        chr=$(python scripts/extract_chromosome.py --ensembl_id \"{wildcards.gene}\")
+        echo $chr
+        for plink_bed in {input.plink_bed}; do
+            if [[ "$plink_bed" =~ \\.($chr)\\. ]]; then
+                plink_fileset=$(echo "$plink_bed" | sed 's/\\.bed$//')
+                matched_plink=$plink_fileset
+                bash scripts/filter_to_gene_plink.sh $plink_fileset {wildcards.gene} \
+                    {params.distance} {params.threads} {input.sparse_matrix_id} \
+                    {params.outfolder} >> {log.stdout} 2>> {log.stderr}
+            fi
+        done
+
+        if [[ -z "$matched_plink" ]]; then
+            echo "ERROR: No matching plink fileset (.bim/.bed/.fam) found for chromosome $chr"
+        fi
+        """
+
+rule filter_to_coding_gene_plink:
+    input:
+        plink_bim = lambda wildcards: plink_bim_files if input_format == "plink" else [],
+        plink_bed = lambda wildcards: plink_bed_files if input_format == "plink" else [],
+        plink_fam = lambda wildcards: plink_fam_files if input_format == "plink" else [],
+        sparse_matrix_id = sparse_matrix_id,
+        regions = "run_files/bed/expanded_coding_regions_{gene}.bed"
     output:
         bim = "run_files/{gene}_{distance}_{maf}.bim",
         bed = "run_files/{gene}_{distance}_{maf}.bed",
@@ -275,7 +373,8 @@ rule spa_tests_stepwise_conditional_vcf:
         "run_files/{gene}_{trait}_{distance}_{maf}_string.txt" 
     params:
         maf_common="{maf}",
-        use_null_var_ratio=config["use_null_var_ratio"]
+        use_null_var_ratio=config["use_null_var_ratio"],
+        P_T=config["conditioning_pvalue"]
     log:
         stdout="logs/spa_tests_stepwise_conditional/{gene}_{trait}_{distance}_{maf}.out",
         stderr="logs/spa_tests_stepwise_conditional/{gene}_{trait}_{distance}_{maf}.err"
@@ -285,7 +384,7 @@ rule spa_tests_stepwise_conditional_vcf:
         chr=$(python scripts/extract_chromosome.py --ensembl_id \"{wildcards.gene}\")
         for vcf in {input.vcf}; do
             conda run --no-capture-output -n RSAIGE_vcf_version bash scripts/stepwise_conditional_SAIGE.sh \
-                $vcf {output} {input.model_file} {input.variance_file} {input.sparse_matrix} $chr {params.use_null_var_ratio} > {log.stdout} 2> {log.stderr}
+                $vcf {output} {input.model_file} {input.variance_file} {input.sparse_matrix} $chr {params.use_null_var_ratio} {params.P_T} > {log.stdout} 2> {log.stderr}
         done
         """
 
@@ -309,7 +408,8 @@ rule spa_tests_stepwise_conditional_plink:
         "run_files/{gene}_{trait}_{distance}_{maf}_string.txt"
     params:
         maf_common="{maf}",
-        use_null_var_ratio=config["use_null_var_ratio"]
+        use_null_var_ratio=config["use_null_var_ratio"],
+        P_T=config["conditioning_pvalue"]
     log:
         stdout="logs/spa_tests_stepwise_conditional/{gene}_{trait}_{distance}_{maf}.out",
         stderr="logs/spa_tests_stepwise_conditional/{gene}_{trait}_{distance}_{maf}.err"
@@ -320,14 +420,15 @@ rule spa_tests_stepwise_conditional_plink:
         for plink_bed in {input.plink_bed}; do
             plink_fileset=$(echo "$plink_bed" | sed 's/\\.bed$//')
             conda run --no-capture-output -n RSAIGE_vcf_version bash scripts/stepwise_conditional_SAIGE_plink.sh \
-                $plink_fileset {output} {input.model_file} {input.variance_file} {input.sparse_matrix} $chr {params.use_null_var_ratio} > {log.stdout} 2> {log.stderr}
+                $plink_fileset {output} {input.model_file} {input.variance_file} {input.sparse_matrix} $chr {params.use_null_var_ratio} {params.P_T} > {log.stdout} 2> {log.stderr}
         done
         """
 
 # Format-specific conditional analysis rules
 rule spa_tests_conditional_vcf:
     input:
-        vcf=lambda wildcards: input_files,
+        vcf = "run_files/{gene}_{distance}.vcf.bgz",
+        vcf_csi = "run_files/{gene}_{distance}.vcf.bgz.csi",
         model_file=lambda wildcards: [
             mf for mf in model_files
             if re.search(rf'(?:^|[/_.\-]){re.escape(wildcards.trait)}(?=[/_.\-])', mf)
@@ -349,24 +450,23 @@ rule spa_tests_conditional_vcf:
     log:
         stdout="logs/spa_tests_conditional/{gene}_{trait}_{distance}_{maf}.out",
         stderr="logs/spa_tests_conditional/{gene}_{trait}_{distance}_{maf}.err"
-    threads: 8
+    threads: 4
     shell:
         """
         set -euo pipefail
-        chr=$(python scripts/extract_chromosome.py --ensembl_id \"{wildcards.gene}\")
-        for vcf in {input.vcf}; do
-            if [[ "$vcf" =~ \\.($chr)\\. ]]; then
-                conda run --no-capture-output -n RSAIGE_vcf_version bash scripts/saige_step2_conditioning_check.sh \
-                    $vcf {output} {params.min_mac} {input.model_file} {input.variance_file} {input.sparse_matrix} {input.group_file} {params.annotations_to_include} {input.conditioning_variants} {params.max_MAF} {params.use_null_var_ratio} > {log.stdout} 2> {log.stderr}
-            fi
-        done
+        conda run --no-capture-output -n RSAIGE_vcf_version \
+            bash scripts/saige_step2_conditioning_check.sh \
+            {input.vcf} {output} {params.min_mac} {input.model_file} \
+            {input.variance_file} {input.sparse_matrix} {input.group_file} \
+            {params.annotations_to_include} {input.conditioning_variants} \
+            {params.max_MAF} {params.use_null_var_ratio} > {log.stdout} 2> {log.stderr}
         """
 
 rule spa_tests_conditional_plink:
     input:
-        plink_bim = lambda wildcards: plink_bim_files,
-        plink_bed = lambda wildcards: plink_bed_files,
-        plink_fam = lambda wildcards: plink_fam_files,
+        plink_bim = "run_files/{gene}_{distance}.bim",
+        plink_bed = "run_files/{gene}_{distance}.bed",
+        plink_fam = "run_files/{gene}_{distance}.fam",
         model_file=lambda wildcards: [
             mf for mf in model_files
             if re.search(rf'(?:^|[/_.\-]){re.escape(wildcards.trait)}(?=[/_.\-])', mf)
@@ -392,14 +492,13 @@ rule spa_tests_conditional_plink:
     shell:
         """
         set -euo pipefail
-        chr=$(python scripts/extract_chromosome.py --ensembl_id \"{wildcards.gene}\")
-        for plink_bed in {input.plink_bed}; do
-            if [[ "$plink_bed" =~ \\.($chr)\\. ]]; then
-                plink_fileset=$(echo "$plink_bed" | sed 's/\\.bed$//')
-                conda run --no-capture-output -n RSAIGE_vcf_version bash scripts/saige_step2_conditioning_check_plink.sh \
-                    $plink_fileset {output} {params.min_mac} {input.model_file} {input.variance_file} {input.sparse_matrix} {input.group_file} {params.annotations_to_include} {input.conditioning_variants} {params.max_MAF} {params.use_null_var_ratio} > {log.stdout} 2> {log.stderr}
-            fi
-        done
+        plink_fileset=$(echo {input.plink_bed} | sed 's/\\.bed$//')
+        conda run --no-capture-output -n RSAIGE_vcf_version \
+            bash scripts/saige_step2_conditioning_check_plink.sh \
+            $plink_fileset {output} {params.min_mac} {input.model_file} \
+            {input.variance_file} {input.sparse_matrix} {input.group_file} \
+            {params.annotations_to_include} {input.conditioning_variants} \
+            {params.max_MAF} {params.use_null_var_ratio} > {log.stdout} 2> {log.stderr}
         """
 
 rule combine_results:
@@ -424,10 +523,14 @@ if input_format == "vcf":
     ruleorder: spa_tests_stepwise_conditional_vcf > spa_tests_stepwise_conditional_plink
     ruleorder: spa_tests_conditional_vcf > spa_tests_conditional_plink
     ruleorder: filter_to_coding_gene_vcf > filter_to_coding_gene_plink
+    ruleorder: filter_to_gene_vcf > filter_to_gene_plink
 else:  # plink
     ruleorder: spa_tests_stepwise_conditional_plink > spa_tests_stepwise_conditional_vcf
     ruleorder: spa_tests_conditional_plink > spa_tests_conditional_vcf
     ruleorder: filter_to_coding_gene_plink > filter_to_coding_gene_vcf
+    ruleorder: filter_to_gene_plink > filter_to_gene_vcf
 
 ruleorder: identify_gene_start_stop > filter_to_coding_gene_plink
 ruleorder: identify_gene_start_stop > filter_to_coding_gene_vcf
+ruleorder: spa_tests_stepwise_conditional_vcf > filter_to_gene_vcf
+ruleorder: spa_tests_stepwise_conditional_plink > filter_to_gene_plink

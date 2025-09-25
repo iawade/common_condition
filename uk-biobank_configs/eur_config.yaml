@@ -12,6 +12,7 @@ list_of_group_files: "ukb_paths/eur/eur_group_file_list.txt"
 
 ## Prerequisite: Don't need to change if using files/instructions provided in repo 
 gene_trait_pairs_to_test: "gene_phenotype_pairs_290525.csv"
+gene_trait_pairs_to_test_with_conditioning_variants: "gene_phenotype_pairs_with_conditioning_variants_EUR.tsv.gz"
 protein_coding_region_bed: "data/protein_coding_regions_hg38_no_padding_no_UTR_v39.bed"
 phenotype_json: "pilot_phenotypes.json"
 
@@ -26,6 +27,7 @@ threads: 2
 min_mac: 0.5
 annotations_to_include: "pLoF,damaging_missense_or_protein_altering,other_missense_or_protein_altering,synonymous,pLoF:damaging_missense_or_protein_altering,pLoF:damaging_missense_or_protein_altering:other_missense_or_protein_altering:synonymous"
 use_null_var_ratio: false
+conditioning_pvalue: 0.01
 
 # SAIGE versions for filetypes
 saige_vcf_version: "1.3.6"

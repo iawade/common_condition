@@ -4,9 +4,9 @@ source /opt/conda/etc/profile.d/conda.sh
 conda activate brava_hits_common_condition_check
 
 # Path to the Snakemake workflow file
-WORKFLOW_FILE="step2_final_group_tests_vcf.smk"
+WORKFLOW_FILE="step2_final_group_tests.smk"
 
-mkdir -p final_saige_outputs final_run_files
+mkdir -p final_saige_outputs final_run_files/bed
 
 CORES=$(nproc)
 

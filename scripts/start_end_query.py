@@ -4,10 +4,10 @@ import time
 import logging
 import gzip
 
-def get_gene_coordinates(ensembl_id, file='data/all_genes.tsv.gz', is_gzipped=True):
+def get_gene_coordinates(ensembl_id, folder, file='data/all_genes.tsv.gz', is_gzipped=True):
 
     # Dynamically create the output filename
-    output_file = f"run_files/bed/{ensembl_id}.bed"
+    output_file = f"{folder}/{ensembl_id}.bed"
     open_input = gzip.open if is_gzipped else open
 
     with open_input(file, 'rt') as infile, open(output_file, 'wt') as output:
@@ -22,7 +22,8 @@ if __name__ == "__main__":
     parser.add_argument('--gene_file', required=False, default='data/all_genes.tsv.gz', help='lookup file of all gene (start, end) pairs')
     parser.add_argument('--not_gzipped', action='store_true', help='is the lookup file gzipped? If not, use this flag')
     parser.add_argument('--ensembl_id', required=True, help='Ensembl gene ID')
+    parser.add_argument('--folder', required=False, default='run_files/bed', help='output_folder')
     args = parser.parse_args()
 
     # Run the function with provided arguments
-    get_gene_coordinates(args.ensembl_id, args.gene_file, not args.not_gzipped)
+    get_gene_coordinates(args.ensembl_id, args.folder, args.gene_file, not args.not_gzipped)

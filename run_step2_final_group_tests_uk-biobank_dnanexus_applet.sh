@@ -6,17 +6,18 @@ conda activate brava_hits_common_condition_check
 # Make files present in same filepath, so that file locations
 # in the list files are relative to the script directory
 mv uk-biobank_configs/${ANC}_config.yaml config.yaml
-Rscript scripts/create_chr_specific_filepaths.r --chr ${CHR} -p ${P_T}
+Rscript scripts/create_chr_specific_filepaths.r --chr ${CHR}
 
-WORKFLOW_FILE="step1_iterative_conditioning.smk"
+# Path to the Snakemake workflow file
+WORKFLOW_FILE="step2_final_group_tests.smk"
+
+mkdir -p final_saige_outputs final_run_files
+
 CORES=$(nproc)
 
 # Generate a timestamped log file
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 LOGFILE="snakemake_run_${TIMESTAMP}.log"
-
-# Tidy up (just in case)
-rm brava_stepwise_conditional_analysis_results*.txt
 
 # Run Snakemake with the specified options
 echo "Starting a run of Snakemake workflow..."
