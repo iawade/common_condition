@@ -373,7 +373,8 @@ rule spa_tests_stepwise_conditional_vcf:
         "run_files/{gene}_{trait}_{distance}_{maf}_string.txt" 
     params:
         maf_common="{maf}",
-        use_null_var_ratio=config["use_null_var_ratio"]
+        use_null_var_ratio=config["use_null_var_ratio"],
+        P_T=config["conditioning_pvalue"]
     log:
         stdout="logs/spa_tests_stepwise_conditional/{gene}_{trait}_{distance}_{maf}.out",
         stderr="logs/spa_tests_stepwise_conditional/{gene}_{trait}_{distance}_{maf}.err"
@@ -383,7 +384,7 @@ rule spa_tests_stepwise_conditional_vcf:
         chr=$(python scripts/extract_chromosome.py --ensembl_id \"{wildcards.gene}\")
         for vcf in {input.vcf}; do
             conda run --no-capture-output -n RSAIGE_vcf_version bash scripts/stepwise_conditional_SAIGE.sh \
-                $vcf {output} {input.model_file} {input.variance_file} {input.sparse_matrix} $chr {params.use_null_var_ratio} > {log.stdout} 2> {log.stderr}
+                $vcf {output} {input.model_file} {input.variance_file} {input.sparse_matrix} $chr {params.use_null_var_ratio} {params.P_T} > {log.stdout} 2> {log.stderr}
         done
         """
 
@@ -407,7 +408,8 @@ rule spa_tests_stepwise_conditional_plink:
         "run_files/{gene}_{trait}_{distance}_{maf}_string.txt"
     params:
         maf_common="{maf}",
-        use_null_var_ratio=config["use_null_var_ratio"]
+        use_null_var_ratio=config["use_null_var_ratio"],
+        P_T=config["conditioning_pvalue"]
     log:
         stdout="logs/spa_tests_stepwise_conditional/{gene}_{trait}_{distance}_{maf}.out",
         stderr="logs/spa_tests_stepwise_conditional/{gene}_{trait}_{distance}_{maf}.err"
@@ -418,7 +420,7 @@ rule spa_tests_stepwise_conditional_plink:
         for plink_bed in {input.plink_bed}; do
             plink_fileset=$(echo "$plink_bed" | sed 's/\\.bed$//')
             conda run --no-capture-output -n RSAIGE_vcf_version bash scripts/stepwise_conditional_SAIGE_plink.sh \
-                $plink_fileset {output} {input.model_file} {input.variance_file} {input.sparse_matrix} $chr {params.use_null_var_ratio} > {log.stdout} 2> {log.stderr}
+                $plink_fileset {output} {input.model_file} {input.variance_file} {input.sparse_matrix} $chr {params.use_null_var_ratio} {params.P_T} > {log.stdout} 2> {log.stderr}
         done
         """
 

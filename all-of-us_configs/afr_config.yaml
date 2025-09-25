@@ -25,6 +25,7 @@ threads: 2
 min_mac: 0.5
 annotations_to_include: "pLoF,damaging_missense,other_missense,synonymous,pLoF:damaging_missense,pLoF:damaging_missense:other_missense:synonymous"
 use_null_var_ratio: false
+conditioning_pvalue: 0.01
 
 # SAIGE versions for filetypes
 saige_vcf_version: "1.3.6"

@@ -9,6 +9,8 @@ SPARSEGRM="${5}"
 SPARSEGRMID="${SPARSEGRM}.sampleIDs.txt"
 CHR="${6}"
 USE_NULL_VAR_RATIO="${7}"
+P_T="${8}"
+
 echo "null var vatio"
 echo "${USE_NULL_VAR_RATIO}"
 
@@ -37,9 +39,6 @@ fi
 
 # Run the command
 "${cmd[@]}"
-
-# Signficant threshold for p-values
-P_T=1e-5
 
 # Obtain the top hit as the first conditioning marker
 cond_M=$(sort -g -k13,13 ${TMPFILE} | head -n 2 | tail -1 | awk '{print $1":"$2":"$4":"$5}')
