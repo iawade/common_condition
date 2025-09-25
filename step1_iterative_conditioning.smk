@@ -8,8 +8,7 @@ wildcard_constraints:
     trait="[A-Za-z0-9]+",
     gene_trait="[A-Za-z0-9]+_[A-Za-z0-9]+",  # For concatenated gene_trait wildcards
     distance="[0-9]+",
-    maf="[0-9.]+",
-    chr="chr[0-9XY]+"
+    maf="[0-9.]+"
 
 # Read inputs from config file
 input_format = config["input_format"]  # "vcf" or "plink"
@@ -527,6 +526,7 @@ else:  # plink
     ruleorder: spa_tests_stepwise_conditional_plink > spa_tests_stepwise_conditional_vcf
     ruleorder: spa_tests_conditional_plink > spa_tests_conditional_vcf
     ruleorder: filter_to_coding_gene_plink > filter_to_coding_gene_vcf
+    ruleorder: filter_to_gene_plink > filter_to_gene_vcf
 
 ruleorder: identify_gene_start_stop > filter_to_coding_gene_plink
 ruleorder: identify_gene_start_stop > filter_to_coding_gene_vcf
