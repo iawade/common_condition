@@ -7,11 +7,19 @@ suppressPackageStartupMessages(library(optparse))
 option_list <- list(
   make_option(c("-c", "--chr"), type = "character", default = NULL,
               help = "chromosome to restrict to", metavar = "character")
+  make_option(c("-p", type = "numeric", default = NULL),
+              help = "alter the p-value threshold in the config")
 )
 
 # Parse arguments
 opt_parser <- OptionParser(option_list = option_list)
 opt <- parse_args(opt_parser)
+
+library(data.table)
+library(dplyr)
+library(yaml)
+
+config <- read_yaml("config.yaml")
 
 if (is.null(opt$chr)) {
   cat("No chromosome restriction")
@@ -20,11 +28,6 @@ if (is.null(opt$chr)) {
   if (!(opt$chr %in% paste0("chr", c(seq(1,22), "X")))) {
     stop("Please provide a --chr argument in 1..22, X.", call. = FALSE)
   }
-
-  library(data.table)
-  library(dplyr)
-  library(yaml)
-  config <- read_yaml("config.yaml")
 
   # Determine the vcf/plink filepaths
   paths_to_change <- c("list_of_vcf_files", "list_of_plink_files",
@@ -46,7 +49,13 @@ if (is.null(opt$chr)) {
       }
     }
   }
-
-  # Rewrite the config
-  write_yaml(config, "config.yaml")
 }
+
+if (is.null(opt$p)) {
+  cat("No alteration to the passed p-value threshold")
+} else {
+  config[["conditioning_pvalue"]] <- opt$p
+}
+
+# Rewrite the config
+write_yaml(config, "config.yaml")
