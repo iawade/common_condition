@@ -6,8 +6,8 @@ suppressPackageStartupMessages(library(optparse))
 # Define command line options
 option_list <- list(
   make_option(c("-c", "--chr"), type = "character", default = NULL,
-              help = "chromosome to restrict to", metavar = "character")
-  make_option(c("-p", type = "numeric", default = NULL),
+              help = "chromosome to restrict to", metavar = "character"),
+  make_option(c("-p", "--pvalue_T"), type = "numeric", default = NULL,
               help = "alter the p-value threshold in the config")
 )
 
