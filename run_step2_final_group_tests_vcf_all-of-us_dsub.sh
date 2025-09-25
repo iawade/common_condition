@@ -25,7 +25,7 @@ mv ${SAIGE_DIR} final_saige_outputs
 mv all-of-us_configs/${ANC}_config.yaml config.yaml
 Rscript scripts/create_chr_specific_filepaths.r --chr ${CHR}
 
-WORKFLOW_FILE="step2_final_group_tests_vcf.smk"
+WORKFLOW_FILE="step2_final_group_tests.smk"
 
 mkdir -p final_saige_outputs final_run_files/bed
 
