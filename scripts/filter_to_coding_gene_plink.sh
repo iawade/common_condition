@@ -13,15 +13,6 @@ EXPANDED_BED="run_files/bed/expanded_coding_regions_${ENSEMBL_ID}.bed"
 # Output files
 OUTPUT_PLINK="run_files/${ENSEMBL_ID}_${BP_DISTANCE}_${MAF_COMMON}"
 
-chr_bed=$(head -n1 ${EXPANDED_BED} | cut -f1)
-chr_plink=$(head -n1 ${INPUT_PLINK}.bim | cut -f1)
-
-# If the plink chromosome column does not match the format in the bed interval file, change it to match.
-if [[ "$chr_plink" != "$chr_bed" ]]; then
-    awk -v chr="$chr_plink" 'BEGIN{OFS="\t"}{$1=chr; print}' "$EXPANDED_BED" > "${EXPANDED_BED}.tmp"
-    mv "${EXPANDED_BED}.tmp" "$EXPANDED_BED"
-fi
-
 # Use plink to filter by the expanded BED regions and MAF threshold
 # Using --maf $MAF_COMMON and --mac 41, which is the same as max(MAC > 40, MAF > $MAF_COMMON)
 echo "Filtering PLINK files (${INPUT_PLINK}.*) to match sparse GRM IDs ($n_sparse samples)..."
