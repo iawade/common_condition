@@ -51,7 +51,8 @@ echo ${P_T}
 
 # Add the top variant to the list of conditioning markers
 CONDITION=${cond_M}
-intFlag=$(awk -v P_top="${P_top}" -v P_T="${P_T}" 'BEGIN{print (P_top<P_T)?1:0}')
+# intFlag=$(awk -v P_top="${P_top}" -v P_T="${P_T}" 'BEGIN{print (P_top<P_T)?1:0}')
+intFlag=$(python3 -c "print(1 if ${P_top} < ${P_T} else 0)")
 rm -f "${TMPFILE}"
 
 while [ "${intFlag}" -eq 1 ]
@@ -85,7 +86,8 @@ do
   CONDITION=$(Rscript scripts/sort_conditioning_snps.R --condition "${CONDITION_unordered}")
   echo $CONDITION
 
-  intFlag=$(awk -v P_top="${P_top}" -v P_T="${P_T}" 'BEGIN{print (P_top<P_T)?1:0}')
+  # intFlag=$(awk -v P_top="${P_top}" -v P_T="${P_T}" 'BEGIN{print (P_top<P_T)?1:0}')
+  intFlag=$(python3 -c "print(1 if ${P_top} < ${P_T} else 0)")
   rm -f "${TMPFILE}"
 done
 
