@@ -40,13 +40,24 @@ fi
 "${cmd[@]}"
 
 # Obtain the top hit as the first conditioning marker
-cond_M=$(sort -g -k13,13 ${TMPFILE} | head -n 2 | tail -1 | awk '{print $1":"$2":"$4":"$5}')
-P_top=$(sort -g -k13,13 ${TMPFILE} | head -n 2 | tail -1 | awk '{print $13}')
+topline=$(sort -g -k13,13 "${TMPFILE}" | head -n 2 | tail -1)
+cond_M=$(awk '{print $1":"$2":"$4":"$5}' <<< "$topline")
+P_top=$(awk '{print $13}' <<< "$topline")
+lowest_pos_id=$(sort -g -k2,2 "${TMPFILE}" | head -n 2 | tail -1 | awk '{print $1":"$2":"$4":"$5}')
 
 echo "Lowest Pvalue in the sumstats file"
 echo "${cond_M}: ${P_top}"
 echo "Pvalue for significance for conditioning"
 echo ${P_T}
+vars=2
+
+while [ ${cond_M} = ${lowest_pos_id} ]; do
+  echo "Weird edge case - SAIGE cannot condtion on the first variant in the bim."
+  vars=$((vars+1))
+  topline=$(sort -g -k13,13 "${TMPFILE}" | head -n ${vars} | tail -1)
+  cond_M=$(awk '{print $1":"$2":"$4":"$5}' <<< "$topline")
+  P_top=$(awk '{print $13}' <<< "$topline")
+done
 
 # Add the top variant to the list of conditioning markers
 CONDITION=${cond_M}
@@ -61,11 +72,33 @@ do
 
   ncol=$(awk '{print NF; exit}' "${TMPFILE}")
   if [ "$ncol" -eq 29 ]; then
-    cond_M=$(sort -g -k20,20 ${TMPFILE} | head -n 2 | tail -1 | awk '{print $1":"$2":"$4":"$5}')
-    P_top=$(sort -g -k20,20 ${TMPFILE} | head -n 2 | tail -1 | awk '{print $20}')
+
+    topline=$(sort -g -k20,20 "${TMPFILE}" | head -n 2 | tail -1)
+    cond_M=$(awk '{print $1":"$2":"$4":"$5}' <<< "$topline")
+    P_top=$(awk '{print $20}' <<< "$topline")
+
+    while [ ${cond_M} = ${lowest_pos_id} ]; do
+      echo "Weird edge case - SAIGE cannot condtion on the first variant in the bim."
+      vars=$((vars+1))
+      topline=$(sort -g -k20,20 "${TMPFILE}" | head -n ${vars} | tail -1)
+      cond_M=$(awk '{print $1":"$2":"$4":"$5}' <<< "$topline")
+      P_top=$(awk '{print $20}' <<< "$topline")
+    done
+
   elif [ "$ncol" -eq 19 ]; then
-    cond_M=$(sort -g -k18,18 ${TMPFILE} | head -n 2 | tail -1 | awk '{print $1":"$2":"$4":"$5}')
-    P_top=$(sort -g -k18,18 ${TMPFILE} | head -n 2 | tail -1 | awk '{print $18}')
+
+    topline=$(sort -g -k18,18 "${TMPFILE}" | head -n 2 | tail -1)
+    cond_M=$(awk '{print $1":"$2":"$4":"$5}' <<< "$topline")
+    P_top=$(awk '{print $18}' <<< "$topline")
+
+    while [ ${cond_M} = ${lowest_pos_id} ]; do
+      echo "Weird edge case - SAIGE cannot condtion on the first variant in the bim."
+      vars=$((vars+1))
+      topline=$(sort -g -k18,18 "${TMPFILE}" | head -n ${vars} | tail -1)
+      cond_M=$(awk '{print $1":"$2":"$4":"$5}' <<< "$topline")
+      P_top=$(awk '{print $18}' <<< "$topline")
+    done
+
   else
     echo "Unexpected number of columns ($ncol) in $TMPFILE" >&2
     exit 1
