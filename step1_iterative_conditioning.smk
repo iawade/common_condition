@@ -463,7 +463,7 @@ rule spa_tests_conditional_vcf:
     log:
         stdout="logs/spa_tests_conditional/{gene}_{trait}_{distance}_{maf}.out",
         stderr="logs/spa_tests_conditional/{gene}_{trait}_{distance}_{maf}.err"
-    threads: 4
+    threads: 1
     shell:
         """
         set -euo pipefail
@@ -501,7 +501,7 @@ rule spa_tests_conditional_plink:
     log:
         stdout="logs/spa_tests_conditional/{gene}_{trait}_{distance}_{maf}.out",
         stderr="logs/spa_tests_conditional/{gene}_{trait}_{distance}_{maf}.err"
-    threads: 4
+    threads: 1
     shell:
         """
         set -euo pipefail

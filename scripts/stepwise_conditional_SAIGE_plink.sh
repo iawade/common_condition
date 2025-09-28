@@ -52,7 +52,7 @@ echo ${P_T}
 vars=2
 
 while [ ${cond_M} = ${lowest_pos_id} ]; do
-  echo "Weird edge case - SAIGE cannot condtion on the first variant in the bim."
+  echo "Weird edge case - SAIGE cannot condition on the first variant in the bim."
   vars=$((vars+1))
   topline=$(sort -g -k13,13 "${TMPFILE}" | head -n ${vars} | tail -1)
   cond_M=$(awk '{print $1":"$2":"$4":"$5}' <<< "$topline")
@@ -78,7 +78,7 @@ do
     P_top=$(awk '{print $20}' <<< "$topline")
 
     while [ ${cond_M} = ${lowest_pos_id} ]; do
-      echo "Weird edge case - SAIGE cannot condtion on the first variant in the bim."
+      echo "Weird edge case - SAIGE cannot condition on the first variant in the bim."
       vars=$((vars+1))
       topline=$(sort -g -k20,20 "${TMPFILE}" | head -n ${vars} | tail -1)
       cond_M=$(awk '{print $1":"$2":"$4":"$5}' <<< "$topline")
@@ -92,7 +92,7 @@ do
     P_top=$(awk '{print $18}' <<< "$topline")
 
     while [ ${cond_M} = ${lowest_pos_id} ]; do
-      echo "Weird edge case - SAIGE cannot condtion on the first variant in the bim."
+      echo "Weird edge case - SAIGE cannot condition on the first variant in the bim."
       vars=$((vars+1))
       topline=$(sort -g -k18,18 "${TMPFILE}" | head -n ${vars} | tail -1)
       cond_M=$(awk '{print $1":"$2":"$4":"$5}' <<< "$topline")
