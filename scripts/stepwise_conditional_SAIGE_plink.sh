@@ -82,6 +82,7 @@ if [ $(wc -l < ${PLINK}.bim) -gt 2 ]; then
       # Note that we need to re-determine the first variant in the output, as it seems to 
       # vary based on whether we are performing conditioning or not
       lowest_pos_id=$(sort -g -k2,2 "${TMPFILE}" | head -n 2 | tail -1 | awk '{print $1":"$2":"$4":"$5}')
+      echo "Lowest position variant's ID: ${lowest_pos_id}"
 
       while [ ${cond_M} = ${lowest_pos_id} ]; do
         echo "Weird edge case - SAIGE cannot condition on the first variant in the bim."
@@ -100,7 +101,8 @@ if [ $(wc -l < ${PLINK}.bim) -gt 2 ]; then
       # Note that we need to re-determine the first variant in the output, as it seems to 
       # vary based on whether we are performing conditioning or not
       lowest_pos_id=$(sort -g -k2,2 "${TMPFILE}" | head -n 2 | tail -1 | awk '{print $1":"$2":"$4":"$5}')
-
+      echo "Lowest position variant's ID: ${lowest_pos_id}"
+      
       while [ ${cond_M} = ${lowest_pos_id} ]; do
         echo "Weird edge case - SAIGE cannot condition on the first variant in the bim."
         vars=$((vars+1))
