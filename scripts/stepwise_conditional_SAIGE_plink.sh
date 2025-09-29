@@ -60,12 +60,12 @@ if [ $(wc -l < ${PLINK}.bim) -gt 2 ]; then
     cond_M=$(awk '{print $1":"$2":"$4":"$5}' <<< "$topline")
     P_top=$(awk '{print $13}' <<< "$topline")
   done
+  vars=2
 
   # Add the top variant to the list of conditioning markers
   CONDITION=${cond_M}
   # intFlag=$(awk -v P_top="${P_top}" -v P_T="${P_T}" 'BEGIN{print (P_top<P_T)?1:0}')
   intFlag=$(python3 -c "print(1 if ${P_top} < ${P_T} else 0)")
-  rm -f "${TMPFILE}"
 
   while [ "${intFlag}" -eq 1 ]
   do
@@ -79,6 +79,9 @@ if [ $(wc -l < ${PLINK}.bim) -gt 2 ]; then
       topline=$(sort -g -k20,20 "${TMPFILE}" | head -n 2 | tail -1)
       cond_M=$(awk '{print $1":"$2":"$4":"$5}' <<< "$topline")
       P_top=$(awk '{print $20}' <<< "$topline")
+      # Note that we need to re-determine the first variant in the output, as it seems to 
+      # vary based on whether we are performing conditioning or not
+      lowest_pos_id=$(sort -g -k2,2 "${TMPFILE}" | head -n 2 | tail -1 | awk '{print $1":"$2":"$4":"$5}')
 
       while [ ${cond_M} = ${lowest_pos_id} ]; do
         echo "Weird edge case - SAIGE cannot condition on the first variant in the bim."
@@ -87,12 +90,16 @@ if [ $(wc -l < ${PLINK}.bim) -gt 2 ]; then
         cond_M=$(awk '{print $1":"$2":"$4":"$5}' <<< "$topline")
         P_top=$(awk '{print $20}' <<< "$topline")
       done
+      vars=2
 
     elif [ "$ncol" -eq 19 ]; then
 
       topline=$(sort -g -k18,18 "${TMPFILE}" | head -n 2 | tail -1)
       cond_M=$(awk '{print $1":"$2":"$4":"$5}' <<< "$topline")
       P_top=$(awk '{print $18}' <<< "$topline")
+      # Note that we need to re-determine the first variant in the output, as it seems to 
+      # vary based on whether we are performing conditioning or not
+      lowest_pos_id=$(sort -g -k2,2 "${TMPFILE}" | head -n 2 | tail -1 | awk '{print $1":"$2":"$4":"$5}')
 
       while [ ${cond_M} = ${lowest_pos_id} ]; do
         echo "Weird edge case - SAIGE cannot condition on the first variant in the bim."
@@ -101,6 +108,7 @@ if [ $(wc -l < ${PLINK}.bim) -gt 2 ]; then
         cond_M=$(awk '{print $1":"$2":"$4":"$5}' <<< "$topline")
         P_top=$(awk '{print $18}' <<< "$topline")
       done
+      vars=2
 
     else
       echo "Unexpected number of columns ($ncol) in $TMPFILE" >&2
