@@ -15,7 +15,7 @@ echo "null var vatio"
 echo "${USE_NULL_VAR_RATIO}"
 
 # Edge case
-if [ $(bcftools index -n $VCF) -gt 1 ]; then 
+if [ $(bcftools index -n $VCF) -gt 0 ]; then 
 
   TMPFILE=$(mktemp)
   cmd=(step2_SPAtests.R
