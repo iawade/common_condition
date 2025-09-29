@@ -19,9 +19,9 @@ if [ $(wc -l < ${PLINK}.bim) -gt 2 ]; then
   
   TMPFILE=$(mktemp)
   cmd=(step2_SPAtests.R
-      --bimFile=${PLINK}.bim \
-      --bedFile=${PLINK}.bed \
-      --famFile=${PLINK}.fam \
+      --bimFile=${PLINK}.bim
+      --bedFile=${PLINK}.bed
+      --famFile=${PLINK}.fam
       --minMAF=0
       --minMAC=10
       --GMMATmodelFile=${MODELFILE}
@@ -102,7 +102,7 @@ if [ $(wc -l < ${PLINK}.bim) -gt 2 ]; then
       # vary based on whether we are performing conditioning or not
       lowest_pos_id=$(sort -g -k2,2 "${TMPFILE}" | head -n 2 | tail -1 | awk '{print $1":"$2":"$4":"$5}')
       echo "Lowest position variant's ID: ${lowest_pos_id}"
-      
+
       while [ ${cond_M} = ${lowest_pos_id} ]; do
         echo "Weird edge case - SAIGE cannot condition on the first variant in the bim."
         vars=$((vars+1))
