@@ -28,9 +28,15 @@ bcftools view --threads "$THREADS" \
   bcftools filter --threads "$THREADS" -i "MAC > 40 && MAF > $MAF_COMMON" |
   bcftools annotate --rename-chrs data/chr_map.tsv |
   bcftools annotate --set-id '%CHROM:%POS:%REF:%ALT' |
-  bcftools view -Oz -o "${OUTPUT_VCF}"
+  bcftools view -Oz -o "${OUTPUT_VCF}" || true
 
-bcftools index --csi -f "${OUTPUT_VCF}"
+if [ ! -e "${OUTPUT_VCF}" ]; then
+  echo "Edge case - vcf file does not exist, following restriction"
+  touch ${OUTPUT_VCF}
+  touch ${OUTPUT_VCF}.csi
+else
+  bcftools index --csi -f "${OUTPUT_VCF}" || true
+fi
 
 rm run_files/bed/expanded_coding_regions_${ENSEMBL_ID}_${MAF_COMMON}.bed
 echo "Created indexed bgzipped VCF files for the gene ${ENSEMBL_ID}"

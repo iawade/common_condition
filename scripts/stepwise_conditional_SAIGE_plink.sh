@@ -124,6 +124,8 @@ if [ $(wc -l < ${PLINK}.bim) -gt 2 ]; then
     intFlag=$(python3 -c "print(1 if ${P_top} < ${P_T} else 0)")
     rm -f "${TMPFILE}"
   done
+else
+  echo "No common variants present in the region" 
 fi
 
 # Note that the very last variant in "$CONDITION_unordered" is not significant any more after the final conditioning:
