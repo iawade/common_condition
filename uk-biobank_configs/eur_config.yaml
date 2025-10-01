@@ -1,6 +1,6 @@
 # Config File for BRaVa Pilot Study Common Variant Conditional Analysis Pipeline on UK Biobank
 
-input_format: "vcf"  # or "plink"
+input_format: "plink"  # or "plink"
 
 # Prerequisite
 list_of_vcf_files: "ukb_paths/eur/eur_vcf_file_list.txt"
@@ -27,7 +27,7 @@ threads: 2
 min_mac: 0.5
 annotations_to_include: "pLoF,damaging_missense_or_protein_altering,other_missense_or_protein_altering,synonymous,pLoF:damaging_missense_or_protein_altering,pLoF:damaging_missense_or_protein_altering:other_missense_or_protein_altering:synonymous"
 use_null_var_ratio: false
-conditioning_pvalue: 0.01
+conditioning_pvalue: 0.00001
 
 # SAIGE versions for filetypes
 saige_vcf_version: "1.3.6"

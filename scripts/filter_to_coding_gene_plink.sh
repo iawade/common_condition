@@ -13,15 +13,6 @@ EXPANDED_BED="run_files/bed/expanded_coding_regions_${ENSEMBL_ID}.bed"
 # Output files
 OUTPUT_PLINK="run_files/${ENSEMBL_ID}_${BP_DISTANCE}_${MAF_COMMON}"
 
-chr_bed=$(head -n1 ${EXPANDED_BED} | cut -f1)
-chr_plink=$(head -n1 ${INPUT_PLINK}.bim | cut -f1)
-
-# If the plink chromosome column does not match the format in the bed interval file, change it to match.
-if [[ "$chr_plink" != "$chr_bed" ]]; then
-    awk -v chr="$chr_plink" 'BEGIN{OFS="\t"}{$1=chr; print}' "$EXPANDED_BED" > "${EXPANDED_BED}.tmp"
-    mv "${EXPANDED_BED}.tmp" "$EXPANDED_BED"
-fi
-
 # Use plink to filter by the expanded BED regions and MAF threshold
 # Using --maf $MAF_COMMON and --mac 41, which is the same as max(MAC > 40, MAF > $MAF_COMMON)
 echo "Filtering PLINK files (${INPUT_PLINK}.*) to match sparse GRM IDs ($n_sparse samples)..."
@@ -33,29 +24,36 @@ plink2 --bfile ${INPUT_PLINK} \
   --set-all-var-ids chr@:#:\$r:\$a \
   --new-id-max-allele-len 10000 \
   --make-bed \
-  --out ${OUTPUT_PLINK}
+  --out ${OUTPUT_PLINK} || true
 
-TMPFILE=$(mktemp)
-awk '{
-  if ($1 ~ /^chr/) {
-    # already has "chr"
-    if ($1 == "chr23") {
-      $1 = "chrX"
+if [ ! -e "${OUTPUT_PLINK}.bim" ]; then
+  echo "Edge case - plink file does not exist, following restriction"
+  touch ${OUTPUT_PLINK}.bim
+  touch ${OUTPUT_PLINK}.bed
+  touch ${OUTPUT_PLINK}.fam
+else
+  TMPFILE=$(mktemp)
+  awk '{
+    if ($1 ~ /^chr/) {
+      # already has "chr"
+      if ($1 == "chr23") {
+        $1 = "chrX"
+      }
+      if ($1 == "chr24") {
+        $1 = "chrY"
+      }
+      print  
+    } else {
+      $1 = "chr" $1
+      if ($1 == "23") {
+        $1 = "chrX"
+      }
+      if ($1 == "24") {
+        $1 = "chrY"
+      }
+      print
     }
-    if ($1 == "chr24") {
-      $1 = "chrY"
-    }
-    print  
-  } else {
-    $1 = "chr" $1
-    if ($1 == "23") {
-      $1 = "chrX"
-    }
-    if ($1 == "24") {
-      $1 = "chrY"
-    }
-    print
-  }
-}' OFS='\t' ${OUTPUT_PLINK}.bim > ${TMPFILE} && mv ${TMPFILE} ${OUTPUT_PLINK}.bim
+  }' OFS='\t' ${OUTPUT_PLINK}.bim > ${TMPFILE} && mv ${TMPFILE} ${OUTPUT_PLINK}.bim
+fi
 
 echo "Created plink fileset (.bim/.bed/.fam) for the gene ${ENSEMBL_ID}"

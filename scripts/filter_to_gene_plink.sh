@@ -19,31 +19,36 @@ plink2 --bfile ${INPUT_PLINK} \
       --set-all-var-ids chr@:#:\$r:\$a \
       --new-id-max-allele-len 10000 \
       --make-bed \
-      --out ${OUTPUT_PLINK}
+      --out ${OUTPUT_PLINK} || true
 
-TMPFILE=$(mktemp)
-awk '{
-  if ($1 ~ /^chr/) {
-    # already has "chr"
-    if ($1 == "chr23") {
-      $1 = "chrX"
+if [ ! -e "${OUTPUT_PLINK}.bim" ]; then
+  echo "Edge case - plink file does not exist, following restriction"
+  touch ${OUTPUT_PLINK}.bim
+  touch ${OUTPUT_PLINK}.bed
+  touch ${OUTPUT_PLINK}.fam
+else
+  TMPFILE=$(mktemp)
+  awk '{
+    if ($1 ~ /^chr/) {
+      # already has "chr"
+      if ($1 == "chr23") {
+        $1 = "chrX"
+      }
+      if ($1 == "chr24") {
+        $1 = "chrY"
+      }
+      print  
+    } else {
+      $1 = "chr" $1
+      if ($1 == "23") {
+        $1 = "chrX"
+      }
+      if ($1 == "24") {
+        $1 = "chrY"
+      }
+      print
     }
-    if ($1 == "chr24") {
-      $1 = "chrY"
-    }
-    print  
-  } else {
-    $1 = "chr" $1
-    if ($1 == "23") {
-      $1 = "chrX"
-    }
-    if ($1 == "24") {
-      $1 = "chrY"
-    }
-    print
-  }
-}' OFS='\t' ${OUTPUT_PLINK}.bim > ${TMPFILE} && mv ${TMPFILE} ${OUTPUT_PLINK}.bim
-
-# fi
+  }' OFS='\t' ${OUTPUT_PLINK}.bim > ${TMPFILE} && mv ${TMPFILE} ${OUTPUT_PLINK}.bim
+fi
 
 echo "Created plink fileset (.bim/.bed/.fam) for the gene ${ENSEMBL_ID}"

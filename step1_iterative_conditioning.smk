@@ -227,6 +227,7 @@ rule filter_to_gene_vcf:
 
         if [[ -z "$matched_vcf" ]]; then
             echo "ERROR: No matching VCF found for chromosome $chr"
+            exit 1
         fi
         """
 
@@ -261,6 +262,7 @@ rule filter_to_coding_gene_vcf:
 
         if [[ -z "$matched_vcf" ]]; then
             echo "ERROR: No matching VCF found for chromosome $chr"
+            exit 1
         fi
         """
 
@@ -301,6 +303,7 @@ rule filter_to_gene_plink:
 
         if [[ -z "$matched_plink" ]]; then
             echo "ERROR: No matching plink fileset (.bim/.bed/.fam) found for chromosome $chr"
+            exit 1
         fi
         """
 
@@ -331,12 +334,15 @@ rule filter_to_coding_gene_plink:
             if [[ "$plink_bed" =~ \\.($chr)\\. ]]; then
                 plink_fileset=$(echo "$plink_bed" | sed 's/\\.bed$//')
                 matched_plink=$plink_fileset
-                bash scripts/filter_to_coding_gene_plink.sh $plink_fileset {wildcards.gene} {params.distance} {wildcards.maf} {params.threads} {input.sparse_matrix_id} >> {log.stdout} 2>> {log.stderr}
+                bash scripts/filter_to_coding_gene_plink.sh $plink_fileset {wildcards.gene} \
+                    {params.distance} {wildcards.maf} {params.threads} \
+                    {input.sparse_matrix_id} >> {log.stdout} 2>> {log.stderr}
             fi
         done
 
         if [[ -z "$matched_plink" ]]; then
             echo "ERROR: No matching plink fileset (.bim/.bed/.fam) found for chromosome $chr"
+            exit 1
         fi
         """
 
@@ -350,7 +356,8 @@ rule filter_group_file:
         stderr="logs/filter_group_file/{gene}.err"
     shell:
         """
-        bash scripts/filter_group_file.sh {wildcards.gene} {output} {input.group} > {log.stdout} 2> {log.stderr}
+        bash scripts/filter_group_file.sh {wildcards.gene} {output} \
+            {input.group} > {log.stdout} 2> {log.stderr}
         """
 
 # Format-specific stepwise conditional rules
@@ -383,8 +390,11 @@ rule spa_tests_stepwise_conditional_vcf:
         set -euo pipefail
         chr=$(python scripts/extract_chromosome.py --ensembl_id \"{wildcards.gene}\")
         for vcf in {input.vcf}; do
-            conda run --no-capture-output -n RSAIGE_vcf_version bash scripts/stepwise_conditional_SAIGE.sh \
-                $vcf {output} {input.model_file} {input.variance_file} {input.sparse_matrix} $chr {params.use_null_var_ratio} {params.P_T} > {log.stdout} 2> {log.stderr}
+            conda run --no-capture-output -n RSAIGE_vcf_version \
+                bash scripts/stepwise_conditional_SAIGE.sh \
+                $vcf {output} {input.model_file} {input.variance_file} \
+                {input.sparse_matrix} $chr {params.use_null_var_ratio} \
+                {params.P_T} > {log.stdout} 2> {log.stderr}
         done
         """
 
@@ -419,8 +429,11 @@ rule spa_tests_stepwise_conditional_plink:
         chr=$(python scripts/extract_chromosome.py --ensembl_id \"{wildcards.gene}\")
         for plink_bed in {input.plink_bed}; do
             plink_fileset=$(echo "$plink_bed" | sed 's/\\.bed$//')
-            conda run --no-capture-output -n RSAIGE_vcf_version bash scripts/stepwise_conditional_SAIGE_plink.sh \
-                $plink_fileset {output} {input.model_file} {input.variance_file} {input.sparse_matrix} $chr {params.use_null_var_ratio} {params.P_T} > {log.stdout} 2> {log.stderr}
+            conda run --no-capture-output -n RSAIGE_vcf_version \
+                bash scripts/stepwise_conditional_SAIGE_plink.sh \
+                $plink_fileset {output} {input.model_file} {input.variance_file} \
+                {input.sparse_matrix} $chr {params.use_null_var_ratio} \
+                {params.P_T} > {log.stdout} 2> {log.stderr}
         done
         """
 
@@ -450,7 +463,7 @@ rule spa_tests_conditional_vcf:
     log:
         stdout="logs/spa_tests_conditional/{gene}_{trait}_{distance}_{maf}.out",
         stderr="logs/spa_tests_conditional/{gene}_{trait}_{distance}_{maf}.err"
-    threads: 4
+    threads: 1
     shell:
         """
         set -euo pipefail
@@ -488,7 +501,7 @@ rule spa_tests_conditional_plink:
     log:
         stdout="logs/spa_tests_conditional/{gene}_{trait}_{distance}_{maf}.out",
         stderr="logs/spa_tests_conditional/{gene}_{trait}_{distance}_{maf}.err"
-    threads: 4
+    threads: 1
     shell:
         """
         set -euo pipefail
