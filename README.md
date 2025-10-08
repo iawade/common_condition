@@ -104,38 +104,39 @@ In a final step, we then determine the union of these lists centrally for each g
 > [!IMPORTANT]
 > The pipeline expects a **separate genetic data file (plink or vcf) for each chromosome**.
    - For example, in the case of vcf files being passed:
-      > #### `config.yaml`
-      > ```yaml
-      > list_of_vcf_files: "vcf_list.txt"
-      > ```
-      > #### `vcf_list.txt`
-      > ```
-      > test_files/QC_applied_common_variants_present_chr21.vcf.bgz
-      > or
-      > ...
-      > test_files/QC_applied_common_variants_present_chr1.vcf.bgz
-      > test_files/QC_applied_common_variants_present_chr2.vcf.bgz
-      > ```
+     #### `config.yaml`
+     ```yaml
+     list_of_vcf_files: "vcf_list.txt"
+     ```
+     #### `vcf_list.txt`
+     ```
+     test_files/QC_applied_common_variants_present_chr21.vcf.bgz
+     or
+     ...
+     test_files/QC_applied_common_variants_present_chr1.vcf.bgz
+     test_files/QC_applied_common_variants_present_chr2.vcf.bgz
+     ```
    - Similarly, if plink files are passed:
-      > #### `config.yaml`
-      > ```yaml
-      > list_of_plink_files: "plink_list.txt"
-      > ```
-      > #### `plink_list.txt`
-      > ```
-      > test_files/QC_applied_common_variants_present_chr21
-      > or
-      > ...
-      > test_files/QC_applied_common_variants_present_chr1
-      > test_files/QC_applied_common_variants_present_chr2
-      > ```
-> Note that in the case if plink files, the extension is excluded, but it is expected that the `.bim`, `.bed`, and `'.fam` are in the same location, with the same naming before the extension.
+     #### `config.yaml`
+     ```yaml
+     list_of_plink_files: "plink_list.txt"
+     ```
+     #### `plink_list.txt`
+     ```
+     test_files/QC_applied_common_variants_present_chr21
+     or
+     ...
+     test_files/QC_applied_common_variants_present_chr1
+     test_files/QC_applied_common_variants_present_chr2
+     ```
+Note that in the case if plink files, the extension is excluded, but it is expected that the `.bim`, `.bed`, and `'.fam` are in the same location, with the same naming before the extension.
+
 ---
-##### **Converting to VCF or plink (`.bim`/`.bed`/`.fam`)**
+#### **Converting to VCF or plink (`.bim`/`.bed`/`.fam`)**
 
 This workflow requires input variant files in VCF format or plink (`.bed/.bim/.fam`) format. If your data is currently in plink2 (`.pgen/.pvar/.psam`) or BGEN format, **you will need to convert it to plink or VCF first** - we recommend plink, given the choice, as the SAIGE codebase is more stable for plink files.
 
-   ##### Important Notes on PLINK 1.x
+##### Important Notes on PLINK 1.x
 > [!WARNING]  
 > PLINK v1.9 can alter data in ways that cause issues:
 
@@ -172,19 +173,20 @@ This workflow requires input variant files in VCF format or plink (`.bed/.bim/.f
       >   - 0.001
       >   - 0.0001
       > ```
+---
 
-#### Container Setup (Docker or Singularity/Apptainer)
+## Container Setup (Docker or Singularity/Apptainer)
 To create the everything required to run the iterative conditioning pipeline, first determine whether you are able to use docker, or singuarity/apptainer. Once you know which you can use, move to the relevant section below:
 
-##### Apptainer (previously known as apptainer)
+### Apptainer (previously known as apptainer)
 You can grab the container from dockerhub or google artifact registry. They are identical.
-###### From dockerhub
+#### From dockerhub
 ```sh
 singularity pull brava-common-check.sif docker://astheeggeggs/brava-common-check:v4
 # or
 apptainer pull brava-common-check.sif docker://astheeggeggs/brava-common-check:v4
 ```
-###### From google artifact registry
+#### From google artifact registry
 ```sh
 singularity pull brava-common-check.sif docker://gcr.io/weighty-elf-452116-c7/brava-common-check:v4
 # or
@@ -200,12 +202,12 @@ export APPTAINER_CACHEDIR=.apptainer/cache
 ```
 where you can replace `.apptainer/cache` with where you would like to place it.
 
-##### Docker
-###### From dockerhub
+### Docker
+#### From dockerhub
 ```sh
 docker pull astheeggeggs/brava-common-check:v4
 ```
-###### From google artifact repository
+#### From google artifact repository
 ```sh
 docker pull gcr.io/weighty-elf-452116-c7/brava-common-check:v4
 ```
@@ -252,7 +254,7 @@ Importantly, all of your data (paths will be in the `config.yml`, `list_of_plink
 
 ---
 
-## Group File Reordering if using VCF files
+### Group File Reordering if using VCF files
 
 > [!WARNING]  
 > If you are running the pipeline using VCF files, variant order must exactly match between your VCF and the group file.  
@@ -291,7 +293,7 @@ Importantly, all of your data (paths will be in the `config.yml`, `list_of_plink
    - Keeps the original order from the VCF
    - Writes a new `filtered_group_file.txt.gz`
 
-   ### Expected Inputs
+   #### Expected Inputs
 
    - `groups/combined_group_file.txt.gz` — your original group file
    - `*.vcf.gz` — the VCFs you're using for association tests
@@ -302,7 +304,7 @@ Importantly, all of your data (paths will be in the `config.yml`, `list_of_plink
    - If this format differs in your data, you'll need to modify the extraction and matching logic accordingly.
    - Keep the `var` and `anno` lines in sync — they must remain paired after filtering.
 
-   ### Final Reminder
+   #### Final Reminder
 
    SAIGE will not warn you if variant IDs mismatch or go out of order.  
    You must manually ensure correct ordering, or you risk invalid results.
