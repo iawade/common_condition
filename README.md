@@ -95,51 +95,58 @@ In a final step, we then determine the union of these lists centrally for each g
 > [!NOTE]
 >  - Annotations for potential common variants that will be pulled out in this workflow and used for conditioning **are not** required to be in the group file
 
-5. **QCed VCF with Genotypes**
-   - VCFs with all samples and sites for analysis included, including individual genotypes
-   - Please remember to use a quality-controlled VCF that **still includes common variants**
+5. **QCed VCF or plink file with Genotypes**
+   - plink (`.bim`/`.bed`/`.fam`) files or VCF files with all samples and sites for analysis included, including individual genotypes
+   - Please remember to use a quality-controlled VCF/plink files that **still includes common variants**
    - **VCFs must have a `.csi` index**, located in the same place within the file structure as each VCF
-   - **Please make sure values/names in VCF `CHROM` column match those in the bed file** (the protein coding intervals BED file, not a plink bed!): i.e. "chr1" instead of "1", "CM000663.2", "NC_000001.11" or something even more esoteric
+   - **Please make sure values/names in VCF `CHROM` column match those in the bed file** (the protein coding intervals BED file, not a plink bed!): i.e. "chr1" instead of "1", "CM000663.2", "NC_000001.11" or something even more esoteric.
+   - Note that we actually try to deal with the above, but things will work faster if they're in the same format
 > [!IMPORTANT]
-> The pipeline expects a **separate VCF for each chromosome**.
-   - For example:
-      > #### `config.yaml`
-      > ```yaml
-      > list_of_vcf_files: "vcf_list.txt"
-      > ```
-      > #### `vcf_list.txt`
-      > ```
-      > test_files/QC_applied_common_variants_present_chr21.vcf.bgz
-      > or
-      > ...
-      > test_files/QC_applied_common_variants_present_chr1.vcf.bgz
-      > test_files/QC_applied_common_variants_present_chr2.vcf.bgz
-      > ```
+> The pipeline expects a **separate genetic data file (plink or vcf) for each chromosome**.
+   - For example, in the case of vcf files being passed:
+     #### `config.yaml`
+     ```yaml
+     list_of_vcf_files: "vcf_list.txt"
+     ```
+     #### `vcf_list.txt`
+     ```
+     test_files/QC_applied_common_variants_present_chr21.vcf.bgz
+     or
+     ...
+     test_files/QC_applied_common_variants_present_chr1.vcf.bgz
+     test_files/QC_applied_common_variants_present_chr2.vcf.bgz
+     ```
+   - Similarly, if plink files are passed:
+     #### `config.yaml`
+     ```yaml
+     list_of_plink_files: "plink_list.txt"
+     ```
+     #### `plink_list.txt`
+     ```
+     test_files/QC_applied_common_variants_present_chr21
+     or
+     ...
+     test_files/QC_applied_common_variants_present_chr1
+     test_files/QC_applied_common_variants_present_chr2
+     ```
+Note that in the case if plink files, the extension is excluded, but it is expected that the `.bim`, `.bed`, and `'.fam` are in the same location, with the same naming before the extension.
+
 ---
-##### **Converting PLINK or BGEN to VCF**
+#### **Converting to VCF or plink (`.bim`/`.bed`/`.fam`)**
 
-This workflow requires input variant files in VCF format. If your data is currently in PLINK (`.bed/.bim/.fam` or `.pgen/.pvar/.psam`) or BGEN format, **you must convert it to VCF first**.
+This workflow requires input variant files in VCF format or plink (`.bed/.bim/.fam`) format. If your data is currently in plink2 (`.pgen/.pvar/.psam`) or BGEN format, **you will need to convert it to plink or VCF first** - we recommend plink, given the choice, as the SAIGE codebase is more stable for plink files.
 
-   ##### Important Notes on PLINK 1.x
+##### Important Notes on PLINK 1.x
 > [!WARNING]  
-> PLINK v1.9 can alter data in ways that cause serious issues:
+> PLINK v1.9 can alter data in ways that cause issues:
 
    - Chromosome names may be output as numeric (e.g. `1`) instead of `chr1`
    - Sample IDs in the VCF may include family IDs (e.g. `FID_IID`)
    - Reference/alternate allele order may be flipped unless `--keep-allele-order` is used
-
-   An example script is provided to safely convert from PLINK v1 format:
-      scripts/UTILITY_export_vcf_from_plink.sh
-
-      This script:
-      - Enforces `chr1`, `chr2`, ... chromosome naming
-      - Strips family IDs from sample names
-      - Uses `--keep-allele-order` to preserve allele direction
-      - Outputs a bgzipped VCF with `.csi` index
 ---
 
 > [!IMPORTANT]
-> Remember, ensure that the CHROM column in the VCF matches the protein coding BED file format (e.g. "chr1", not "1"). Similarly, ensure the group file also matches ("chr1" not "1") for variants in the group file.
+> Remember, ensure that the CHROM column in the VCF or plink files match the protein coding BED file format (e.g. "chr1", not "1"). Similarly, ensure the group file also matches ("chr1" not "1") for variants in the group file. Note that we do our best to check and fix this along the way, but despite my best efforts to correct all edge cases and munge variant IDs to the expected formats, errors could slip through. If they do, it will likely be at the final group-based testing phase, and you'll see the error manifest as a difference in p-value for the unconditioned gene-based test compared to your first run through with universal-saige. I will perform this sanity check, and we can work through any issues if/when they arise.
 
 6. **Sparse GRM**
    - From previous analyses there should be a sparse genetic relationship matrix (GRM) generated by SAIGE step0 consisting of the individuals included in the analysis
@@ -153,83 +160,104 @@ This workflow requires input variant files in VCF format. If your data is curren
 > This is the same naming as exported by SAIGE step0, so shouldn't be an issue! 
 
 7. **Other Config Parameters**
+   - "input_format" should be either `plink` or `vcf`.
    - "gene_trait_pairs_to_test" relates to the csv of BRaVa gene-trait pairs to be tested/confirmed with these conditional analyses. The actual csv is not provided in this repo. It can be downloaded from `gs://brava-meta-pilot-analysis/gene_phenotype_pairs_060625.csv.gz`. **If you're unable to access as an analyst in BRaVa, please email bravaconsortium@gmail.com.
    - "maf" outlines the minor allele frequencies defining "common" variants to be tested in this conditional analysis
    - "distance" relates to how many bases up and downstream of the gene of interest's start/stop coordinates to identify common variants for conditioning
    - The values stored in these entries **should not be changed** in the config. The config file you use should have:
       > #### `config.yaml` 
       > ```yaml
+      > conditioning_pvalue: 0.00001
       > distance: 500000
       > maf:
       >   - 0.001
       >   - 0.0001
       > ```
+---
 
-### Required Software
-- **SAIGE**
-- **bedtools**
-- **bcftools**
+## Container Setup (Docker or Singularity/Apptainer)
+To create the everything required to run the iterative conditioning pipeline, first determine whether you are able to use docker, or singuarity/apptainer. Once you know which you can use, move to the relevant section below:
 
-#### **Software Handling:**
-   - Software can either be independently installed or can all be used via the conda environment provided in this repo 
-   
-#### Conda Environment Setup
-To create the conda environment from the `brava_hits_common_condition_check_conda_env.yaml` file provided, follow these steps:
+### Apptainer (previously known as apptainer)
+You can grab the container from dockerhub or google artifact registry. They are identical.
+#### From dockerhub
+```sh
+singularity pull brava-common-check.sif docker://astheeggeggs/brava-common-check:v4
+# or
+apptainer pull brava-common-check.sif docker://astheeggeggs/brava-common-check:v4
+```
+#### From google artifact registry
+```sh
+singularity pull brava-common-check.sif docker://gcr.io/weighty-elf-452116-c7/brava-common-check:v4
+# or
+apptainer pull brava-common-check.sif docker://gcr.io/weighty-elf-452116-c7/brava-common-check:v4
+```
+Note that there's a preference for dockerhub (as it's free!), but gcr was more stable in our hands when using dsub on the All of Us platform, so we have provided the two locations.
 
-##### **Activate Conda:**
-   - Hopefully conda is already installed but, if necessary, it can be installed with instructions from https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html 
-   - Activate Conda (double-check with system admin if unsure how)
-   - For example it can activated with:
-      > ```bash
-      > eval "$(conda shell.bash hook)"
-      > ```
-   - Or on some systems:
-      > ```bash
-      > "/opt/software/applications/anaconda/3/etc/profile.d/conda.sh"
-      > ```
+If you have errors to do with disk quotas - it could well be the your local home directory is very small. You can change the location of the cache to somewhere on your HPC with more available space using e.g.
+```sh
+mkdir -p .apptainer/cache
+export SINGULARITY_CACHEDIR=.apptainer/cache
+export APPTAINER_CACHEDIR=.apptainer/cache
+```
+where you can replace `.apptainer/cache` with where you would like to place it.
 
-##### **Create the Conda Environment:**
-   - Run the following command to install the environment in the desired location:
-     > ```bash
-     > conda env create --prefix /path/to/envs/brava_hits_common_condition_check -f brava_hits_common_condition_check_conda_env.yaml
-     > ```
-   - Note: This is a relatively large environment and needs and a machine with at least 4-8Gb of memory to 
+### Docker
+#### From dockerhub
+```sh
+docker pull astheeggeggs/brava-common-check:v4
+```
+#### From google artifact repository
+```sh
+docker pull gcr.io/weighty-elf-452116-c7/brava-common-check:v4
+```
 
-##### **Activate the Environment:**
-   - Once the environment is created, activate it using the following command:
-     > ```bash
-     > conda activate /path/to/envs/brava_hits_common_condition_check
-     > ```
+## Running the pipeline!
+Once you have the docker or singularity container pulled, you can then run step 1 of the pipeline. First, you need to clone this repository e.g.:
+```
+git clone https://github.com/astheeggeggs/common_condition.git
+```
+You can then run `run_step1_iterative_conditioning.sh` from within the docker that you've pulled. If you're using docker:
+```sh
+docker run \
+      -v $(pwd)/common_condition:/common_condition \
+      -w /common_condition \
+      gcr.io/weighty-elf-452116-c7/brava-common-check:v4 \
+      bash /common_condition/run_step1_iterative_conditioning.sh
+```
+or if you're using singularity/apptainer:
+```sh
+apptainer exec \
+  -B $(pwd)/common_condition:/common_condition \
+  -W /common_condition \
+  brava-common-check.sif \
+  bash /common_condition/run_step1_iterative_conditioning.sh
+```
+or
+```
+singularity exec \
+  -B $(pwd)/common_condition:/common_condition \
+  -W /common_condition \
+  brava-common-check.sif \
+  bash /common_condition/run_step1_iterative_conditioning.sh
+```
 
-##### **Install bcftools separately**
-   - bcftools is lightweight and can be installed very easily. See https://www.htslib.org/download/ for instructions.
-
-## Running the SnakeMake pipeline
-- Once everything is set up, running should be relatively straightforward
-- A submission script `snakemake_iterative_call.sh` is provided, simply run the script locally or submit to a cluster with relevant options, for example:
-   > ```bash
-   > bash snakemake_iterative_call.sh
-   > ```
-   or
-   > ```bash
-   > sbatch --job-name=common_conditioning_pipeline --mem-per-cpu=8000  --ntasks=1 --cpus-per-task=8 --partition=short --output=slurm-%x-%A_%a.out snakemake_iterative_call.sh
-   > ```
-   etc
+Importantly, all of your data (paths will be in the `config.yml`, `list_of_plink_files`/`list_of_vcf_files`, `list_of_model_files`, `list_of_variance_ratio_files`, `sparse_matrix`, `list_of_group_files`, `gene_trait_pairs_to_test`, `protein_coding_region_bed`, and `phenotype_json`. Each location must be present within the mounted directory which is passed to the container, and filepaths will be relative to the working directory (`/common_condition` in the examples above). I've found that a straightforward appraoach is to place a folder containing your data this directory and mount it (likely named common_condition), by `-v`/`-w` or `-B`/`-W` as above.
 
 ## Final Outputs
-- The pipeline ultimately produces two files:
+- The pipeline ultimately produces three files:
    - `brava_stepwise_conditional_analysis_results.txt`
    - `brava_stepwise_conditional_analysis_results.txt.singleAssoc.txt`
-- These contain all the conditional SAIGE step2 outputs concatenated together
+   - `brava_stepwise_conditional_analysis_results.txt.conditioning.variants.txt`
+- These contain all the conditional SAIGE step2 outputs and the gene and variant level, as well as the collection of conditioning variants used for each (gene, trait, max_MAF) tuple (where conditioning was applied).
 - Please rename to something appropriate and send to Duncan Palmer!
 
 ---
 
-
-## Group File Reordering
+### Group File Reordering if using VCF files
 
 > [!WARNING]  
-> Variant order must exactly match between your VCF and the group file.  
+> If you are running the pipeline using VCF files, variant order must exactly match between your VCF and the group file.  
 > If not, SAIGE will either silently skip variants or misalign them, leading to incorrect or silently corrupted results.
 
    SAIGE reads variants from the group file in the order they appear, assuming the VCF files contain variants in the exact same order. If the order does not match:
@@ -265,7 +293,7 @@ To create the conda environment from the `brava_hits_common_condition_check_cond
    - Keeps the original order from the VCF
    - Writes a new `filtered_group_file.txt.gz`
 
-   ### Expected Inputs
+   #### Expected Inputs
 
    - `groups/combined_group_file.txt.gz` — your original group file
    - `*.vcf.gz` — the VCFs you're using for association tests
@@ -276,12 +304,9 @@ To create the conda environment from the `brava_hits_common_condition_check_cond
    - If this format differs in your data, you'll need to modify the extraction and matching logic accordingly.
    - Keep the `var` and `anno` lines in sync — they must remain paired after filtering.
 
-   ### Final Reminder
+   #### Final Reminder
 
    SAIGE will not warn you if variant IDs mismatch or go out of order.  
    You must manually ensure correct ordering, or you risk invalid results.
    
    ---
-
-> [!NOTE]  
-> This pipeline utilises `mktemp`. By default this writes files in the `/tmp/` directory. If `/tmp/` is not available, for whatever reason, it may be worth double-checking that `mktemp`'s workarounds (for example writing to `/var/tmp/` ) are working before running the workflow 
