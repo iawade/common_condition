@@ -46,6 +46,7 @@ with open(list_of_group_files) as f:
     group_files = [line.strip() for line in f]
 
 print(f"Input format: {input_format}")
+print(f"Gene trait pairs to test: {gene_trait_pairs_to_test}")
 print(f"Input files Sample: {input_files[:5]}")
 print(f"Group files Sample: {group_files[:5]}")
 
