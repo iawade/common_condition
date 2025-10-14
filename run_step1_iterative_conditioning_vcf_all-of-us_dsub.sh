@@ -23,7 +23,8 @@ mv ${RUN_DIR} run_files
 mv ${SAIGE_DIR} saige_outputs
 
 mv all-of-us_configs/${ANC}_config.yaml config.yaml
-Rscript scripts/create_chr_specific_filepaths.r --chr ${CHR}
+Rscript scripts/create_chr_specific_filepaths.r --chr ${CHR} -p ${P_T}
+
 
 WORKFLOW_FILE="step1_iterative_conditioning.smk"
 
@@ -49,9 +50,9 @@ snakemake --snakefile "$WORKFLOW_FILE" --cores $CORES --jobs $CORES \
 
 echo "Run complete. Log saved to $LOGFILE"
 mv ${LOGFILE} ${OUTPUT}/
-mv logs ${OUTPUT}/${ANC}_${CHR}_logs
-mv saige_outputs ${OUTPUT}/${ANC}_${CHR}_saige_outputs
-mv run_files ${OUTPUT}/${ANC}_${CHR}_run_files
-mv brava_stepwise_conditional_analysis_results.txt ${OUTPUT}/brava_${ANC}_${CHR}_stepwise_conditional_analysis_results.txt
-mv brava_stepwise_conditional_analysis_results.txt.singleAssoc.txt ${OUTPUT}/brava_${ANC}_${CHR}_stepwise_conditional_analysis_results.txt.singleAssoc.txt
-mv brava_stepwise_conditional_analysis_results.txt.conditioning.variants.txt ${OUTPUT}/brava_${ANC}_${CHR}_stepwise_conditional_analysis_results.txt.conditioning.variants.txt
+mv logs ${OUTPUT}/${ANC}_${CHR}_${P_T}_logs
+mv saige_outputs ${OUTPUT}/${ANC}_${CHR}_${P_T}_saige_outputs
+mv run_files ${OUTPUT}/${ANC}_${CHR}_${P_T}_run_files
+mv brava_stepwise_conditional_analysis_results.txt ${OUTPUT}/brava_${ANC}_${CHR}_${P_T}_stepwise_conditional_analysis_results.txt
+mv brava_stepwise_conditional_analysis_results.txt.singleAssoc.txt ${OUTPUT}/brava_${ANC}_${CHR}_${P_T}_stepwise_conditional_analysis_results.txt.singleAssoc.txt
+mv brava_stepwise_conditional_analysis_results.txt.conditioning.variants.txt ${OUTPUT}/brava_${ANC}_${CHR}_${P_T}_stepwise_conditional_analysis_results.txt.conditioning.variants.txt
