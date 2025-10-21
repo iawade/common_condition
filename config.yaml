@@ -25,6 +25,9 @@ threads: 2
 
 # rule: spa_tests_conditional
 min_mac: 0.5
+# In this annotations_to_include, please ensure that the damaging missense and other missense naming is as in your annotation file.
+# This is likely one of damaging_missense_or_protein_altering or damaging_missense. Similarly for other missense: likely one of
+# other_missense_or_protein_altering or other_missense. Multiple naming conventions were used in the initial return of sumstats!
 annotations_to_include: "pLoF,damaging_missense,other_missense,synonymous,pLoF:damaging_missense,pLoF:damaging_missense:other_missense:synonymous"
 use_null_var_ratio: false
 conditioning_pvalue: 0.01
