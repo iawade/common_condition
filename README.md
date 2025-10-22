@@ -12,12 +12,12 @@ For each MAF mask, we carry out association analysis of all variants with MAF gr
 
 Each biobank (you!) then provides conditioning variant lists.
 
-In the config, make sure that for `annotations_to_include` that the damaging missense and other missense naming is as in your annotation group file. This is likely one of `damaging_missense_or_protein_altering` or `damaging_missense`. Similarly for other missense: likely one of `other_missense_or_protein_altering` or `other_missense`. Multiple naming conventions were used in the initial return of sumstats! The current default in the example config in this directory is
-```
-annotations_to_include: "pLoF,damaging_missense,other_missense,synonymous,pLoF:damaging_missense,pLoF:damaging_missense:other_missense:synonymous"
-```
-Please check!
-
+> [!WARNING]  
+> In the config, make sure that for `annotations_to_include` that the damaging missense and other missense naming is as in your annotation group file. This is likely one of `damaging_missense_or_protein_altering` or `damaging_missense`. Similarly for other missense: likely one of `other_missense_or_protein_altering` or `other_missense`. Multiple naming conventions were used in the initial return of sumstats! The current default in the example config in this directory is
+> ```
+> annotations_to_include: "pLoF,damaging_missense,other_missense,synonymous,pLoF:damaging_missense,pLoF:damaging_missense:other_missense:synonymous"
+> ```
+> Please check!
 
 In a final step, we then determine the union of these lists centrally for each genetic ancestry. The resultant variant lists are then shared back with the constituent biobanks. Biobanks then perform final gene-based association analysis conditioning on these variants. To guard against collinearity in the variants used for conditioning, we first perform linkage disequilibrium pruning, ensuring that no-pair of variants in the set have _r_<sup>2</sup> > 0.9. (WORK IN PROGRESS).
 
