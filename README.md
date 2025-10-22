@@ -10,7 +10,7 @@ Briefly, following gene-based analysis and subsequent meta-analysis, we will car
 
 For each MAF mask, we carry out association analysis of all variants with MAF greater than the MAF of the mask within 500kb of the gene. If any variant association has an association _P_-value < 1 × 10<sup>-5</sup>, we add it to a set of conditioning variants and condition on it `--condition` flag within SAIGE, and iteratively rerun until no variant in the region is associated (_P_-value < 1 × 10<sup>-5</sup>) with the trait. This procedure is carried out for all (ancestry, biobank) pairs.
 
-Each biobank (you!) then provides conditioning variant lists.
+Each biobank (you!) then provides conditioning variant lists, as well as gene and variant based association test results for subsequent testing of agreement with earlier summary statistic results.
 
 > [!WARNING]  
 > In the config, make sure that for `annotations_to_include` that the damaging missense and other missense naming is as in your annotation group file. This is likely one of `damaging_missense_or_protein_altering` or `damaging_missense`. Similarly for other missense: likely one of `other_missense_or_protein_altering` or `other_missense`. Multiple naming conventions were used in the initial return of sumstats! The current default in the example config in this directory is
