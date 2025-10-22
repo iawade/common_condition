@@ -10,7 +10,14 @@ Briefly, following gene-based analysis and subsequent meta-analysis, we will car
 
 For each MAF mask, we carry out association analysis of all variants with MAF greater than the MAF of the mask within 500kb of the gene. If any variant association has an association _P_-value < 1 × 10<sup>-5</sup>, we add it to a set of conditioning variants and condition on it `--condition` flag within SAIGE, and iteratively rerun until no variant in the region is associated (_P_-value < 1 × 10<sup>-5</sup>) with the trait. This procedure is carried out for all (ancestry, biobank) pairs.
 
-Each biobank (you!) then provides conditioning variant lists.
+Each biobank (you!) then provides conditioning variant lists, as well as gene and variant based association test results for subsequent testing of agreement with earlier summary statistic results.
+
+> [!WARNING]  
+> In the config, make sure that for `annotations_to_include` that the damaging missense and other missense naming is as in your annotation group file. This is likely one of `damaging_missense_or_protein_altering` or `damaging_missense`. Similarly for other missense: likely one of `other_missense_or_protein_altering` or `other_missense`. Multiple naming conventions were used in the initial return of sumstats! The current default in the example config in this directory is
+> ```
+> annotations_to_include: "pLoF,damaging_missense,other_missense,synonymous,pLoF:damaging_missense,pLoF:damaging_missense:other_missense:synonymous"
+> ```
+> Please check!
 
 In a final step, we then determine the union of these lists centrally for each genetic ancestry. The resultant variant lists are then shared back with the constituent biobanks. Biobanks then perform final gene-based association analysis conditioning on these variants. To guard against collinearity in the variants used for conditioning, we first perform linkage disequilibrium pruning, ensuring that no-pair of variants in the set have _r_<sup>2</sup> > 0.9. (WORK IN PROGRESS).
 
@@ -103,6 +110,7 @@ In a final step, we then determine the union of these lists centrally for each g
    - Note that we actually try to deal with the above, but things will work faster if they're in the same format
 > [!IMPORTANT]
 > The pipeline expects a **separate genetic data file (plink or vcf) for each chromosome**.
+> Additionally, these **must be named with a "." either side of the chrom name** 
    - For example, in the case of vcf files being passed:
      #### `config.yaml`
      ```yaml
@@ -110,11 +118,8 @@ In a final step, we then determine the union of these lists centrally for each g
      ```
      #### `vcf_list.txt`
      ```
-     test_files/QC_applied_common_variants_present_chr21.vcf.bgz
-     or
-     ...
-     test_files/QC_applied_common_variants_present_chr1.vcf.bgz
-     test_files/QC_applied_common_variants_present_chr2.vcf.bgz
+     test_files/QC_applied_common_variants_present.chr1.vcf.bgz
+     test_files/QC_applied_common_variants_present.chr2.vcf.bgz
      ```
    - Similarly, if plink files are passed:
      #### `config.yaml`
@@ -123,11 +128,8 @@ In a final step, we then determine the union of these lists centrally for each g
      ```
      #### `plink_list.txt`
      ```
-     test_files/QC_applied_common_variants_present_chr21
-     or
-     ...
-     test_files/QC_applied_common_variants_present_chr1
-     test_files/QC_applied_common_variants_present_chr2
+     test_files/QC_applied_common_variants_present.chr1
+     test_files/QC_applied_common_variants_present.chr2
      ```
 Note that in the case if plink files, the extension is excluded, but it is expected that the `.bim`, `.bed`, and `'.fam` are in the same location, with the same naming before the extension.
 
@@ -161,7 +163,7 @@ This workflow requires input variant files in VCF format or plink (`.bed/.bim/.f
 
 7. **Other Config Parameters**
    - "input_format" should be either `plink` or `vcf`.
-   - "gene_trait_pairs_to_test" relates to the csv of BRaVa gene-trait pairs to be tested/confirmed with these conditional analyses. The actual csv is not provided in this repo. It can be downloaded from `gs://brava-meta-pilot-analysis/gene_phenotype_pairs_060625.csv.gz`. **If you're unable to access as an analyst in BRaVa, please email bravaconsortium@gmail.com.
+   - "gene_trait_pairs_to_test" relates to the csv of BRaVa gene-trait pairs to be tested/confirmed with these conditional analyses. **The actual csv is not provided in this repo**. It can be downloaded from `gs://brava-meta-pilot-analysis/gene_phenotype_pairs_060625.csv.gz`. *If you're unable to access as an analyst in BRaVa, please email bravaconsortium@gmail.com*.
    - "maf" outlines the minor allele frequencies defining "common" variants to be tested in this conditional analysis
    - "distance" relates to how many bases up and downstream of the gene of interest's start/stop coordinates to identify common variants for conditioning
    - The values stored in these entries **should not be changed** in the config. The config file you use should have:
@@ -212,6 +214,9 @@ docker pull astheeggeggs/brava-common-check:v4
 docker pull gcr.io/weighty-elf-452116-c7/brava-common-check:v4
 ```
 
+> [!WARNING]
+> Depending on your system’s connectivity or network speed, building the Docker/Singularity image can take over an hour.
+
 ## Running the pipeline!
 Once you have the docker or singularity container pulled, you can then run step 1 of the pipeline. First, you need to clone this repository e.g.:
 ```
@@ -242,7 +247,7 @@ singularity exec \
   bash /common_condition/run_step1_iterative_conditioning.sh
 ```
 
-Importantly, all of your data (paths will be in the `config.yml`, `list_of_plink_files`/`list_of_vcf_files`, `list_of_model_files`, `list_of_variance_ratio_files`, `sparse_matrix`, `list_of_group_files`, `gene_trait_pairs_to_test`, `protein_coding_region_bed`, and `phenotype_json`. Each location must be present within the mounted directory which is passed to the container, and filepaths will be relative to the working directory (`/common_condition` in the examples above). I've found that a straightforward appraoach is to place a folder containing your data this directory and mount it (likely named common_condition), by `-v`/`-w` or `-B`/`-W` as above.
+Importantly, all of your data (paths will be in the `config.yml`, `list_of_plink_files`/`list_of_vcf_files`, `list_of_model_files`, `list_of_variance_ratio_files`, `sparse_matrix`, `list_of_group_files`, `gene_trait_pairs_to_test`, `protein_coding_region_bed`, and `phenotype_json`. Each location must be present within the mounted directory which is passed to the container, and filepaths will be relative to the working directory (`/common_condition` in the examples above). I've found that a straightforward approach is to place a folder containing your data this directory and mount it (likely named common_condition), by `-v`/`-w` or `-B`/`-W` as above.
 
 ## Final Outputs
 - The pipeline ultimately produces three files:
