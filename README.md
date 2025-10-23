@@ -163,7 +163,7 @@ This workflow requires input variant files in VCF format or plink (`.bed/.bim/.f
 
 7. **Other Config Parameters**
    - "input_format" should be either `plink` or `vcf`.
-   - "gene_trait_pairs_to_test" relates to the csv of BRaVa gene-trait pairs to be tested/confirmed with these conditional analyses. **The actual csv is not provided in this repo**. It can be downloaded from `gs://brava-meta-pilot-analysis/gene_phenotype_pairs_060625.csv.gz`. *If you're unable to access as an analyst in BRaVa, please email bravaconsortium@gmail.com*.
+   - "gene_trait_pairs_to_test" relates to the csv of BRaVa gene-trait pairs to be tested/confirmed with these conditional analyses. **The actual csv is not provided in this repo**. It can be downloaded from `gs://brava-meta-pilot-analysis/gene_phenotype_pairs_101025.csv.gz`. *If you're unable to access as an analyst in BRaVa, please email bravaconsortium@gmail.com*. **Note that you will need to decompress the file before running!**
    - "maf" outlines the minor allele frequencies defining "common" variants to be tested in this conditional analysis
    - "distance" relates to how many bases up and downstream of the gene of interest's start/stop coordinates to identify common variants for conditioning
    - The values stored in these entries **should not be changed** in the config. The config file you use should have:
