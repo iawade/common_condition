@@ -21,10 +21,11 @@ chr_bed=$(head -n1 ${EXPANDED_BED} | cut -f1)
 if [[ "$chr_vcf" != "$chr_bed" ]]; then
     awk -v chr="$chr_vcf" 'BEGIN{OFS="\t"}{$1=chr; print}' \
       "$EXPANDED_BED" > "run_files/bed/expanded_coding_regions_${ENSEMBL_ID}_${MAF_COMMON}.bed"
+    EXPANDED_BED="run_files/bed/expanded_coding_regions_${ENSEMBL_ID}_${MAF_COMMON}.bed"
 fi
 
 bcftools view --threads "$THREADS" \
-  -R "run_files/bed/expanded_coding_regions_${ENSEMBL_ID}_${MAF_COMMON}.bed" "$INPUT_VCF" |
+  -R "$EXPANDED_BED" "$INPUT_VCF" |
   bcftools filter --threads "$THREADS" -i "MAC > 40 && MAF > $MAF_COMMON" |
   bcftools annotate --rename-chrs data/chr_map.tsv |
   bcftools annotate --set-id '%CHROM:%POS:%REF:%ALT' |

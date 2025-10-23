@@ -10,7 +10,7 @@ sparse_matrix: "snakemake_eas/mtx/allofus_array_eas_snp_wise_relatednessCutoff_0
 list_of_group_files: "aou_paths/eas/eas_group_file_list.txt"
 
 ## Prerequisite: Don't need to change if using files/instructions provided in repo 
-gene_trait_pairs_to_test: "gene_phenotype_pairs_290525.csv"
+gene_trait_pairs_to_test: "gene_phenotype_pairs_101025.csv"
 gene_trait_pairs_to_test_with_conditioning_variants: "gene_phenotype_pairs_with_conditioning_variants_EAS.tsv"
 protein_coding_region_bed: "protein_coding_regions_hg38_no_padding_no_UTR_v39.bed"
 phenotype_json: "pilot_phenotypes.json"
