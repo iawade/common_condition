@@ -219,7 +219,9 @@ rule filter_to_gene_vcf:
         for vcf in {input.vcf}; do
             if [[ "$vcf" =~ \\.($chr)\\. ]]; then
                 matched_vcf=$vcf
-                bash scripts/filter_to_gene_vcf.sh $vcf {wildcards.gene} {params.distance} {params.threads} >> {log.stdout} 2>> {log.stderr}
+                bash scripts/filter_to_gene_vcf.sh $vcf {wildcards.gene} \
+                    {params.distance} {params.threads} \
+                    {params.outfolder} >> {log.stdout} 2>> {log.stderr}
             fi
         done
 
@@ -257,7 +259,9 @@ rule filter_to_gene_plink:
             if [[ "$plink_bed" =~ \\.($chr)\\. ]]; then
                 plink_fileset=$(echo "$plink_bed" | sed 's/\\.bed$//')
                 matched_plink=$plink_fileset
-                bash scripts/filter_to_gene_plink.sh $plink_fileset {wildcards.gene} {params.distance} {params.threads} {input.sparse_matrix_id} >> {log.stdout} 2>> {log.stderr}
+                bash scripts/filter_to_gene_plink.sh $plink_fileset {wildcards.gene} \
+                    {params.distance} {params.threads} {input.sparse_matrix_id} \
+                    {params.outfolder} >> {log.stdout} 2>> {log.stderr}
             fi
         done
 
