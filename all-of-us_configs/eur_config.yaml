@@ -4,6 +4,7 @@ input_format: "plink"  # or "plink"
 
 # Prerequisite
 list_of_vcf_files: "aou_paths/eur/eur_vcf_file_list.txt"
+list_of_plink_files: "aou_paths/eur/eur_plink_file_list.txt"
 list_of_model_files: "aou_paths/eur/eur_model_file_list.txt"
 list_of_variance_ratio_files: "aou_paths/eur/eur_variance_file_list.txt"
 sparse_matrix: "snakemake_eur/mtx/allofus_array_eur_snp_wise_relatednessCutoff_0.05_5000_randomMarkersUsed.sparseGRM.mtx"
