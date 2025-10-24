@@ -8,7 +8,7 @@ This pipeline is designed to determine common variants which have the potential 
 
 Briefly, following gene-based analysis and subsequent meta-analysis, we will carry out common variant conditioning for all gene-phenotype pairs with significant meta-analysis association _P_-values. For each (biobank, ancestry, phenotype) tuple, we will then determine a collection of variants to condition on to account for signal driven by common variation nearby. To do this, we have created the iterative conditioning pipeline in this repository (`snakemake_iterative_call.sh`).
 
-For each MAF mask, we carry out association analysis of all variants with MAF greater than the MAF of the mask within 500kb of the gene. If any variant association has an association _P_-value < 1 × 10<sup>-5</sup>, we add it to a set of conditioning variants and condition on it `--condition` flag within SAIGE, and iteratively rerun until no variant in the region is associated (_P_-value < 1 × 10<sup>-5</sup>) with the trait. This procedure is carried out for all (ancestry, biobank) pairs.
+For each MAF mask, we carry out association analysis of all variants with MAF greater than the MAF of the mask within 500kb of the gene. If any variant association has an association _P_-value < _P_<sub>T</sub>, we add it to a set of conditioning variants and condition on it `--condition` flag within SAIGE, and iteratively rerun until no variant in the region is associated (_P_-value < _P_<sub>T</sub>) with the trait. This procedure is carried out for all (ancestry, biobank) pairs. We ask that all biobanks run the pipeline with the `conditioning_pvalue` in the config set at 0.001 and 0.00001, in two separate runs.
 
 Each biobank (you!) then provides conditioning variant lists, as well as gene and variant based association test results for subsequent testing of agreement with earlier summary statistic results.
 
@@ -180,7 +180,7 @@ This workflow requires input variant files in VCF format or plink (`.bed/.bim/.f
 ## Container Setup (Docker or Singularity/Apptainer)
 To create the everything required to run the iterative conditioning pipeline, first determine whether you are able to use docker, or singuarity/apptainer. Once you know which you can use, move to the relevant section below:
 
-### Apptainer (previously known as apptainer)
+### Apptainer (previously known as Singularity)
 You can grab the container from dockerhub or google artifact registry. They are identical.
 #### From dockerhub
 ```sh

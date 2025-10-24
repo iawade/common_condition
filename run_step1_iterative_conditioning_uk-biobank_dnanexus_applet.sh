@@ -8,6 +8,7 @@ conda activate brava_hits_common_condition_check
 mv uk-biobank_configs/${ANC}_config.yaml config.yaml
 Rscript scripts/create_chr_specific_filepaths.r --chr ${CHR} -p ${P_T}
 
+# Path to the Snakemake workflow file
 WORKFLOW_FILE="step1_iterative_conditioning.smk"
 CORES=$(nproc)
 
