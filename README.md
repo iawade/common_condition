@@ -180,7 +180,7 @@ This workflow requires input variant files in VCF format or plink (`.bed/.bim/.f
 ## Container Setup (Docker or Singularity/Apptainer)
 To create the everything required to run the iterative conditioning pipeline, first determine whether you are able to use docker, or singuarity/apptainer. Once you know which you can use, move to the relevant section below:
 
-### Apptainer (previously known as apptainer)
+### Apptainer (previously known as Singularity)
 You can grab the container from dockerhub or google artifact registry. They are identical.
 #### From dockerhub
 ```sh
