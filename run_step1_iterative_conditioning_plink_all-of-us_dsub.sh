@@ -13,7 +13,7 @@ mv ${MODEL_DIR} ${DATA_DIR}
 mv ${MATRIX_DIR} ${DATA_DIR}
 mv ${VARIANCE_DIR} ${DATA_DIR}
 mv ${GROUP_DIR} ${DATA_DIR}
-VCF_DIR="${DATA_DIR}/plink/combined"
+PLINK_DIR="${DATA_DIR}/plink/combined"
 mkdir -p ${PLINK_DIR}
 mv ${PLINK_BIM} ${PLINK_DIR}
 mv ${PLINK_BED} ${PLINK_DIR}
