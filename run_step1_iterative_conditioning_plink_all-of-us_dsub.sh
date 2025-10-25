@@ -13,28 +13,33 @@ mv ${MODEL_DIR} ${DATA_DIR}
 mv ${MATRIX_DIR} ${DATA_DIR}
 mv ${VARIANCE_DIR} ${DATA_DIR}
 mv ${GROUP_DIR} ${DATA_DIR}
-PLINK_DIR="${DATA_DIR}/plink/combined"
+VCF_DIR="${DATA_DIR}/plink/combined"
 mkdir -p ${PLINK_DIR}
 mv ${PLINK_BIM} ${PLINK_DIR}
 mv ${PLINK_BED} ${PLINK_DIR}
 mv ${PLINK_FAM} ${PLINK_DIR}
 
 # move any already completed run information into the VM
-mv ${RUN_DIR} final_run_files
-mv ${SAIGE_DIR} final_saige_outputs
+mv ${RUN_DIR} run_files
+mv ${SAIGE_DIR} saige_outputs
 
 mv all-of-us_configs/${ANC}_config.yaml config.yaml
-Rscript scripts/create_chr_specific_filepaths.r --chr ${CHR}
+Rscript scripts/create_chr_specific_filepaths.r --chr ${CHR} -p ${P_T}
 
-WORKFLOW_FILE="step2_final_group_tests.smk"
 
-mkdir -p final_saige_outputs final_run_files/bed
+WORKFLOW_FILE="step1_iterative_conditioning.smk"
+
+mkdir -p saige_outputs run_files/bed
 
 CORES=$(nproc)
 
 # Generate a timestamped log file
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 LOGFILE="snakemake_run_${TIMESTAMP}.log"
+
+# Tidy up (just in case)
+rm brava_stepwise_conditional_analysis_results.txt
+rm brava_stepwise_conditional_analysis_results.txt.singleAssoc.txt
 
 # Run Snakemake with the specified options
 echo "Starting a run of Snakemake workflow..."
@@ -46,8 +51,9 @@ snakemake --snakefile "$WORKFLOW_FILE" --cores $CORES --jobs $CORES \
 
 echo "Run complete. Log saved to $LOGFILE"
 mv ${LOGFILE} ${OUTPUT}/
-mv logs ${OUTPUT}/${ANC}_${CHR}_logs
-mv final_saige_outputs ${OUTPUT}/${ANC}_${CHR}_final_saige_outputs
-mv final_run_files ${OUTPUT}/${ANC}_${CHR}_final_run_files
-mv brava_final_conditional_analysis_results.txt ${OUTPUT}/brava_${ANC}_${CHR}_final_conditional_analysis_results.txt
-mv brava_final_conditional_analysis_results.txt.singleAssoc.txt ${OUTPUT}/brava_${ANC}_${CHR}_final_conditional_analysis_results.txt.singleAssoc.txt
+mv logs ${OUTPUT}/${ANC}_${CHR}_${P_T}_logs
+mv saige_outputs ${OUTPUT}/${ANC}_${CHR}_${P_T}_saige_outputs
+mv run_files ${OUTPUT}/${ANC}_${CHR}_${P_T}_run_files
+mv brava_stepwise_conditional_analysis_results.txt ${OUTPUT}/brava_${ANC}_${CHR}_${P_T}_stepwise_conditional_analysis_results.txt
+mv brava_stepwise_conditional_analysis_results.txt.singleAssoc.txt ${OUTPUT}/brava_${ANC}_${CHR}_${P_T}_stepwise_conditional_analysis_results.txt.singleAssoc.txt
+mv brava_stepwise_conditional_analysis_results.txt.conditioning.variants.txt ${OUTPUT}/brava_${ANC}_${CHR}_${P_T}_stepwise_conditional_analysis_results.txt.conditioning.variants.txt
