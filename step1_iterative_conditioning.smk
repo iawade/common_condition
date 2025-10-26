@@ -193,7 +193,9 @@ rule identify_gene_start_stop:
         python scripts/start_end_query.py \
             --ensembl_id \"{wildcards.gene}\" > {log.stdout} 2> {log.stderr}
         bash scripts/expand_coding_region.sh {wildcards.gene} \
-            {params.distance} {params.outfolder} >> {log.stdout} 2>> {log.stderr}
+            {params.distance} {params.outfolder} \
+            > >(tee -a {log.stdout}) \
+            2> >(tee -a {log.stderr} >&2)
         """
 
 # VCF-specific rules
@@ -222,7 +224,9 @@ rule filter_to_gene_vcf:
                 matched_vcf=$vcf
                 bash scripts/filter_to_gene_vcf.sh $vcf {wildcards.gene} \
                     {params.distance} {params.threads} \
-                    {params.outfolder} >> {log.stdout} 2>> {log.stderr}
+                    {params.outfolder} \
+                    > >(tee -a {log.stdout}) \
+                    2> >(tee -a {log.stderr} >&2)
             fi
         done
 
@@ -257,7 +261,9 @@ rule filter_to_coding_gene_vcf:
                 matched_vcf=$vcf
                 bash scripts/filter_to_coding_gene_vcf.sh $vcf {wildcards.gene} \
                     {params.distance} {wildcards.maf} \
-                    {params.threads} >> {log.stdout} 2>> {log.stderr}
+                    {params.threads} \
+                    > >(tee -a {log.stdout}) \
+                    2> >(tee -a {log.stderr} >&2)
             fi
         done
 
@@ -298,7 +304,9 @@ rule filter_to_gene_plink:
                 matched_plink=$plink_fileset
                 bash scripts/filter_to_gene_plink.sh $plink_fileset {wildcards.gene} \
                     {params.distance} {params.threads} {input.sparse_matrix_id} \
-                    {params.outfolder} >> {log.stdout} 2>> {log.stderr}
+                    {params.outfolder} \
+                    > >(tee -a {log.stdout}) \
+                    2> >(tee -a {log.stderr} >&2)
             fi
         done
 
@@ -337,7 +345,9 @@ rule filter_to_coding_gene_plink:
                 matched_plink=$plink_fileset
                 bash scripts/filter_to_coding_gene_plink.sh $plink_fileset {wildcards.gene} \
                     {params.distance} {wildcards.maf} {params.threads} \
-                    {input.sparse_matrix_id} >> {log.stdout} 2>> {log.stderr}
+                    {input.sparse_matrix_id} \
+                    > >(tee -a {log.stdout}) \
+                    2> >(tee -a {log.stderr} >&2)
             fi
         done
 
@@ -358,7 +368,9 @@ rule filter_group_file:
     shell:
         """
         bash scripts/filter_group_file.sh {wildcards.gene} {output} \
-            {input.group} > {log.stdout} 2> {log.stderr}
+            {input.group} \
+            > >(tee -a {log.stdout}) \
+            2> >(tee -a {log.stderr} >&2)
         """
 
 # Format-specific stepwise conditional rules
@@ -477,7 +489,9 @@ rule spa_tests_conditional_vcf:
             {input.vcf} {output} {params.min_mac} {input.model_file} \
             {input.variance_file} {input.sparse_matrix} {input.group_file} \
             {params.annotations_to_include} {input.conditioning_variants} \
-            {params.max_MAF} {params.use_null_var_ratio} > {log.stdout} 2> {log.stderr}
+            {params.max_MAF} {params.use_null_var_ratio} \
+            > >(tee -a {log.stdout}) \
+            2> >(tee -a {log.stderr} >&2)
         """
 
 rule spa_tests_conditional_plink:
@@ -516,7 +530,9 @@ rule spa_tests_conditional_plink:
             $plink_fileset {output} {params.min_mac} {input.model_file} \
             {input.variance_file} {input.sparse_matrix} {input.group_file} \
             {params.annotations_to_include} {input.conditioning_variants} \
-            {params.max_MAF} {params.use_null_var_ratio} > {log.stdout} 2> {log.stderr}
+            {params.max_MAF} {params.use_null_var_ratio} \
+            > >(tee -a {log.stdout}) \
+            2> >(tee -a {log.stderr} >&2)
         """
 
 rule combine_results:
@@ -533,7 +549,9 @@ rule combine_results:
     shell:
         """
         set -euo pipefail
-        python scripts/combine_saige_outputs.py --out {output} > {log.stdout} 2> {log.stderr}
+        python scripts/combine_saige_outputs.py --out {output} \
+        > >(tee -a {log.stdout}) \
+        2> >(tee -a {log.stderr} >&2)
         """
 
 # Rule order to ensure proper execution based on input format
