@@ -395,7 +395,9 @@ rule spa_tests_stepwise_conditional_vcf:
                 bash scripts/stepwise_conditional_SAIGE.sh \
                 $vcf {output} {input.model_file} {input.variance_file} \
                 {input.sparse_matrix} $chr {params.use_null_var_ratio} \
-                {params.P_T} > {log.stdout} 2> {log.stderr}
+                {params.P_T} \
+                > >(tee -a {log.stdout}) \
+                2> >(tee -a {log.stderr} >&2)
         done
         """
 
@@ -434,7 +436,9 @@ rule spa_tests_stepwise_conditional_plink:
                 bash scripts/stepwise_conditional_SAIGE_plink.sh \
                 $plink_fileset {output} {input.model_file} {input.variance_file} \
                 {input.sparse_matrix} $chr {params.use_null_var_ratio} \
-                {params.P_T} > {log.stdout} 2> {log.stderr}
+                {params.P_T} \
+                > >(tee -a {log.stdout}) \
+                2> >(tee -a {log.stderr} >&2)
         done
         """
 
