@@ -365,7 +365,8 @@ rule prune_to_independent_conditioning_variants_plink:
             fi
         else
             # No variants to prune, create an empty output
-            echo "None of the variants are present in the plink {.bim/.bed/.fam} fileset"
+            echo "Hello"
+            echo "None of the variants are present in the plink .bim/.bed/.fam fileset"
             touch {output}
             nvar=$(wc -l < {output})
             echo $nvar
