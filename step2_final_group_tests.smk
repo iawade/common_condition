@@ -449,8 +449,8 @@ rule spa_tests_conditional_plink:
         """
         set -euo pipefail
         nvar=$(wc -l < {input.conditioning_variants})
-        echo $nvar
-        cat {input.conditioning_variants}
+        echo $nvar > >(tee -a {log.stdout}) 2> >(tee -a {log.stderr} >&2)
+        cat {input.conditioning_variants} > >(tee -a {log.stdout}) 2> >(tee -a {log.stderr} >&2)
         if [[ $nvar -eq 0 ]]; then
             echo "No variants to condition on" > >(tee -a {log.stdout}) 2> >(tee -a {log.stderr} >&2)
             touch {output}
