@@ -225,7 +225,7 @@ rule filter_to_gene_vcf:
             if [[ "$vcf" =~ \\.($chr)\\. ]]; then
                 matched_vcf=$vcf
                 bash scripts/filter_to_gene_vcf.sh $vcf {wildcards.gene} \
-                    {params.distance} {params.threads} \
+                    {params.distance} {params.threads} {params.outfolder} \
                     > >(tee -a {log.stdout}) 2> >(tee -a {log.stderr} >&2)
             fi
         done
