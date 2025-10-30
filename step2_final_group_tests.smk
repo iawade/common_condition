@@ -175,7 +175,8 @@ rule filter_group_file:
         stderr="logs/final_filter_group_file/{gene}.err"
     shell:
         """
-        bash scripts/filter_group_file.sh {wildcards.gene} {output} {input.group} > {log.stdout} 2> {log.stderr}
+        bash scripts/filter_group_file.sh {wildcards.gene} {output} {input.group} \
+            > >(tee -a {log.stdout}) 2> >(tee -a {log.stderr} >&2)
         """
 
 rule identify_gene_start_stop:
@@ -191,8 +192,12 @@ rule identify_gene_start_stop:
     shell:
         """
         set -euo pipefail
-        python scripts/start_end_query.py --ensembl_id \"{wildcards.gene}\" --folder {params.outfolder} > {log.stdout} 2> {log.stderr}
-        bash scripts/expand_coding_region.sh {wildcards.gene} {params.distance} {params.outfolder} >> {log.stdout} 2>> {log.stderr}
+        python scripts/start_end_query.py --ensembl_id \"{wildcards.gene}\" \
+            --folder {params.outfolder} \
+            > >(tee -a {log.stdout}) \
+            2> >(tee -a {log.stderr} >&2)
+        bash scripts/expand_coding_region.sh {wildcards.gene} {params.distance} \
+            {params.outfolder} > >(tee -a {log.stdout}) 2> >(tee -a {log.stderr} >&2)
         """
 
 # VCF-specific rules
@@ -220,8 +225,8 @@ rule filter_to_gene_vcf:
             if [[ "$vcf" =~ \\.($chr)\\. ]]; then
                 matched_vcf=$vcf
                 bash scripts/filter_to_gene_vcf.sh $vcf {wildcards.gene} \
-                    {params.distance} {params.threads} \
-                    {params.outfolder} >> {log.stdout} 2>> {log.stderr}
+                    {params.distance} {params.threads} {params.outfolder} \
+                    > >(tee -a {log.stdout}) 2> >(tee -a {log.stderr} >&2)
             fi
         done
 
@@ -261,7 +266,8 @@ rule filter_to_gene_plink:
                 matched_plink=$plink_fileset
                 bash scripts/filter_to_gene_plink.sh $plink_fileset {wildcards.gene} \
                     {params.distance} {params.threads} {input.sparse_matrix_id} \
-                    {params.outfolder} >> {log.stdout} 2>> {log.stderr}
+                    {params.outfolder} \
+                    > >(tee -a {log.stdout}) 2> >(tee -a {log.stderr} >&2)
             fi
         done
 
@@ -316,7 +322,10 @@ rule prune_to_independent_conditioning_variants_vcf:
             fi
         else
             # No conditioning variants present in the vcf file
+            echo "None of the variants are present in the .vcf file"
             touch {output}
+            nvar=$(wc -l < {output})
+            echo $nvar
         fi
         """
 
@@ -356,7 +365,11 @@ rule prune_to_independent_conditioning_variants_plink:
             fi
         else
             # No variants to prune, create an empty output
+            echo "Hello"
+            echo "None of the variants are present in the plink .bim/.bed/.fam fileset"
             touch {output}
+            nvar=$(wc -l < {output})
+            echo $nvar
         fi
         """
 
@@ -390,12 +403,19 @@ rule spa_tests_conditional_vcf:
     shell:
         """
         set -euo pipefail
-        conda run --no-capture-output -n RSAIGE_vcf_version \
-            bash scripts/saige_step2_conditioning_check.sh \
-            {input.vcf} {output} {params.min_mac} {input.model_file} \
-            {input.variance_file} {input.sparse_matrix} {input.group_file} \
-            {params.annotations_to_include} {input.conditioning_variants} \
-            {params.max_MAF} {params.use_null_var_ratio} > {log.stdout} 2> {log.stderr}
+        nvar=$(wc -l < {input.conditioning_variants})
+        if [[ $nvar -eq 0 ]]; then
+            echo "No variants to condition on" > >(tee -a {log.stdout}) 2> >(tee -a {log.stderr} >&2)
+            touch {output}
+        else
+            conda run --no-capture-output -n RSAIGE_vcf_version \
+                bash scripts/saige_step2_conditioning_check.sh \
+                {input.vcf} {output} {params.min_mac} {input.model_file} \
+                {input.variance_file} {input.sparse_matrix} {input.group_file} \
+                {params.annotations_to_include} {input.conditioning_variants} \
+                {params.max_MAF} {params.use_null_var_ratio} \
+                > >(tee -a {log.stdout}) 2> >(tee -a {log.stderr} >&2)
+        fi
         """
 
 rule spa_tests_conditional_plink:
@@ -428,13 +448,22 @@ rule spa_tests_conditional_plink:
     shell:
         """
         set -euo pipefail
-        plink_fileset=$(echo {input.plink_bed} | sed 's/\\.bed$//')
-        conda run --no-capture-output -n RSAIGE_vcf_version \
-            bash scripts/saige_step2_conditioning_check_plink.sh \
-            $plink_fileset {output} {params.min_mac} {input.model_file} \
-            {input.variance_file} {input.sparse_matrix} {input.group_file} \
-            {params.annotations_to_include} {input.conditioning_variants} \
-            {params.max_MAF} {params.use_null_var_ratio} > {log.stdout} 2> {log.stderr}
+        nvar=$(wc -l < {input.conditioning_variants})
+        echo $nvar > >(tee -a {log.stdout}) 2> >(tee -a {log.stderr} >&2)
+        cat {input.conditioning_variants} > >(tee -a {log.stdout}) 2> >(tee -a {log.stderr} >&2)
+        if [[ $nvar -eq 0 ]]; then
+            echo "No variants to condition on" > >(tee -a {log.stdout}) 2> >(tee -a {log.stderr} >&2)
+            touch {output}
+        else
+            plink_fileset=$(echo {input.plink_bed} | sed 's/\\.bed$//')
+            conda run --no-capture-output -n RSAIGE_vcf_version \
+                bash scripts/saige_step2_conditioning_check_plink.sh \
+                $plink_fileset {output} {params.min_mac} {input.model_file} \
+                {input.variance_file} {input.sparse_matrix} {input.group_file} \
+                {params.annotations_to_include} {input.conditioning_variants} \
+                {params.max_MAF} {params.use_null_var_ratio} \
+                > >(tee -a {log.stdout}) 2> >(tee -a {log.stderr} >&2)
+        fi
         """
 
 rule combine_results:
@@ -454,7 +483,9 @@ rule combine_results:
     shell:
         """
         set -euo pipefail
-        python scripts/combine_saige_outputs.py --final --out {output} > {log.stdout} 2> {log.stderr}
+        python scripts/combine_saige_outputs.py --final --out {output} \
+            > >(tee -a {log.stdout}) \
+            2> >(tee -a {log.stderr} >&2)
         """
 
 # Rule order to ensure proper execution based on input format

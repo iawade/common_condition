@@ -4,7 +4,7 @@
 INPUT_VCF="$1" # QC'd, needs GT's; single ancestry-group
 ENSEMBL_ID="$2" # Prevents any potential issues with gene symbols
 BP_DISTANCE="$3" # TODO Error handling / kb vs just the number
-MAF_COMMON="$4" 
+MAF_COMMON="$4"
 THREADS="$5"
 
 EXPANDED_BED="run_files/bed/expanded_coding_regions_${ENSEMBL_ID}.bed"

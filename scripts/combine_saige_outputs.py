@@ -27,7 +27,7 @@ def combine_outputs(out, final=False):
     dfs = []
     df_singles = []
     df_conditionings = []
-
+    
     # Process each file
     for file in files:
         # Extract ancestry, trait, variant class and mode from filename
