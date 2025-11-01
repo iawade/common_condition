@@ -7,7 +7,7 @@ PLINK="$3" # Input plink fileset
 FILE="$4"
 
 TMPFILE=$(mktemp)
-Rscript filter_to_samples.R -m ${MODELFILE} -o ${TMPFILE}.sample
+Rscript scripts/filter_to_samples.R -m ${MODELFILE} -o ${TMPFILE}.sample
 plink2 --bfile ${PLINK} --extract ${CONDITION} --make-bed \
 	--keep ${TMPFILE}.sample --mac 10 --make-bed \
 	--out ${TMPFILE} || true
