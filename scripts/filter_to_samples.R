@@ -27,6 +27,6 @@ samples <- function(modelfile)
 if (is.null(opt$condition)) {
   stop("Please provide a --modelfile argument.", call. = FALSE)
 } else {
-  samples <- samples(opt$condition)
+  samples <- samples(opt$modelfile)
   fwrite(samples, file=opt$outfile, sep="\t", quote=FALSE)
 }
