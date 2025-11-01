@@ -2,6 +2,7 @@
 
 # Load required packages
 suppressPackageStartupMessages(library(optparse))
+suppressPackageStartupMessages(library(data.table))
 
 # Define command line options
 option_list <- list(
