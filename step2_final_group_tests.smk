@@ -335,7 +335,11 @@ rule prune_to_independent_conditioning_variants_plink:
         plink_bed = "final_run_files/{gene}_{distance}.bed",
         plink_fam = "final_run_files/{gene}_{distance}.fam",
         conditioning_variants = "final_run_files/{gene}_{trait}_{maf}_extract.txt",
-        group_file="final_run_files/{gene}_group_file.txt"
+        group_file="final_run_files/{gene}_group_file.txt",
+        model_file=lambda wildcards: [
+            mf for mf in model_files
+            if re.search(rf'(?:^|[/_.\-]){re.escape(wildcards.trait)}(?=[/_.\-])', mf)
+        ],
     output:
         "final_run_files/{gene}_{trait}_{maf}_{distance}_ld_pruned_string.txt"
     params:
@@ -343,34 +347,9 @@ rule prune_to_independent_conditioning_variants_plink:
     shell:
         """
         set -euo pipefail
-
-        TMPFILE=$(mktemp)
         plink_fileset=$(echo "{input.plink_bed}" | sed 's/\\.bed$//')
-        plink2 --bfile $plink_fileset \
-            --extract {input.conditioning_variants} \
-            --make-bed --out ${{TMPFILE}} || true
-        
-        if [[ -f ${{TMPFILE}}.bim ]]; then
-            nvar=$(wc -l < ${{TMPFILE}}.bim)
-            if [[ $nvar -eq 1 ]]; then
-                cut -f2 ${{TMPFILE}}.bim > {output}
-            else
-                plink2 --bfile ${{TMPFILE}} \
-                  --indep-pairwise 50 5 0.9 \
-                  --out {params.file} || true
-                # Finally, create a comma separated string from this
-                if [[ -f {params.file}.prune.in ]]; then
-                    paste -sd, {params.file}.prune.in > {output}
-                fi
-            fi
-        else
-            # No variants to prune, create an empty output
-            echo "Hello"
-            echo "None of the variants are present in the plink .bim/.bed/.fam fileset"
-            touch {output}
-            nvar=$(wc -l < {output})
-            echo $nvar
-        fi
+        bash scripts/pop_phenotype_specific_filter.sh {input.model_file} \
+            {input.conditioning_variants} $plink_fileset {params.file}
         """
 
 # Format-specific conditional analysis rules
