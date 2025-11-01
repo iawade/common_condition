@@ -8,7 +8,7 @@ FILE="$4"
 
 TMPFILE=$(mktemp)
 Rscript scripts/filter_to_samples.R -m ${MODELFILE} -o ${TMPFILE}.sample
-plink2 --bfile ${PLINK} --extract ${CONDITION} --make-bed \
+plink2 --bfile ${PLINK} --extract ${CONDITION} \
 	--keep ${TMPFILE}.sample --mac 10 --make-bed \
 	--out ${TMPFILE} || true
         

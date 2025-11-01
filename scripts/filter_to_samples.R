@@ -29,5 +29,6 @@ if (is.null(opt$modelfile)) {
   stop("Please provide a --modelfile argument.", call. = FALSE)
 } else {
   samples <- samples(opt$modelfile)
-  fwrite(samples, file=opt$outfile, sep="\t", quote=FALSE)
+  fwrite(data.table(samples), file=opt$outfile, sep="\t", quote=FALSE,
+    col.names=FALSE)
 }
