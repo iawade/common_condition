@@ -24,7 +24,7 @@ samples <- function(modelfile)
 }
 
 # Call the function with the argument from the command line
-if (is.null(opt$condition)) {
+if (is.null(opt$modelfile)) {
   stop("Please provide a --modelfile argument.", call. = FALSE)
 } else {
   samples <- samples(opt$modelfile)
