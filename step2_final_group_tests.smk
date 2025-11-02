@@ -292,12 +292,15 @@ rule prune_to_independent_conditioning_variants_vcf:
         "final_run_files/{gene}_{trait}_{maf}_{distance}_ld_pruned_string.txt" 
     params:
         file="final_run_files/{gene}_{trait}_{maf}_{distance}_ld_pruned_string"
+    log:
+        stdout="logs/prune_vcf/{gene}_{trait}_{maf}_{distance}.out",
+        stderr="logs/prune_vcf/{gene}_{trait}_{maf}_{distance}.err"
     shell:
         """
         set -euo pipefail
         bash scripts/pop_phenotype_specific_filter.sh \
             {input.model_file} {input.conditioning_variants} {input.conditioning_variants_bed} \
-            {input.vcf} {params.file}
+            {input.vcf} {params.file} > >(tee -a {log.stdout}) 2> >(tee -a {log.stderr} >&2)
         """
 
 rule prune_to_independent_conditioning_variants_plink:
@@ -315,12 +318,16 @@ rule prune_to_independent_conditioning_variants_plink:
         "final_run_files/{gene}_{trait}_{maf}_{distance}_ld_pruned_string.txt"
     params:
         file="final_run_files/{gene}_{trait}_{maf}_{distance}_ld_pruned_string"
+    log:
+        stdout="logs/prune_plink/{gene}_{trait}_{maf}_{distance}.out",
+        stderr="logs/prune_plink/{gene}_{trait}_{maf}_{distance}.err"
     shell:
         """
         set -euo pipefail
         plink_fileset=$(echo "{input.plink_bed}" | sed 's/\\.bed$//')
         bash scripts/pop_phenotype_specific_filter_plink.sh {input.model_file} \
-            {input.conditioning_variants} $plink_fileset {params.file}
+            {input.conditioning_variants} $plink_fileset {params.file} \
+            > >(tee -a {log.stdout}) 2> >(tee -a {log.stderr} >&2)
         """
 
 # Format-specific conditional analysis rules
