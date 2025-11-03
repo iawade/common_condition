@@ -283,50 +283,24 @@ rule prune_to_independent_conditioning_variants_vcf:
         vcf_csi = "final_run_files/{gene}_{distance}.vcf.bgz.csi",
         conditioning_variants = "final_run_files/{gene}_{trait}_{maf}_extract.txt",
         conditioning_variants_bed = "final_run_files/{gene}_{trait}_{maf}_extract.bed",
-        group_file="final_run_files/{gene}_group_file.txt"
+        group_file="final_run_files/{gene}_group_file.txt",
+        model_file=lambda wildcards: [
+            mf for mf in model_files
+            if re.search(rf'(?:^|[/_.\-]){re.escape(wildcards.trait)}(?=[/_.\-])', mf)
+        ]
     output:
         "final_run_files/{gene}_{trait}_{maf}_{distance}_ld_pruned_string.txt" 
     params:
         file="final_run_files/{gene}_{trait}_{maf}_{distance}_ld_pruned_string"
+    log:
+        stdout="logs/prune_vcf/{gene}_{trait}_{maf}_{distance}.out",
+        stderr="logs/prune_vcf/{gene}_{trait}_{maf}_{distance}.err"
     shell:
         """
         set -euo pipefail
-
-        TMPFILE=$(mktemp)
-        # Define a bed file first
-        plink2 --vcf {input.vcf} --extract range {input.conditioning_variants_bed} \
-          --make-bed --out ${{TMPFILE}} || true
-        if [[ -f ${{TMPFILE}}.bim ]]; then
-
-            # Sort the .bim file variant ID
-            awk 'BEGIN{{OFS="\t"}} {{ $2 = "chr" $1 ":" $4 ":" $6 ":" $5; print }}' ${{TMPFILE}}.bim > ${{TMPFILE}}.bim.tmp
-            mv ${{TMPFILE}}.bim.tmp ${{TMPFILE}}.bim
-
-            # Extract the exact variants
-            plink2 --bfile ${{TMPFILE}} \
-                --extract {input.conditioning_variants} \
-                --make-bed --out ${{TMPFILE}}.tmp || true
-
-            nvar=$(wc -l < ${{TMPFILE}}.tmp.bim)
-
-            if [[ $nvar -eq 1 ]]; then
-                cut -f2 ${{TMPFILE}}.tmp.bim > {output}
-            else
-                plink2 --bfile ${{TMPFILE}}.tmp \
-                  --indep-pairwise 50 5 0.9 \
-                  --out {params.file} || true
-                # Finally, create a comma separated string from this
-                if [[ -f {params.file}.prune.in ]]; then
-                    paste -sd, {params.file}.prune.in > {output}
-                fi
-            fi
-        else
-            # No conditioning variants present in the vcf file
-            echo "None of the variants are present in the .vcf file"
-            touch {output}
-            nvar=$(wc -l < {output})
-            echo $nvar
-        fi
+        bash scripts/pop_phenotype_specific_filter.sh \
+            {input.model_file} {input.conditioning_variants} {input.conditioning_variants_bed} \
+            {input.vcf} {params.file} > >(tee -a {log.stdout}) 2> >(tee -a {log.stderr} >&2)
         """
 
 rule prune_to_independent_conditioning_variants_plink:
@@ -335,42 +309,25 @@ rule prune_to_independent_conditioning_variants_plink:
         plink_bed = "final_run_files/{gene}_{distance}.bed",
         plink_fam = "final_run_files/{gene}_{distance}.fam",
         conditioning_variants = "final_run_files/{gene}_{trait}_{maf}_extract.txt",
-        group_file="final_run_files/{gene}_group_file.txt"
+        group_file="final_run_files/{gene}_group_file.txt",
+        model_file=lambda wildcards: [
+            mf for mf in model_files
+            if re.search(rf'(?:^|[/_.\-]){re.escape(wildcards.trait)}(?=[/_.\-])', mf)
+        ]
     output:
         "final_run_files/{gene}_{trait}_{maf}_{distance}_ld_pruned_string.txt"
     params:
         file="final_run_files/{gene}_{trait}_{maf}_{distance}_ld_pruned_string"
+    log:
+        stdout="logs/prune_plink/{gene}_{trait}_{maf}_{distance}.out",
+        stderr="logs/prune_plink/{gene}_{trait}_{maf}_{distance}.err"
     shell:
         """
         set -euo pipefail
-
-        TMPFILE=$(mktemp)
         plink_fileset=$(echo "{input.plink_bed}" | sed 's/\\.bed$//')
-        plink2 --bfile $plink_fileset \
-            --extract {input.conditioning_variants} \
-            --make-bed --out ${{TMPFILE}} || true
-        
-        if [[ -f ${{TMPFILE}}.bim ]]; then
-            nvar=$(wc -l < ${{TMPFILE}}.bim)
-            if [[ $nvar -eq 1 ]]; then
-                cut -f2 ${{TMPFILE}}.bim > {output}
-            else
-                plink2 --bfile ${{TMPFILE}} \
-                  --indep-pairwise 50 5 0.9 \
-                  --out {params.file} || true
-                # Finally, create a comma separated string from this
-                if [[ -f {params.file}.prune.in ]]; then
-                    paste -sd, {params.file}.prune.in > {output}
-                fi
-            fi
-        else
-            # No variants to prune, create an empty output
-            echo "Hello"
-            echo "None of the variants are present in the plink .bim/.bed/.fam fileset"
-            touch {output}
-            nvar=$(wc -l < {output})
-            echo $nvar
-        fi
+        bash scripts/pop_phenotype_specific_filter_plink.sh {input.model_file} \
+            {input.conditioning_variants} $plink_fileset {params.file} \
+            > >(tee -a {log.stdout}) 2> >(tee -a {log.stderr} >&2)
         """
 
 # Format-specific conditional analysis rules
