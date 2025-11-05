@@ -58,6 +58,9 @@ RUN FLAGPATH=$(which python | sed "s|/bin/python$||") && \
     export LDFLAGS="-L${FLAGPATH}/lib" && \
     export CPPFLAGS="-I${FLAGPATH}/include"
 
+# Regenie
+RUN conda create -n regenie_env -c conda-forge -c bioconda regenie
+
 # SAIGE 1.3.6
 ARG saige_vcf_version="1.3.6"
 
