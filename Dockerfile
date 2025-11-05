@@ -58,9 +58,6 @@ RUN FLAGPATH=$(which python | sed "s|/bin/python$||") && \
     export LDFLAGS="-L${FLAGPATH}/lib" && \
     export CPPFLAGS="-I${FLAGPATH}/include"
 
-# Regenie
-RUN conda create -n regenie_env -c conda-forge -c bioconda regenie
-
 # SAIGE 1.3.6
 ARG saige_vcf_version="1.3.6"
 
@@ -176,3 +173,9 @@ ENV PATH="/:${PATH}"
 # docker push astheeggeggs/brava-common-check:latest
 # docker tag brava-common-check gcr.io/weighty-elf-452116-c7/brava-common-check:latest
 # docker push gcr.io/weighty-elf-452116-c7/brava-common-check:latest
+
+# Regenie
+from astheeggeggs/brava-common-check:v4
+SHELL ["/bin/bash", "-lc"]
+RUN conda create -n regenie_env -y -c conda-forge -c bioconda regenie && \
+    conda clean -afy
