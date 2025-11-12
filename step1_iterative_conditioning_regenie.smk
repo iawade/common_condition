@@ -53,6 +53,7 @@ phenotype_json = config["phenotype_json"]
 # intersect that with the json to define the collection of available phenotypes
 phenotype_file = config["phenotype_file"]
 covariate_file = config["covariate_file"]
+keep = config["keep"]
 
 covariate_cols = config["covariate_cols"]
 categ_covariate_cols = config["categorical_covariate_cols"]
@@ -221,7 +222,7 @@ def set_fid_zero_inplace(infile):
     suffix = infile.suffix.lower()
     
     # fam files: no header, always 6 columns
-    if suffix == ".fam":
+    if suffix in (".fam", ".id"):
         sep, engine = find_sep(infile)
         df = pd.read_csv(infile, sep=sep, engine=engine, header=None, dtype=str)
         df[0] = "0"
@@ -242,6 +243,7 @@ def set_fid_zero_inplace(infile):
 # We assume that FID is set to 0 for all samples by default
 set_fid_zero_inplace(covariate_file)
 set_fid_zero_inplace(phenotype_file)
+set_fid_zero_inplace(keep)
 
 sep, engine = find_sep(phenotype_file)
 headers = pd.read_csv(phenotype_file, sep=sep,
@@ -333,7 +335,7 @@ rule filter_to_gene_plink:
         plink_bim = lambda wildcards: plink_bim_files if input_format == "plink" else [],
         plink_bed = lambda wildcards: plink_bed_files if input_format == "plink" else [],
         plink_fam = lambda wildcards: plink_fam_files if input_format == "plink" else [],
-        sparse_matrix_id = sparse_matrix_id,
+        keep = keep,
         regions = "run_files/bed/expanded_regions_{gene}.bed"
     output:
         bim = "run_files/{gene}_{distance}.bim",
@@ -357,7 +359,7 @@ rule filter_to_gene_plink:
                 plink_fileset=$(echo "$plink_bed" | sed 's/\\.bed$//')
                 matched_plink=$plink_fileset
                 bash scripts/filter_to_gene_plink.sh $plink_fileset {wildcards.gene} \
-                    {params.distance} {params.threads} {input.sparse_matrix_id} \
+                    {params.distance} {params.threads} {input.keep} \
                     {params.outfolder} \
                     > >(tee -a {log.stdout}) \
                     2> >(tee -a {log.stderr} >&2)

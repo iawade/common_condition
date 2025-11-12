@@ -7,7 +7,7 @@ list_of_plink_files: "ukb_paths/eur/eur_plink_file_list.txt"
 list_of_loco_files: "ukb_paths/eur/eur_loco_file_list.txt"
 list_of_regenie_annotation_files: "ukb_paths/eur/eur_annotation_file_list.txt"
 list_of_regenie_setlist_files: "ukb_paths/eur/eur_setlist_file_list.txt"
-keep: "snakemake_eur/mtx/brava_EUR_relatednessCutoff_0.05_5000_randomMarkersUsed.sparseGRM.mtx"
+keep: "snakemake_eur/keep/ukb22418_b0_v2.autosomes.qced.EUR.id"
 phenotype_file: "snakemake_eur/phenotypes/ukb.standing_height.20250508.tsv"
 covariate_file: "snakemake_eur/covariates/ukb_brava_default_covariates.20250508.tsv"
 
