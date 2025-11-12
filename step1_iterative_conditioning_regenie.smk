@@ -416,16 +416,17 @@ rule filter_to_coding_gene_plink:
 # Need to do this, looping over the files - figure out how to pass a list of files
 rule filter_group_file_regenie:
     input:
-        group = lambda wildcards: group_files
+        annotation = lambda wildcards: regenie_annotation_files,
+        setlist = lambda wildcards: regenie_setlist_files
     output:
-        "run_files/{gene}_group_file.txt"
+        "run_files/{gene}"
     log:
         stdout="logs/filter_group_file/{gene}.out",
         stderr="logs/filter_group_file/{gene}.err"
     shell:
         """
-        bash scripts/filter_group_file.sh {wildcards.gene} {output} \
-            {input.group} \
+        Rscript scripts/filter_group_file_regenie.R {wildcards.gene} {output} \
+             {','.join(input.annotation)} {','.join(input.setlist)} \
             > >(tee -a {log.stdout}) \
             2> >(tee -a {log.stderr} >&2)
         """
