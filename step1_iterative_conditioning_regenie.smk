@@ -419,7 +419,7 @@ rule filter_group_file_regenie:
         annotation = lambda wildcards: regenie_annotation_files,
         setlist = lambda wildcards: regenie_setlist_files
     output:
-        annotation = "run_files/{gene}.annotation.txt"
+        annotation = "run_files/{gene}.annotation.txt",
         setlist = "run_files/{gene}.setlist.txt"
     log:
         stdout="logs/filter_group_file/{gene}.out",
