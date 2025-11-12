@@ -419,13 +419,16 @@ rule filter_group_file_regenie:
         annotation = lambda wildcards: regenie_annotation_files,
         setlist = lambda wildcards: regenie_setlist_files
     output:
-        "run_files/{gene}"
+        annotation = "run_files/{gene}.annotation.txt"
+        setlist = "run_files/{gene}.setlist.txt"
     log:
         stdout="logs/filter_group_file/{gene}.out",
         stderr="logs/filter_group_file/{gene}.err"
+    params:
+        out_prefix="run_files/{gene}"
     shell:
         """
-        Rscript scripts/filter_group_file_regenie.R {wildcards.gene} {output} \
+        Rscript scripts/filter_group_file_regenie.R {wildcards.gene} {params.out_prefix} \
              {','.join(input.annotation)} {','.join(input.setlist)} \
             > >(tee -a {log.stdout}) \
             2> >(tee -a {log.stderr} >&2)
