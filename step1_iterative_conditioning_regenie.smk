@@ -377,7 +377,7 @@ rule filter_to_coding_gene_plink:
         plink_bim = lambda wildcards: plink_bim_files if input_format == "plink" else [],
         plink_bed = lambda wildcards: plink_bed_files if input_format == "plink" else [],
         plink_fam = lambda wildcards: plink_fam_files if input_format == "plink" else [],
-        sparse_matrix_id = sparse_matrix_id,
+        keep = keep,
         regions = "run_files/bed/expanded_coding_regions_{gene}.bed"
     output:
         bim = "run_files/{gene}_{distance}_{maf}.bim",
@@ -401,7 +401,7 @@ rule filter_to_coding_gene_plink:
                 matched_plink=$plink_fileset
                 bash scripts/filter_to_coding_gene_plink.sh $plink_fileset {wildcards.gene} \
                     {params.distance} {wildcards.maf} {params.threads} \
-                    {input.sparse_matrix_id} \
+                    {input.keep} \
                     > >(tee -a {log.stdout}) \
                     2> >(tee -a {log.stderr} >&2)
             fi
