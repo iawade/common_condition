@@ -19,6 +19,9 @@ Each biobank (you!) then provides conditioning variant lists, as well as gene an
 > ```
 > Please check!
 
+> [!WARNING]  
+> If you are running the pipeline on an HPC it is possible that the scheduler will kill the job if it uses too much RAM. This is because plink2 is clever and attempts to use all memory available to it - the same is also true of snakemake. If you think this problem might apply to you, you will need to restrict the available memory to plink2 and snakemake. To do this, you can use the `--memory X` flag in plink2, and the `--resources mem_mb=Y` in the overall call to snakemake, setting `X` and `Y` to the RAM in mb available for the subtask and overall snakemake job, respectively.
+
 In a final step, we then determine the union of these lists centrally for each genetic ancestry. The resultant variant lists are then shared back with the constituent biobanks. Biobanks then perform final gene-based association analysis conditioning on these variants. To guard against collinearity in the variants used for conditioning, we first perform linkage disequilibrium pruning, ensuring that no-pair of variants in the set have _r_<sup>2</sup> > 0.9. (WORK IN PROGRESS).
 
 ## Prerequisites
