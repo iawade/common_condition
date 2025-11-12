@@ -55,7 +55,7 @@ phenotype_file = config["phenotype_file"]
 covariate_file = config["covariate_file"]
 
 covariate_cols = config["covariate_cols"]
-categ_covariate_cols = config["categ_covariate_cols"]
+categ_covariate_cols = config["categorical_covariate_cols"]
 
 # # categorical covariate cols - use Nik's flags in the step 1 log he ran
 # # phenotype_cols - don't need this, we let it be defined by the available loco files
