@@ -430,7 +430,7 @@ rule filter_group_file_regenie:
     shell:
         """
         Rscript scripts/filter_group_file_regenie.R {wildcards.gene} {params.out_prefix} \
-             {','.join(input.annotation)} {','.join(input.setlist)} \
+             {{','.join(input.annotation)}} {{','.join(input.setlist)}} \
             > >(tee -a {log.stdout}) \
             2> >(tee -a {log.stderr} >&2)
         """
