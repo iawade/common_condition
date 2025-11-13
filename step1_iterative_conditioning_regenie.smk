@@ -411,7 +411,7 @@ rule spa_tests_stepwise_conditional_plink:
     params:
         maf_common="{maf}",
         P_T=config["conditioning_pvalue"],
-        covariate_cols = config["covariate_cols"]
+        covariate_cols = config["covariate_cols"],
         categ_covariate_cols = config["categorical_covariate_cols"]
     log:
         stdout="logs/spa_tests_stepwise_conditional/{gene}_{trait}_{distance}_{maf}.out",
