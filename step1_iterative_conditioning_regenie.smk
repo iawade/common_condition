@@ -32,7 +32,6 @@ wildcard_constraints:
 # min_mac=0.5
 # annotations_to_include="pLoF,damaging_missense_or_protein_altering,other_missense_or_protein_altering,synonymous,pLoF:damaging_missense_or_protein_altering,pLoF:damaging_missense_or_protein_altering:other_missense_or_protein_altering:synonymous"
 
-
 # # Additional files
 # phenotypes="snakemake_eur/phenotypes/ukb.standing_height.20250508.tsv"
 # covariates="snakemake_eur/covariates/ukb_brava_default_covariates.20250508.tsv"
@@ -54,69 +53,6 @@ phenotype_json = config["phenotype_json"]
 phenotype_file = config["phenotype_file"]
 covariate_file = config["covariate_file"]
 keep = config["keep"]
-
-covariate_cols = config["covariate_cols"]
-categ_covariate_cols = config["categorical_covariate_cols"]
-
-# # categorical covariate cols - use Nik's flags in the step 1 log he ran
-# # phenotype_cols - don't need this, we let it be defined by the available loco files
-
-# # We need to split the job up into tiny little jobs
-# # only allowing gene-phenotype pairs
-
-# # Decide what I need to move to the node and move it, and then start 
-# # and interactive job. Make sure that we use the new docker.
-# # then I can just iterate and get to the end
-
-# # SAMPLE IDs to keep - equivalent as the mtx IDs I think
-# # This should be a list containing the first two columns of the fam file - this should
-# # be used instead of the sparse mtx sample IDs
-
-# # Remove output prefix from .loco file
-# # Generate this file on the fly - won't take long so just do it for all of the loco files
-# # Define the pred.list for ourselves - we'll always just use a single trait
-# # since we need to run for (gene, phenotype) pairs
-# PRED="regenie_step1_${anc}_${PHENOCOL}_pred.list"
-# LOCO="regenie_step1_${anc}_${PHENOCOL}_1.loco"
-# PRED_LOCAL="$HOME/tmp-predfile.txt"
-# cat ${PRED} | sed 's/\/home\/dnanexus\/out\/out\///g' > ${PRED_LOCAL} # Just rename the location of the predfile
-# PRED=${PRED_LOCAL}
-# head $PRED
-
-# Determine whehter cts or binary
-# trait_flag="--qt --apply-rint"
-#trait_flag="--bt --firth --approx --pThresh 0.1"
-
-# # Define genotypes flag
-# if [ ${GENOTYPES} == *.bed ]; then
-#   BFILE=$( echo $GENOTYPES | sed 's/.bed$//g' )
-
-#   # Rename FID column in PLINK bfile
-#   awk '{ print $2,$2,$3,$4,$5,$6 }' ${BFILE}.fam > ${BFILE}.fam-tmp # why?
-#   mv ${BFILE}.fam-tmp ${BFILE}.fam
-#   head ${BFILE}.fam
-#   genotypes_flag="--bed ${BFILE}"
-
-# regenie \
-#   --step 2 \
-#   ${genotypes_flag} \
-#   --phenoFile ${PHENOFILE_LOCAL} \
-#   --covarFile ${COVARFILE_LOCAL} \
-#   ${trait_flag} \
-#   --keep ${KEEP} \
-#   --pred $PRED \
-#   --minMAC 0.5 \
-#   --bsize 400 \
-#   --out ${OUT}
-
-# # Move and compress the output
-# mv *regenie ${OUT}.regenie
-# gzip *regenie
-
-# #rm tmp-*
-
-# regenie requires info about whether it's cts or case/control - I can extract that from
-# the phenotype json file
 
 # Format-specific file lists
 if input_format == "plink":
@@ -259,6 +195,21 @@ for pid in phenotype_ids:  # phenotype IDs from JSON
     if trait_in_loco and trait_in_phenotypes:
         available_traits.add(pid)
 
+# For all available traits, determine the loco file and the phenotype, and create the
+# pred file
+for trait in available_traits:
+    pattern = rf'(?:^|[/_.\-]){re.escape(trait)}(?=$|[/_.\-])'
+    matching_files = [lf for lf in loco_files if re.search(pattern, lf)]
+    if len(matching_files) != 1:
+        raise ValueError(f"Trait '{trait}' expected exactly 1 match in loco_files, but found {len(matching_files)}: {matching_files}")
+    loco_path = matching_files[0]
+    # Write a separate TSV file for this trait
+    output_file = f"run_files/{trait}_pred.list"
+    with open(output_file, "w") as f:
+        f.write(f"{trait} {loco_path}\n")
+
+print(f"Wrote {len(available_traits)} space-delimited pred files to run_files")
+
 # Store valid gene-trait pairs as a list
 valid_gene_trait_pairs = [f"{gene}_{trait}" for gene, trait in zip(gene_trait_pairs_df.iloc[:, 1], gene_trait_pairs_df.iloc[:, 0]) if trait in available_traits]
 
@@ -270,9 +221,9 @@ genes_in_valid_pairs = sorted({pair.split("_")[0] for pair in valid_gene_trait_p
 # Define format-specific output files for the 'all' rule
 def get_format_outputs():
     base_outputs = [
-        # expand("run_files/{gene_trait}_{distance}_{maf}_string.txt",
-               # gene_trait=valid_gene_trait_pairs,
-               # distance=config["distance"], maf=config["maf"]),
+        expand("run_files/{gene_trait}_{distance}_{maf}_string.txt",
+               gene_trait=valid_gene_trait_pairs,
+               distance=config["distance"], maf=config["maf"]),
         expand("run_files/{gene}.annotation.txt", gene=genes_in_valid_pairs),
         expand("run_files/{gene}.setlist.txt", gene=genes_in_valid_pairs),
         expand("run_files/bed/{gene}.bed", gene=genes_in_valid_pairs),
@@ -440,47 +391,45 @@ rule filter_group_file_regenie:
             2> >(tee -a {log.stderr} >&2)
         """
 
-# # Format-specific stepwise conditional rules
-# rule spa_tests_stepwise_conditional_plink:
-#     input:
-#         plink_bim = "run_files/{gene}_{distance}_{maf}.bim",
-#         plink_bed = "run_files/{gene}_{distance}_{maf}.bed",
-#         plink_fam = "run_files/{gene}_{distance}_{maf}.fam",
-#         model_file=lambda wildcards: [
-#             mf for mf in model_files
-#             if re.search(rf'(?:^|[/_.\-]){re.escape(wildcards.trait)}(?=[/_.\-])', mf)
-#         ],
-#         variance_file=lambda wildcards: [
-#             vf for vf in variance_files
-#             if re.search(rf'(?:^|[/_.\-]){re.escape(wildcards.trait)}(?=[/_.\-])', vf)
-#         ],
-#         sparse_matrix=sparse_matrix,
-#         sparse_matrix_id=sparse_matrix_id,
-#         group_file="run_files/{gene}_group_file.txt",
-#     output:
-#         "run_files/{gene}_{trait}_{distance}_{maf}_string.txt"
-#     params:
-#         maf_common="{maf}",
-#         use_null_var_ratio=config["use_null_var_ratio"],
-#         P_T=config["conditioning_pvalue"]
-#     log:
-#         stdout="logs/spa_tests_stepwise_conditional/{gene}_{trait}_{distance}_{maf}.out",
-#         stderr="logs/spa_tests_stepwise_conditional/{gene}_{trait}_{distance}_{maf}.err"
-#     shell:
-#         """
-#         set -euo pipefail
-#         chr=$(python scripts/extract_chromosome.py --ensembl_id \"{wildcards.gene}\")
-#         for plink_bed in {input.plink_bed}; do
-#             plink_fileset=$(echo "$plink_bed" | sed 's/\\.bed$//')
-#             conda run --no-capture-output -n RSAIGE_vcf_version \
-#                 bash scripts/stepwise_conditional_SAIGE_plink.sh \
-#                 $plink_fileset {output} {input.model_file} {input.variance_file} \
-#                 {input.sparse_matrix} $chr {params.use_null_var_ratio} \
-#                 {params.P_T} \
-#                 > >(tee -a {log.stdout}) \
-#                 2> >(tee -a {log.stderr} >&2)
-#         done
-#         """
+# Format-specific stepwise conditional rules
+rule spa_tests_stepwise_conditional_plink:
+    input:
+        pred_file = "run_files/{trait}_pred.list",
+        phenotype_file = phenotype_file,
+        covariate_file = covariate_file,
+        plink_bim = "run_files/{gene}_{distance}_{maf}.bim",
+        plink_bed = "run_files/{gene}_{distance}_{maf}.bed",
+        plink_fam = "run_files/{gene}_{distance}_{maf}.fam",
+        loco_file=lambda wildcards: [
+            lf for lf in loco_files
+            if re.search(rf'(?:^|[/_.\-]){re.escape(wildcards.trait)}(?=[/_.\-])', lf)
+        ],
+        annotation_file = "run_files/{gene}.annotation.txt",
+        setlist_file = "run_files/{gene}.setlist.txt"
+    output:
+        "run_files/{gene}_{trait}_{distance}_{maf}_string.txt"
+    params:
+        maf_common="{maf}",
+        P_T=config["conditioning_pvalue"],
+        covariate_cols = config["covariate_cols"]
+        categ_covariate_cols = config["categorical_covariate_cols"]
+    log:
+        stdout="logs/spa_tests_stepwise_conditional/{gene}_{trait}_{distance}_{maf}.out",
+        stderr="logs/spa_tests_stepwise_conditional/{gene}_{trait}_{distance}_{maf}.err"
+    shell:
+        """
+        set -euo pipefail
+        chr=$(python scripts/extract_chromosome.py --ensembl_id \"{wildcards.gene}\")
+        for plink_bed in {input.plink_bed}; do
+            plink_fileset=$(echo "$plink_bed" | sed 's/\\.bed$//')
+            conda run --no-capture-output -n regenie_env \
+                bash scripts/stepwise_conditional_regenie_plink.sh \
+                $plink_fileset {output} {input.phenotype_file} {input.covariate_file} \
+                {input.pred_file} $chr {params.P_T} \
+                > >(tee -a {log.stdout}) \
+                2> >(tee -a {log.stderr} >&2)
+        done
+        """
 
 # # Format-specific conditional analysis rules
 # rule spa_tests_conditional_plink:
@@ -544,5 +493,6 @@ rule filter_group_file_regenie:
 #         """
 
 # # Rule order to ensure proper execution based on input format
+ruleorder: filter_group_file_regenie > identify_gene_start_stop
 # ruleorder: identify_gene_start_stop > filter_to_coding_gene_plink
 # ruleorder: spa_tests_stepwise_conditional_plink > filter_to_gene_plink
