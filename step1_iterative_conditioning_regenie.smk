@@ -140,6 +140,28 @@ with open(list_of_loco_files) as f:
 print("Loco Files Sample:", loco_files[:5])
 print(f"All traits before filtering: {traits}")
 
+# Check that all the loco file headers are of the form 0_IID.
+def fix_loco_header_unknown_sep(loco_file):
+    loco_file = Path(loco_file)
+    with loco_file.open("r+") as f:
+        header = f.readline()
+        rest = f.read()
+        # Match first "word" (first column) and the separator(s) that follow
+        m = re.match(r'^(\S+)(\s+)(.*)$', header)
+        if not m:
+            raise ValueError(f"Cannot parse header line in {loco_file}")
+        first_col, sep, rest_cols = m.groups()
+        # Replace any alphanumeric prefix before '_' with '0_' in the rest of the columns
+        rest_cols_fixed = re.sub(r'\b[A-Za-z0-9]+_', '0_', rest_cols)
+        # Combine first column + separator + fixed remainder
+        new_header = first_col + sep + rest_cols_fixed
+        # Write back
+        f.seek(0)
+        f.write(new_header.rstrip("\n") + "\n")
+        f.write(rest)
+        f.truncate()
+    print(f"✔ Headers in {loco_file} fixed in place: first column kept, others 0_IID")
+
 def find_sep(infile):
     with open(infile) as f:
         headers = f.readline()
@@ -169,12 +191,17 @@ def set_fid_zero_inplace(infile):
     # covariate and phenotype files: have headers
     else:
         sep, engine = find_sep(infile)
-        df = pd.read_csv(infile, sep=sep, engine=engine, dtype='str')
+        df = pd.read_csv(infile, sep=sep, engine=engine, dtype='str',
+            na_values=["", "NA"])
         if "FID" not in df.columns or "IID" not in df.columns:
             raise ValueError(f"{infile} must contain 'FID' and 'IID' columns")
         df["FID"] = "0"
-        df.to_csv(infile, sep="\t", header=True, index=False)
+        df.to_csv(infile, sep="\t", header=True, index=False, na_rep="NA")
         print(f"✔ Overwrote {infile} with FID=0 for {len(df)} rows")
+
+
+for file in loco_files:
+    fix_loco_header_unknown_sep(file)
 
 # Check and ensure that FID, IID in the phenotypes and covariates match the .fam file
 # We assume that FID is set to 0 for all samples by default

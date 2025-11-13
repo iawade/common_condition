@@ -10,6 +10,19 @@ CHR="${6}"
 P_T="${7}"
 # CASE_CONTROL="${8}"
 
+# conda activate regenie_env
+# TMPFILE=$(mktemp)
+# regenie \
+#   --step 2 \
+#   --bed run_files/ENSG00000167601_500000_0.0001 \
+#   --phenoFile snakemake_eur/phenotypes/ukb.standing_height.20250508.tsv \
+#   --covarFile snakemake_eur/covariates/ukb_brava_default_covariates.20250508.tsv \
+#   --qt --apply-rint \
+#   --pred run_files/Height_pred.list \
+#   --minMAC 10 \
+#   --bsize 400 \
+#   --out ${TMPFILE}
+
 # # categorical covariate cols - use Nik's flags in the step 1 log he ran
 # # phenotype_cols - don't need this, we let it be defined by the available loco files
 
