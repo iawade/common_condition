@@ -427,12 +427,15 @@ rule filter_group_file_regenie:
         stderr="logs/filter_group_file/{gene}.err"
     params:
         out_prefix="run_files/{gene}"
+        annotation_csv=lambda wildcards, input: ",".join(input.annotation),
+        setlist_csv=lambda wildcards, input: ",".join(input.setlist)
     shell:
         """
-        echo {{','.join(input.annotation)}}
-        echo {{','.join(input.setlist)}}
+        set -euo pipefail
+        echo {params.annotation_csv}
+        echo {params.setlist_csv}
         Rscript scripts/filter_group_file_regenie.R {wildcards.gene} {params.out_prefix} \
-             {{','.join(input.annotation)}} {{','.join(input.setlist)}} \
+             {params.annotation_csv} {params.setlist_csv} \
             > >(tee -a {log.stdout}) \
             2> >(tee -a {log.stderr} >&2)
         """
