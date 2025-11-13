@@ -1,1 +1,1 @@
-snakemake_eur/loco/Height_EUR.loco
+snakemake_eur/loco/regenie_step1_EUR_Height_1.loco

@@ -197,6 +197,7 @@ for pid in phenotype_ids:  # phenotype IDs from JSON
 
 # For all available traits, determine the loco file and the phenotype, and create the
 # pred file
+mkdir -p run_files
 for trait in available_traits:
     pattern = rf'(?:^|[/_.\-]){re.escape(trait)}(?=$|[/_.\-])'
     matching_files = [lf for lf in loco_files if re.search(pattern, lf)]
