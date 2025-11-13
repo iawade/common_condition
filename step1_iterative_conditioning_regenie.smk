@@ -426,7 +426,7 @@ rule filter_group_file_regenie:
         stdout="logs/filter_group_file/{gene}.out",
         stderr="logs/filter_group_file/{gene}.err"
     params:
-        out_prefix="run_files/{gene}"
+        out_prefix="run_files/{gene}",
         annotation_csv=lambda wildcards, input: ",".join(input.annotation),
         setlist_csv=lambda wildcards, input: ",".join(input.setlist)
     shell:
