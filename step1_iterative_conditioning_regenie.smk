@@ -95,7 +95,6 @@ annotations_to_include = config["annotations_to_include"]
 import pandas as pd
 import json
 import re
-import os
 from scripts.extract_chromosome import get_gene_chr
 from pathlib import Path
 
@@ -199,7 +198,9 @@ for pid in phenotype_ids:  # phenotype IDs from JSON
 
 # For all available traits, determine the loco file and the phenotype, and create the
 # pred file
-mkdir -p run_files
+run_files_dir = Path("run_files")
+run_files_dir.mkdir(exist_ok=True)
+
 for trait in available_traits:
     pattern = rf'(?:^|[/_.\-]){re.escape(trait)}(?=$|[/_.\-])'
     matching_files = [lf for lf in loco_files if re.search(pattern, lf)]
