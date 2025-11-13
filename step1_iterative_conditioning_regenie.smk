@@ -95,6 +95,7 @@ annotations_to_include = config["annotations_to_include"]
 import pandas as pd
 import json
 import re
+import os
 from scripts.extract_chromosome import get_gene_chr
 from pathlib import Path
 
@@ -102,6 +103,7 @@ from pathlib import Path
 pattern = r'\.(chr[0-9X]+)\.'
 if input_format == "plink":
     matches = [re.search(pattern, s) for s in plink_bim_files]
+
 chrs = set([m.group(1) if m else None for m in matches])
 
 print("Available chromosomes:", chrs)
