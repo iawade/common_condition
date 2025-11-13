@@ -57,7 +57,7 @@ trait_flag="--qt --apply-rint"
 # Edge case
 if [ $(wc -l < ${PLINK}.bim) -gt 2 ]; then
   TMPFILE=$(mktemp)
-  cmd=("regenie
+  cmd=(regenie
       --step 2
       --bed ${PLINK}
       --phenoFile ${PHENOFILE}
@@ -66,7 +66,7 @@ if [ $(wc -l < ${PLINK}.bim) -gt 2 ]; then
       --pred ${PREDFILE}
       --minMAC 10
       --bsize 400
-      --out ${TMPFILE}") # Add the covar cols etc
+      --out ${TMPFILE}) # Add the covar cols etc
 
   # Run the command
   "${cmd[@]}"
