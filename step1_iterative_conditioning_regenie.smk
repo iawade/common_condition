@@ -429,6 +429,8 @@ rule filter_group_file_regenie:
         out_prefix="run_files/{gene}"
     shell:
         """
+        echo {{','.join(input.annotation)}}
+        echo {{','.join(input.setlist)}}
         Rscript scripts/filter_group_file_regenie.R {wildcards.gene} {params.out_prefix} \
              {{','.join(input.annotation)}} {{','.join(input.setlist)}} \
             > >(tee -a {log.stdout}) \
