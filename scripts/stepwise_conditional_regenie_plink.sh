@@ -8,6 +8,7 @@ COVARFILE="${4}"
 PREDFILE="${5}" # This should be defined in at the start of the smk file
 CHR="${6}"
 P_T="${7}"
+PHENOCOL=${8}
 # CASE_CONTROL="${8}"
 
 # conda activate regenie_env
@@ -87,7 +88,7 @@ if [ $(wc -l < ${PLINK}.bim) -gt 2 ]; then
   # Add the top variant to the list of conditioning markers
   # Write to a tmp file
   echo ${cond_M} > ${TMPFILE}.cond.txt
-  intFlag=$(python3 -c "print(1 if ${P_top} > ${P_T} else 0)")
+  intFlag=$(python3 -c "print(1 if ${P_top} > ${P_T_log} else 0)")
 
   if [ "${intFlag}" -eq 1 ]; then
     cond_cmd=("${cmd[@]}" --condition-list "${TMPFILE}.cond.txt")

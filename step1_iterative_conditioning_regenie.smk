@@ -456,7 +456,7 @@ rule spa_tests_stepwise_conditional_plink:
             conda run --no-capture-output -n regenie_env \
                 bash scripts/stepwise_conditional_regenie_plink.sh \
                 $plink_fileset {output} {input.phenotype_file} {input.covariate_file} \
-                {input.pred_file} $chr {params.P_T} \
+                {input.pred_file} $chr {params.P_T} {wildcards.trait} \
                 > >(tee -a {log.stdout}) \
                 2> >(tee -a {log.stderr} >&2)
         done
