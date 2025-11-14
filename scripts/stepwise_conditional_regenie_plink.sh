@@ -13,7 +13,7 @@ PHENOCOL=${8}
 
 # conda activate regenie_env
 # TMPFILE=$(mktemp)
-# regenie \
+# cmd=(regenie \
 #   --step 2 \
 #   --bed run_files/ENSG00000167601_500000_0.0001 \
 #   --phenoFile snakemake_eur/phenotypes/ukb.standing_height.20250508.tsv \
@@ -22,8 +22,8 @@ PHENOCOL=${8}
 #   --pred run_files/Height_pred.list \
 #   --minMAC 10 \
 #   --bsize 400 \
-#   --out ${TMPFILE}
-
+#   --out ${TMPFILE})
+# "${cmd[@]}"
 # # categorical covariate cols - use Nik's flags in the step 1 log he ran
 # # phenotype_cols - don't need this, we let it be defined by the available loco files
 
@@ -76,7 +76,6 @@ if [ $(wc -l < ${PLINK}.bim) -gt 2 ]; then
   topline=$(sort -g -k12,12r "${TMPFILE}_${PHENOCOL}.regenie" | head -n 2 | tail -1)
   cond_M=$(awk '{print "chr"$1":"$2":"$4":"$5}' <<< "$topline")
   P_top=$(awk '{print $12}' <<< "$topline")
-  lowest_pos_id=$(sort -g -k2,2 "${TMPFILE}" | head -n 2 | tail -1 | awk '{print $1":"$2":"$4":"$5}')
 
   echo "Lowest Pvalue in the sumstats file"
   echo "${cond_M}: ${P_top}"
@@ -84,84 +83,25 @@ if [ $(wc -l < ${PLINK}.bim) -gt 2 ]; then
   echo ${P_T}
   P_T_log=$(awk -v v="${P_T}" 'BEGIN {print -log(v)/log(10)}')
 
-
-  # Add the top variant to the list of conditioning markers
-  # Write to a tmp file
+  # Add the top variant to the list of conditioning markers, write to a tmp file
   echo ${cond_M} > ${TMPFILE}.cond.txt
   intFlag=$(python3 -c "print(1 if ${P_top} > ${P_T_log} else 0)")
+  cond_cmd=("${cmd[@]}" --condition-list "${TMPFILE}.cond.txt")
 
-  if [ "${intFlag}" -eq 1 ]; then
-    cond_cmd=("${cmd[@]}" --condition-list "${TMPFILE}.cond.txt")
+  while [ "${intFlag}" -eq 1 ]; do
     "${cond_cmd[@]}"
-
-  #   ncol=$(awk '{print NF; exit}' "${TMPFILE}")
-  #   if [ "$ncol" -eq 29 ]; then
-
-  #     topline=$(sort -g -k20,20 "${TMPFILE}" | head -n 2 | tail -1)
-  #     cond_M=$(awk '{print $1":"$2":"$4":"$5}' <<< "$topline")
-  #     P_top=$(awk '{print $20}' <<< "$topline")
-  #     # Note that we need to re-determine the first variant in the output, as it seems to 
-  #     # vary based on whether we are performing conditioning or not
-  #     lowest_pos_id=$(sort -g -k2,2 "${TMPFILE}" | head -n 2 | tail -1 | awk '{print $1":"$2":"$4":"$5}')
-  #     echo "Lowest position variant's ID: ${lowest_pos_id}"
-
-  #     while [ ${cond_M} = ${lowest_pos_id} ]; do
-  #       echo "Weird edge case - SAIGE cannot condition on the first variant in the bim."
-  #       vars=$((vars+1))
-  #       topline=$(sort -g -k20,20 "${TMPFILE}" | head -n ${vars} | tail -1)
-  #       cond_M=$(awk '{print $1":"$2":"$4":"$5}' <<< "$topline")
-  #       P_top=$(awk '{print $20}' <<< "$topline")
-  #     done
-  #     vars=2
-
-  #   elif [ "$ncol" -eq 19 ]; then
-
-  #     topline=$(sort -g -k18,18 "${TMPFILE}" | head -n 2 | tail -1)
-  #     cond_M=$(awk '{print $1":"$2":"$4":"$5}' <<< "$topline")
-  #     P_top=$(awk '{print $18}' <<< "$topline")
-  #     # Note that we need to re-determine the first variant in the output, as it seems to 
-  #     # vary based on whether we are performing conditioning or not
-  #     lowest_pos_id=$(sort -g -k2,2 "${TMPFILE}" | head -n 2 | tail -1 | awk '{print $1":"$2":"$4":"$5}')
-  #     echo "Lowest position variant's ID: ${lowest_pos_id}"
-
-  #     while [ ${cond_M} = ${lowest_pos_id} ]; do
-  #       echo "Weird edge case - SAIGE cannot condition on the first variant in the bim."
-  #       vars=$((vars+1))
-  #       topline=$(sort -g -k18,18 "${TMPFILE}" | head -n ${vars} | tail -1)
-  #       cond_M=$(awk '{print $1":"$2":"$4":"$5}' <<< "$topline")
-  #       P_top=$(awk '{print $18}' <<< "$topline")
-  #     done
-  #     vars=2
-
-  #   else
-  #     echo "Unexpected number of columns ($ncol) in $TMPFILE" >&2
-  #     exit 1
-  #   fi
-
-  #   echo "Lowest Pvalue in the sumstats file"
-  #   echo "${cond_M}: ${P_top}"
-  #   echo "Pvalue for significance for conditioning"
-  #   echo ${P_T}
-
-  #   CONDITION_unordered="${CONDITION},${cond_M}"
-  #   echo "conditioning..."
-
-  #   # intFlag=$(awk -v P_top="${P_top}" -v P_T="${P_T}" 'BEGIN{print (P_top<P_T)?1:0}')
-  #   intFlag=$(python3 -c "print(1 if ${P_top} < ${P_T} else 0)")
-  #   rm -f "${TMPFILE}"
-  fi
+    topline=$(sort -g -k12,12r "${TMPFILE}_${PHENOCOL}.regenie" | head -n 2 | tail -1)
+    cond_M=$(awk '{print "chr"$1":"$2":"$4":"$5}' <<< "$topline")
+    P_top=$(awk '{print $12}' <<< "$topline")
+    echo "Lowest Pvalue in the sumstats file"
+    echo "${cond_M}: ${P_top}"
+    echo "Pvalue for significance for conditioning"
+    echo ${P_T}
+    intFlag=$(python3 -c "print(1 if ${P_top} > ${P_T_log} else 0)")
+    echo ${cond_M} >> ${TMPFILE}.cond.txt
+  done
 else
   echo "No common variants present in the region" 
 fi
 
-# Note that the very last variant in "$CONDITION_unordered" is not significant any more after the final conditioning:
-# CONDITION=$(echo "$CONDITION_unordered" | awk -F',' 'NF>1 { for (i=1; i<NF; i++) printf "%s%s", $i, (i<NF-1 ? "," : "") }')
-
-# # Move and compress the output
-# mv *regenie ${OUT}.regenie
-# gzip *regenie
-
-# #rm tmp-*
-
-# regenie requires info about whether it's cts or case/control - I can extract that from
-# the phenotype json file
+sed '$d' ${TMPFILE}.cond.txt | paste -sd, - > ${VARIANTS_COMMA}
