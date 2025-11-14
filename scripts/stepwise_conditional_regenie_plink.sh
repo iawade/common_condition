@@ -89,9 +89,8 @@ if [ $(wc -l < ${PLINK}.bim) -gt 2 ]; then
   echo ${cond_M} > ${TMPFILE}.cond.txt
   intFlag=$(python3 -c "print(1 if ${P_top} > ${P_T} else 0)")
 
-  if [ "${intFlag}" -eq 1 ]
-  do
-    cond_cmd=("${cmd[@]}" --condition-list="${TMPFILE}.cond.txt")
+  if [ "${intFlag}" -eq 1 ]; then
+    cond_cmd=("${cmd[@]}" --condition-list "${TMPFILE}.cond.txt")
     "${cond_cmd[@]}"
 
   #   ncol=$(awk '{print NF; exit}' "${TMPFILE}")
@@ -149,7 +148,7 @@ if [ $(wc -l < ${PLINK}.bim) -gt 2 ]; then
   #   # intFlag=$(awk -v P_top="${P_top}" -v P_T="${P_T}" 'BEGIN{print (P_top<P_T)?1:0}')
   #   intFlag=$(python3 -c "print(1 if ${P_top} < ${P_T} else 0)")
   #   rm -f "${TMPFILE}"
-  done
+  fi
 else
   echo "No common variants present in the region" 
 fi
