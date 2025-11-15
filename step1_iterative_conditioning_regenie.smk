@@ -138,6 +138,8 @@ with open(phenotype_json) as f:
     phenotype_data = json.load(f)
 
 phenotype_ids = {entry["phenotype_ID"] for entry in phenotype_data}
+phenotype_ids_dict = {entry["phenotype_ID"]: entry for entry in phenotype_data}
+
 print(f"Loaded {len(phenotype_ids)} phenotype_IDs from JSON.")
 print(f"Phenotype IDs from JSON: {phenotype_ids}")
 
@@ -447,7 +449,7 @@ rule spa_tests_stepwise_conditional_plink:
         P_T=config["conditioning_pvalue"],
         covariate_cols = config["covariate_cols"],
         categ_covariate_cols = config["categorical_covariate_cols"],
-        trait_type=lambda wildcards: phenotype_ids[wildcards.trait]["trait_type"]
+        trait_type=lambda wildcards: phenotype_ids_dict[wildcards.trait]["trait_type"]
     log:
         stdout="logs/spa_tests_stepwise_conditional/{gene}_{trait}_{distance}_{maf}.out",
         stderr="logs/spa_tests_stepwise_conditional/{gene}_{trait}_{distance}_{maf}.err"
@@ -491,7 +493,7 @@ rule spa_tests_conditional_plink:
         mask_def="run_files/mask_defs.txt",
         covariate_cols = config["covariate_cols"],
         categ_covariate_cols = config["categorical_covariate_cols"],
-        trait_type=lambda wildcards: phenotype_ids[wildcards.trait]["trait_type"]
+        trait_type=lambda wildcards: phenotype_ids_dict[wildcards.trait]["trait_type"]
     log:
         stdout="logs/spa_tests_conditional/{gene}_{trait}_{distance}_{maf}.out",
         stderr="logs/spa_tests_conditional/{gene}_{trait}_{distance}_{maf}.err"
