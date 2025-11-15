@@ -503,7 +503,7 @@ rule spa_tests_conditional_plink:
         set -euo pipefail
         plink_fileset=$(echo {input.plink_bed} | sed 's/\\.bed$//')
         conda run --no-capture-output -n regenie_env \
-            bash scripts/saige_step2_conditioning_check_regenie_plink.sh \
+            bash scripts/regenie_step2_conditioning_check_plink.sh \
             $plink_fileset {output} {params.min_mac} \
             {input.phenotype_file} {input.covariate_file} \
             {wildcards.trait} {params.covariate_cols} {params.categ_covariate_cols} \
