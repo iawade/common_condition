@@ -39,6 +39,30 @@ cmd=(regenie
   --covarFile ${COVARFILE}
   ${trait_flag}
   --pred ${PREDFILE}
+  --minMAC 10
+  --bsize 400
+  --covarColList "${COVARCOLLIST}"
+  --catCovarList "${CATEGCOVARCOLLIST}"
+  --out ${TMPFILE})
+
+if [ -s "$CONDITION" ]; then
+    echo "There are variants to condition on"
+    cmd+=(--condition-list "${CONDITION}")
+fi
+
+# Run the command
+"${cmd[@]}"
+mv "${TMPFILE}_${PHENOCOL}.regenie" "${OUT}.singleAssoc.txt"
+
+# /tmp is used to guard against weird edge cases if plink files are split in the
+# middle of genes
+cmd=(regenie
+  --step 2
+  --bed ${PLINK}
+  --phenoFile ${PHENOFILE}
+  --covarFile ${COVARFILE}
+  ${trait_flag}
+  --pred ${PREDFILE}
   --covarColList "${COVARCOLLIST}"
   --catCovarList "${CATEGCOVARCOLLIST}"
   --anno-file ${ANNOTATIONFILE}
@@ -61,3 +85,4 @@ fi
 # ALSO NEED TO RUN THE VARIANTS AS WELL (USING THE PREVIOUS COMMAND)
 # Create the final output file for the conditioning variants
 paste -sd, ${CONDITION} > "${TMPFILE}.conditioning.txt" && mv "${TMPFILE}.conditioning.txt" "${CONDITION}"
+mv "${TMPFILE}_${PHENOCOL}.regenie ${OUT}
