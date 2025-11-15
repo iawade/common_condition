@@ -94,8 +94,8 @@ annotations_to_include = config["annotations_to_include"]
 
 annotation_vec = annotations_to_include.split(",")
 with open("run_files/mask_defs.txt", "w") as out:
-    for item in entries:
-        out.write(item + "\t" + item.replace(":", ",") + "\n")
+    for annotation in annotation_vec:
+        out.write(annotation + "\t" + annotation.replace(":", ",") + "\n")
 
 import pandas as pd
 import json
