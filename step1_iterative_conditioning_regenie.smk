@@ -490,7 +490,7 @@ rule spa_tests_conditional_plink:
         max_MAF="{maf}",
         mask_def="run_files/mask_defs.txt",
         covariate_cols = config["covariate_cols"],
-        categ_covariate_cols = config["categorical_covariate_cols"]
+        categ_covariate_cols = config["categorical_covariate_cols"],
         trait_type=lambda wildcards: phenotype_ids[wildcards.trait]["trait_type"]
     log:
         stdout="logs/spa_tests_conditional/{gene}_{trait}_{distance}_{maf}.out",
