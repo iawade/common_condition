@@ -481,7 +481,7 @@ rule spa_tests_conditional_plink:
             if re.search(rf'(?:^|[/_.\-]){re.escape(wildcards.trait)}(?=[/_.\-])', lf)
         ],
         annotation_file = "run_files/{gene}.annotation.txt",
-        setlist_file = "run_files/{gene}.setlist.txt"
+        setlist_file = "run_files/{gene}.setlist.txt",
         conditioning_variants="run_files/{gene}_{trait}_{distance}_{maf}_string.txt"
     output:
         "regenie_outputs/{gene}_{trait}_{distance}_saige_results_{maf}.txt" 

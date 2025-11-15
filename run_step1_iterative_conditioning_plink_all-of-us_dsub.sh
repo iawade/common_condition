@@ -26,7 +26,6 @@ mv ${SAIGE_DIR} saige_outputs
 mv all-of-us_configs/${ANC}_config.yaml config.yaml
 Rscript scripts/create_chr_specific_filepaths.r --chr ${CHR} -p ${P_T}
 
-
 WORKFLOW_FILE="step1_iterative_conditioning.smk"
 
 mkdir -p saige_outputs run_files/bed
