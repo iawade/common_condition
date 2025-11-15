@@ -92,10 +92,13 @@ maf = config["maf"]
 min_mac = config["min_mac"]
 annotations_to_include = config["annotations_to_include"]
 
+run_files_dir = Path("run_files")
+run_files_dir.mkdir(exist_ok=True)
+
 annotation_vec = annotations_to_include.split(",")
-with open("run_files/mask_defs.txt", "w") as out:
+with open("run_files/mask_defs.txt", "w") as f:
     for annotation in annotation_vec:
-        out.write(annotation + "\t" + annotation.replace(":", ",") + "\n")
+        f.write(annotation + "\t" + annotation.replace(":", ",") + "\n")
 
 import pandas as pd
 import json
@@ -230,9 +233,6 @@ for pid in phenotype_ids:  # phenotype IDs from JSON
 
 # For all available traits, determine the loco file and the phenotype, and create the
 # pred file
-run_files_dir = Path("run_files")
-run_files_dir.mkdir(exist_ok=True)
-
 for trait in available_traits:
     pattern = rf'(?:^|[/_.\-]){re.escape(trait)}(?=$|[/_.\-])'
     matching_files = [lf for lf in loco_files if re.search(pattern, lf)]
