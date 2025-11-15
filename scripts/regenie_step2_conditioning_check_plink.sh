@@ -69,6 +69,7 @@ cmd=(regenie
   --set-list ${SETLISTFILE}
   --mask-def ${MASKDEF}
   --aaf-bins ${MAX_MAF}
+  --vc-maxAAF ${MAX_MAF}
   --vc-tests "skat,skato,acato"
   --minMAC ${MIN_MAC}
   --bsize 400
