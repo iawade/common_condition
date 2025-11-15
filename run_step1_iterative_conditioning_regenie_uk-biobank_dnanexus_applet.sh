@@ -24,7 +24,7 @@ echo "Starting a run of Snakemake workflow..."
 # snakemake --snakefile "$WORKFLOW_FILE" --cores $CORES --touch
 snakemake --snakefile "$WORKFLOW_FILE" --cores $CORES --jobs $CORES --latency-wait 60 \
     --max-status-checks-per-second 0.01 \
-    --printshellcmds --verbose --rerun-triggers input params software-env \
+    --printshellcmds --verbose #--rerun-triggers input params software-env \
      2>&1 | tee "$LOGFILE"
 
 echo "Run complete. Log saved to $LOGFILE"

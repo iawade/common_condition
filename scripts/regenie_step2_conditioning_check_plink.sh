@@ -32,27 +32,27 @@ fi
 # /tmp is used to guard against weird edge cases if plink files are split in the
 # middle of genes
 TMPFILE=$(mktemp)
-cmd=(regenie
-  --step 2
-  --bed ${PLINK}
-  --phenoFile ${PHENOFILE}
-  --covarFile ${COVARFILE}
-  ${trait_flag}
-  --pred ${PREDFILE}
-  --minMAC 10
-  --bsize 400
-  --covarColList "${COVARCOLLIST}"
-  --catCovarList "${CATEGCOVARCOLLIST}"
-  --out ${TMPFILE})
+# cmd=(regenie
+#   --step 2
+#   --bed ${PLINK}
+#   --phenoFile ${PHENOFILE}
+#   --covarFile ${COVARFILE}
+#   ${trait_flag}
+#   --pred ${PREDFILE}
+#   --minMAC 10
+#   --bsize 400
+#   --covarColList "${COVARCOLLIST}"
+#   --catCovarList "${CATEGCOVARCOLLIST}"
+#   --out ${TMPFILE})
 
-if [ -s "$CONDITION" ]; then
-    echo "There are variants to condition on"
-    cmd+=(--condition-list "${CONDITION}")
-fi
+# if [ -s "$CONDITION" ]; then
+#     echo "There are variants to condition on"
+#     cmd+=(--condition-list "${CONDITION}")
+# fi
 
-# Run the command
-"${cmd[@]}"
-mv "${TMPFILE}_${PHENOCOL}.regenie" "${OUT}.singleAssoc.txt"
+# # Run the command
+# "${cmd[@]}"
+# mv "${TMPFILE}_${PHENOCOL}.regenie" "${OUT}.singleAssoc.txt"
 
 # /tmp is used to guard against weird edge cases if plink files are split in the
 # middle of genes
