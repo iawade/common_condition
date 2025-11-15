@@ -5,55 +5,22 @@ PLINK="${1}"
 VARIANTS_COMMA="${2}"
 PHENOFILE="${3}"
 COVARFILE="${4}"
-PREDFILE="${5}" # This should be defined in at the start of the smk file
+PREDFILE="${5}"
 CHR="${6}"
 P_T="${7}"
-PHENOCOL=${8}
-# CASE_CONTROL="${8}"
+PHENOCOL="${8}"
+COVARCOLLIST="${9}"
+CATEGCOVARCOLLIST="${10}"
+CASE_CONTROL="${11}"
 
-# conda activate regenie_env
-# TMPFILE=$(mktemp)
-# cmd=(regenie \
-#   --step 2 \
-#   --bed run_files/ENSG00000167601_500000_0.0001 \
-#   --phenoFile snakemake_eur/phenotypes/ukb.standing_height.20250508.tsv \
-#   --covarFile snakemake_eur/covariates/ukb_brava_default_covariates.20250508.tsv \
-#   --qt --apply-rint \
-#   --pred run_files/Height_pred.list \
-#   --minMAC 10 \
-#   --bsize 400 \
-#   --out ${TMPFILE})
-# "${cmd[@]}"
-# # categorical covariate cols - use Nik's flags in the step 1 log he ran
-# # phenotype_cols - don't need this, we let it be defined by the available loco files
-
-# # We need to split the job up into tiny little jobs
-# # only allowing gene-phenotype pairs
-
-# # Decide what I need to move to the node and move it, and then start 
-# # and interactive job. Make sure that we use the new docker.
-# # then I can just iterate and get to the end
-
-# # SAMPLE IDs to keep - equivalent as the mtx IDs I think
-# # This should be a list containing the first two columns of the fam file - this should
-# # be used instead of the sparse mtx sample IDs
-
-# # Remove output prefix from .loco file
-# # Generate this file on the fly - won't take long so just do it for all of the loco files
-# # Define the pred.list for ourselves - we'll always just use a single trait
-# # since we need to run for (gene, phenotype) pairs
-# PRED="regenie_step1_${anc}_${PHENOCOL}_pred.list"
-# LOCO="regenie_step1_${anc}_${PHENOCOL}_1.loco"
-# PRED_LOCAL="$HOME/tmp-predfile.txt"
-# cat ${PRED} | sed 's/\/home\/dnanexus\/out\/out\///g' > ${PRED_LOCAL} # Just rename the location of the predfile
-# PRED=${PRED_LOCAL}
-# head $PRED
-
-# Determine whehter cts or binary
-# If case_control is True 
-#trait_flag="--bt --firth --approx --pThresh 0.1"
-# else
-trait_flag="--qt --apply-rint"
+if [[ "${CASE_CONTROL}" == "binary" ]]; then
+  trait_flag="--bt --firth --approx --pThresh 0.1"
+elif [[ "${CASE_CONTROL}" == "quantitative" ]]; then
+  trait_flag="--qt --apply-rint"
+else
+  echo "No trait type flag recognised" >&2
+  exit 1
+fi
 
 # Edge case
 if [ $(wc -l < ${PLINK}.bim) -gt 2 ]; then
@@ -67,6 +34,8 @@ if [ $(wc -l < ${PLINK}.bim) -gt 2 ]; then
       --pred ${PREDFILE}
       --minMAC 10
       --bsize 400
+      --covarColList "${COVARCOLLIST}"
+      --catCovarList "${CATEGCOVARCOLLIST}"
       --out ${TMPFILE}) # Add the covar cols etc
 
   # Run the command
@@ -104,4 +73,4 @@ else
   echo "No common variants present in the region" 
 fi
 
-sed '$d' ${TMPFILE}.cond.txt | paste -sd, - > ${VARIANTS_COMMA}
+sed '$d' ${TMPFILE}.cond.txt > ${VARIANTS_COMMA}

@@ -92,6 +92,11 @@ maf = config["maf"]
 min_mac = config["min_mac"]
 annotations_to_include = config["annotations_to_include"]
 
+annotation_vec = annotations_to_include.split(",")
+with open("run_files/mask_defs.txt", "w") as out:
+    for item in entries:
+        out.write(item + "\t" + item.replace(":", ",") + "\n")
+
 import pandas as pd
 import json
 import re
@@ -260,11 +265,11 @@ def get_format_outputs():
         expand("run_files/bed/{gene}.bed", gene=genes_in_valid_pairs),
         expand("run_files/bed/expanded_regions_{gene}.bed", gene=genes_in_valid_pairs),
         expand("run_files/bed/expanded_coding_regions_{gene}.bed", gene=genes_in_valid_pairs),
-        # expand("saige_outputs/{gene_trait}_{distance}_saige_results_{maf}.txt",
-               # gene_trait=valid_gene_trait_pairs,
-               # distance=config["distance"],
-               # maf=config["maf"]),
-        # "brava_stepwise_conditional_analysis_results.txt"
+        expand("regenie_outputs/{gene_trait}_{distance}_saige_results_{maf}.txt",
+               gene_trait=valid_gene_trait_pairs,
+               distance=config["distance"],
+               maf=config["maf"]),
+        "brava_stepwise_conditional_analysis_regenie_results.txt"
     ]
     
     if input_format == "plink":
@@ -434,16 +439,15 @@ rule spa_tests_stepwise_conditional_plink:
         loco_file=lambda wildcards: [
             lf for lf in loco_files
             if re.search(rf'(?:^|[/_.\-]){re.escape(wildcards.trait)}(?=[/_.\-])', lf)
-        ],
-        annotation_file = "run_files/{gene}.annotation.txt",
-        setlist_file = "run_files/{gene}.setlist.txt"
+        ]
     output:
         "run_files/{gene}_{trait}_{distance}_{maf}_string.txt"
     params:
         maf_common="{maf}",
         P_T=config["conditioning_pvalue"],
         covariate_cols = config["covariate_cols"],
-        categ_covariate_cols = config["categorical_covariate_cols"]
+        categ_covariate_cols = config["categorical_covariate_cols"],
+        trait_type=lambda wildcards: phenotype_ids[wildcards.trait]["trait_type"]
     log:
         stdout="logs/spa_tests_stepwise_conditional/{gene}_{trait}_{distance}_{maf}.out",
         stderr="logs/spa_tests_stepwise_conditional/{gene}_{trait}_{distance}_{maf}.err"
@@ -457,73 +461,77 @@ rule spa_tests_stepwise_conditional_plink:
                 bash scripts/stepwise_conditional_regenie_plink.sh \
                 $plink_fileset {output} {input.phenotype_file} {input.covariate_file} \
                 {input.pred_file} $chr {params.P_T} {wildcards.trait} \
+                {params.covariate_cols} {params.categ_covariate_cols} {params.trait_type} \
                 > >(tee -a {log.stdout}) \
                 2> >(tee -a {log.stderr} >&2)
         done
         """
 
-# # Format-specific conditional analysis rules
-# rule spa_tests_conditional_plink:
-#     input:
-#         plink_bim = "run_files/{gene}_{distance}.bim",
-#         plink_bed = "run_files/{gene}_{distance}.bed",
-#         plink_fam = "run_files/{gene}_{distance}.fam",
-#         model_file=lambda wildcards: [
-#             mf for mf in model_files
-#             if re.search(rf'(?:^|[/_.\-]){re.escape(wildcards.trait)}(?=[/_.\-])', mf)
-#         ],
-#         variance_file=lambda wildcards: [
-#             vf for vf in variance_files
-#             if re.search(rf'(?:^|[/_.\-]){re.escape(wildcards.trait)}(?=[/_.\-])', vf)
-#         ],
-#         sparse_matrix=sparse_matrix,
-#         group_file="run_files/{gene}_group_file.txt",
-#         conditioning_variants="run_files/{gene}_{trait}_{distance}_{maf}_string.txt"
-#     output:
-#         "saige_outputs/{gene}_{trait}_{distance}_saige_results_{maf}.txt" 
-#     params:
-#         min_mac=min_mac,
-#         annotations_to_include=annotations_to_include,
-#         max_MAF="{maf}",
-#         use_null_var_ratio=config["use_null_var_ratio"]
-#     log:
-#         stdout="logs/spa_tests_conditional/{gene}_{trait}_{distance}_{maf}.out",
-#         stderr="logs/spa_tests_conditional/{gene}_{trait}_{distance}_{maf}.err"
-#     threads: 1
-#     shell:
-#         """
-#         set -euo pipefail
-#         plink_fileset=$(echo {input.plink_bed} | sed 's/\\.bed$//')
-#         conda run --no-capture-output -n RSAIGE_vcf_version \
-#             bash scripts/saige_step2_conditioning_check_plink.sh \
-#             $plink_fileset {output} {params.min_mac} {input.model_file} \
-#             {input.variance_file} {input.sparse_matrix} {input.group_file} \
-#             {params.annotations_to_include} {input.conditioning_variants} \
-#             {params.max_MAF} {params.use_null_var_ratio} \
-#             > >(tee -a {log.stdout}) \
-#             2> >(tee -a {log.stderr} >&2)
-#         """
+# Format-specific conditional analysis rules
+rule spa_tests_conditional_plink:
+    input:
+        pred_file = "run_files/{trait}_pred.list",
+        phenotype_file = phenotype_file,
+        covariate_file = covariate_file,
+        plink_bim = "run_files/{gene}_{distance}_{maf}.bim",
+        plink_bed = "run_files/{gene}_{distance}_{maf}.bed",
+        plink_fam = "run_files/{gene}_{distance}_{maf}.fam",
+        loco_file=lambda wildcards: [
+            lf for lf in loco_files
+            if re.search(rf'(?:^|[/_.\-]){re.escape(wildcards.trait)}(?=[/_.\-])', lf)
+        ],
+        annotation_file = "run_files/{gene}.annotation.txt",
+        setlist_file = "run_files/{gene}.setlist.txt"
+        conditioning_variants="run_files/{gene}_{trait}_{distance}_{maf}_string.txt"
+    output:
+        "regenie_outputs/{gene}_{trait}_{distance}_saige_results_{maf}.txt" 
+    params:
+        min_mac=min_mac,
+        max_MAF="{maf}",
+        mask_def="run_files/mask_defs.txt",
+        covariate_cols = config["covariate_cols"],
+        categ_covariate_cols = config["categorical_covariate_cols"]
+        trait_type=lambda wildcards: phenotype_ids[wildcards.trait]["trait_type"]
+    log:
+        stdout="logs/spa_tests_conditional/{gene}_{trait}_{distance}_{maf}.out",
+        stderr="logs/spa_tests_conditional/{gene}_{trait}_{distance}_{maf}.err"
+    threads: 1
+    shell:
+        """
+        set -euo pipefail
+        plink_fileset=$(echo {input.plink_bed} | sed 's/\\.bed$//')
+        conda run --no-capture-output -n regenie_env \
+            bash scripts/saige_step2_conditioning_check_regenie_plink.sh \
+            $plink_fileset {output} {params.min_mac} \
+            {input.phenotype_file} {input.covariate_file} \
+            {wildcards.trait} {params.covariate_cols} {params.categ_covariate_cols} \
+            {input.pred_file} {input.annotation_file} {input.setlist_file} \
+            {params.mask_def} {input.conditioning_variants} {params.max_MAF} \
+            {params.trait_type} \
+            > >(tee -a {log.stdout}) \
+            2> >(tee -a {log.stderr} >&2)
+        """
 
-# rule combine_results:
-#     input:
-#         expand("saige_outputs/{gene_trait}_{distance}_saige_results_{maf}.txt",
-#                gene_trait=valid_gene_trait_pairs,
-#                distance=config["distance"],
-#                maf=config["maf"]),
-#     output:
-#         "brava_stepwise_conditional_analysis_results.txt"
-#     log:
-#         stdout="logs/combine_results/final_output.out",
-#         stderr="logs/combine_results/final_output.err"
-#     shell:
-#         """
-#         set -euo pipefail
-#         python scripts/combine_saige_outputs.py --out {output} \
-#         > >(tee -a {log.stdout}) \
-#         2> >(tee -a {log.stderr} >&2)
-#         """
+rule combine_results:
+    input:
+        expand("regenie_outputs/{gene_trait}_{distance}_saige_results_{maf}.txt",
+               gene_trait=valid_gene_trait_pairs,
+               distance=config["distance"],
+               maf=config["maf"]),
+    output:
+        "brava_stepwise_conditional_analysis_regenie_results.txt"
+    log:
+        stdout="logs/combine_results/final_output.out",
+        stderr="logs/combine_results/final_output.err"
+    shell:
+        """
+        set -euo pipefail
+        python scripts/combine_saige_outputs.py --out {output} \
+        > >(tee -a {log.stdout}) \
+        2> >(tee -a {log.stderr} >&2)
+        """
 
 # # Rule order to ensure proper execution based on input format
 ruleorder: filter_group_file_regenie > identify_gene_start_stop
-# ruleorder: identify_gene_start_stop > filter_to_coding_gene_plink
-# ruleorder: spa_tests_stepwise_conditional_plink > filter_to_gene_plink
+ruleorder: identify_gene_start_stop > filter_to_coding_gene_plink
+ruleorder: spa_tests_stepwise_conditional_plink > filter_to_gene_plink
