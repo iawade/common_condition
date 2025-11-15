@@ -85,4 +85,4 @@ fi
 # ALSO NEED TO RUN THE VARIANTS AS WELL (USING THE PREVIOUS COMMAND)
 # Create the final output file for the conditioning variants
 paste -sd, ${CONDITION} > "${TMPFILE}.conditioning.txt" && mv "${TMPFILE}.conditioning.txt" "${CONDITION}"
-mv "${TMPFILE}_${PHENOCOL}.regenie ${OUT}
+mv "${TMPFILE}_${PHENOCOL}.regenie" ${OUT}
