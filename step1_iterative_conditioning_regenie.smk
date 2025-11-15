@@ -475,9 +475,9 @@ rule spa_tests_conditional_plink:
         pred_file = "run_files/{trait}_pred.list",
         phenotype_file = phenotype_file,
         covariate_file = covariate_file,
-        plink_bim = "run_files/{gene}_{distance}_{maf}.bim",
-        plink_bed = "run_files/{gene}_{distance}_{maf}.bed",
-        plink_fam = "run_files/{gene}_{distance}_{maf}.fam",
+        plink_bim = "run_files/{gene}_{distance}.bim",
+        plink_bed = "run_files/{gene}_{distance}.bed",
+        plink_fam = "run_files/{gene}_{distance}.fam",
         loco_file=lambda wildcards: [
             lf for lf in loco_files
             if re.search(rf'(?:^|[/_.\-]){re.escape(wildcards.trait)}(?=[/_.\-])', lf)
