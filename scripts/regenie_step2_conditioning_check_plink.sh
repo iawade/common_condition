@@ -1,20 +1,23 @@
 #!/bin/bash
 
+echo "ARG COUNT: $#"
+echo "ARGS: $@"
+
 # Input and output variables
 PLINK="${1}" 
 OUT="${2}"
 MIN_MAC="${3}"
 PHENOFILE="${4}"
 COVARFILE="${5}"
-PHENOCOL=${6}
-COVARCOLLIST=${7}
-CATEGCOVARCOLLIST=${8}
+PHENOCOL="${6}"
+COVARCOLLIST="${7}"
+CATEGCOVARCOLLIST="${8}"
 PREDFILE="${9}"
 ANNOTATIONFILE="${10}"
 SETLISTFILE="${11}"
 MASKDEF="${12}"
 CONDITION="${13}"
-MAX_MAF=${14}
+MAX_MAF="${14}"
 CASE_CONTROL="${15}"
 
 if [[ "${CASE_CONTROL}" == "binary" ]]; then
@@ -40,7 +43,7 @@ cmd=(regenie
   --catCovarList "${CATEGCOVARCOLLIST}"
   --anno-file ${ANNOTATIONFILE}
   --set-list ${SETLISTFILE}
-  --mask-def ${MASKFILE}
+  --mask-def ${MASKDEF}
   --aaf-bins ${MAX_MAF}
   --vc-tests "skat,skato,acato"
   --minMAC ${MIN_MAC}

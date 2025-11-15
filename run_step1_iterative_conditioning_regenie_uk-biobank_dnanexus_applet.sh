@@ -21,10 +21,10 @@ rm brava_stepwise_conditional_analysis_results*.txt
 
 # Run Snakemake with the specified options
 echo "Starting a run of Snakemake workflow..."
-snakemake --snakefile "$WORKFLOW_FILE" --cores $CORES --touch
+# snakemake --snakefile "$WORKFLOW_FILE" --cores $CORES --touch
 snakemake --snakefile "$WORKFLOW_FILE" --cores 1 --jobs 1 --latency-wait 60 \
     --max-status-checks-per-second 0.01 \
-    --printshellcmds --verbose --rerun-triggers code input params software-env \
+    --printshellcmds --verbose --rerun-triggers input params software-env \
      2>&1 | tee "$LOGFILE"
 
 echo "Run complete. Log saved to $LOGFILE"
