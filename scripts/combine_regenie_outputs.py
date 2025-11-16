@@ -13,7 +13,7 @@ def combine_outputs(out, final=False):
         file_string_pattern = "final_run_files/*_*_*_*_ld_pruned_string.txt"
     else:
         file_pattern = "regenie_outputs/*_*_*_saige_results_*.txt"
-        # file_single_pattern = "regenie_outputs/*_*_*_saige_results_*.singleAssoc.txt"
+        file_single_pattern = "regenie_outputs/*_*_*_saige_results_*.singleAssoc.txt"
         file_string_pattern = "run_files/*_*_*_*_string.txt"
     
     # SAIGE outputs
