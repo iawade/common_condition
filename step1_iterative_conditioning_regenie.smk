@@ -528,7 +528,7 @@ rule combine_results:
     shell:
         """
         set -euo pipefail
-        python scripts/combine_saige_outputs.py --out {output} \
+        python scripts/combine_regenie_outputs.py --out {output} \
         > >(tee -a {log.stdout}) \
         2> >(tee -a {log.stderr} >&2)
         """
