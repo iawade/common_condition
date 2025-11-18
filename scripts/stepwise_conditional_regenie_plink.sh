@@ -43,7 +43,8 @@ if [ $(wc -l < ${PLINK}.bim) -gt 2 ]; then
 
   # Obtain the top hit as the first conditioning marker
   topline=$(sort -g -k12,12r "${TMPFILE}_${PHENOCOL}.regenie" | head -n 2 | tail -1)
-  cond_M=$(awk '{print "chr"$1":"$2":"$4":"$5}' <<< "$topline")
+  cond_M=$(awk '{chr = ($1 == 23 ? "X":$1); print "chr" chr":"$2":"$4":"$5}' <<< "$topline")
+
   P_top=$(awk '{print $12}' <<< "$topline")
 
   echo "Lowest Pvalue in the sumstats file"
@@ -60,7 +61,7 @@ if [ $(wc -l < ${PLINK}.bim) -gt 2 ]; then
   while [ "${intFlag}" -eq 1 ]; do
     "${cond_cmd[@]}"
     topline=$(sort -g -k12,12r "${TMPFILE}_${PHENOCOL}.regenie" | head -n 2 | tail -1)
-    cond_M=$(awk '{print "chr"$1":"$2":"$4":"$5}' <<< "$topline")
+    cond_M=$(awk '{chr = ($1 == 23 ? "X":$1); print "chr" chr":"$2":"$4":"$5}' <<< "$topline")
     P_top=$(awk '{print $12}' <<< "$topline")
     echo "Lowest Pvalue in the sumstats file"
     echo "${cond_M}: ${P_top}"
