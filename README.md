@@ -1,4 +1,16 @@
 # Instructions for confirming BRaVa rare-variant gene-trait associations by conditioning on nearby common variants 
+
+## Update 2025-11-25
+
+Thank you to everyone that was able to run step1 of the pipeline before the freeze. The instructions for step2 are as follows:
+* **If you have already ran step1**: the setup is unchanged. The final list of variants to condition on can be downloaded from the BRaVa Google Cloud bucket `gs://brava-meta-pilot-analysis/gene_phenotype_pairs_with_conditioning_variants_251125_*.tsv`. There is one file per ancestry; this is passed via the config (`config.yaml`) under the field `gene_trait_pairs_to_test_with_conditioning_variants`. Once this change has been made, the pipeline is run exactly as before but using the step 2 script: `run_step2_final_group_tests.sh`.
+* **If you have not ran step1**, step 2 can be still performed. Please read the setup and prerequisite instructions below, along with potential pitfalls. Once the required software, directory structure, and inputs are in place, run the step2 pipeline as described above.
+* As a reminder, please remember: In the config, make sure that for `annotations_to_include` that the damaging missense and other missense naming is as in your annotation group file! This is likely one of `damaging_missense_or_protein_altering` or `damaging_missense`. Similarly for other missense: likely one of `other_missense_or_protein_altering` or `other_missense`. Multiple naming conventions were used in the initial return of sumstats! The current default in the example config in this directory is
+> ```
+> annotations_to_include: "pLoF,damaging_missense,other_missense,synonymous,pLoF:damaging_missense,pLoF:damaging_missense:other_missense:synonymous"
+> ```
+> Please check!
+
 > [!IMPORTANT]
 > Please read until the end - some important considerations/potential pitfalls
 
