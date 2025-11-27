@@ -1,6 +1,6 @@
 # Config File for BRaVa Pilot Study Common Variant Conditional Analysis Pipeline on AoU
 
-input_format: "plink"  # or "plink"
+input_format: "vcf"  # or "plink"
 
 # Prerequisite
 list_of_vcf_files: "aou_paths/sas/sas_vcf_file_list.txt"
