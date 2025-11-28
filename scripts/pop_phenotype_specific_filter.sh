@@ -29,7 +29,7 @@ if [[ -f ${TMPFILE}.bim ]]; then
 
     if [[ $nvar -eq 1 ]]; then
         cut -f2 ${TMPFILE}.tmp.bim > ${FILE}.txt
-    else
+    elif [[ "$nvar" -gt 1 ]]; then
         plink2 --bfile ${TMPFILE}.tmp \
           --indep-pairwise 50 5 0.9 \
           --out ${FILE} || true
@@ -37,6 +37,10 @@ if [[ -f ${TMPFILE}.bim ]]; then
         if [[ -f ${FILE}.prune.in ]]; then
             paste -sd, ${FILE}.prune.in > ${FILE}.txt
         fi
+    else
+        # No conditioning variants present
+        cat ${TMPFILE}.bim
+        touch ${FILE}.txt
     fi
 else
     # No conditioning variants present in the vcf file
