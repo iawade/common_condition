@@ -3,6 +3,11 @@
 
 configfile: "config.yaml"
 
+# Extra check outside of shell command
+from pathlib import Path
+run_files_dir = Path("final_run_files")
+run_files_dir.mkdir(parents=True, exist_ok=True)
+
 wildcard_constraints:
     gene="[A-Za-z0-9]+",
     trait="[A-Za-z0-9]+",
