@@ -127,36 +127,32 @@ genes_in_valid_pairs = sorted({pair.split("_")[0] for pair in valid_gene_trait_p
 
 # Group-file sanity check
 present_genes = set()
-
 for gf in group_files:
     try:
-        with open(gf) as f:
-            for line in f:
+        with open(gf) as fh:
+            for line in fh:
                 if not line.strip():
                     continue
-                # space-delimited: first column only
-                gene_id = line.split()[0]
-                present_genes.add(gene_id)
+                present_genes.add(line.split()[0])
     except OSError:
         print(f"WARNING: Could not read group file {gf}")
 
-genes_expected = set(genes_in_valid_pairs)
-n_expected = len(genes_expected)
-n_present = len(genes_expected & present_genes)
-pct_present = (n_present / n_expected * 100) if n_expected else 0.0
+orig_n_genes = len(genes_in_valid_pairs)
+# keep only genes that are both in valid pairs and present in group files
+genes_in_valid_pairs = sorted([g for g in genes_in_valid_pairs if g in present_genes])
+filtered_out = orig_n_genes - len(genes_in_valid_pairs)
 
-print(
-    f"Group-file presence check: "
-    f"{n_present}/{n_expected} genes ({pct_present:.1f}%) present"
-)
+# Also update valid_gene_trait_pairs so downstream expand() matches the filtered genes
+valid_gene_trait_pairs = [p for p in valid_gene_trait_pairs if p.split('_')[0] in genes_in_valid_pairs]
 
-if pct_present < 90.0:
-    missing = sorted(genes_expected - present_genes)
-    print(
-        "WARNING: More than 10% of genes are missing from group files "
-        f"({len(missing)} missing)."
-    )
-    print("Example missing genes (up to 10):", missing[:10])
+if filtered_out > 0:
+    pct = filtered_out / orig_n_genes * 100 if orig_n_genes else 0.0
+    msg = f"INFO: {filtered_out} out of {orig_n_genes} genes were not present in group files and were removed from the run list."
+    # print always, but escalate to WARNING if >10%
+    if pct > 10.0:
+        print("WARNING: " + msg + f" ({pct:.1f}% removed).")
+    else:
+        print("INFO: " + msg + f" ({pct:.1f}% removed).")
 
 # Define format-specific output files for the 'all' rule
 def get_format_outputs():
