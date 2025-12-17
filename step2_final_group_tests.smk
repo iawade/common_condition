@@ -123,6 +123,33 @@ for job in conditioning_jobs:
 
 genes = sorted(set(job['Gene'] for job in conditioning_jobs))
 
+# Group file sanity check
+present_genes = set()
+for gf in group_files:
+    try:
+        with open(gf) as fh:
+            for line in fh:
+                if not line.strip():
+                    continue
+                present_genes.add(line.split()[0])
+    except OSError:
+        print(f"WARNING: Could not read group file {gf}")
+
+orig_n_jobs = len(conditioning_jobs)
+conditioning_jobs = [job for job in conditioning_jobs if job['Gene'] in present_genes]
+filtered_out = orig_n_jobs - len(conditioning_jobs)
+
+# recompute genes used downstream
+genes = sorted(set(job['Gene'] for job in conditioning_jobs))
+
+if filtered_out > 0:
+    pct = filtered_out / orig_n_jobs * 100 if orig_n_jobs else 0.0
+    msg = f"INFO: {filtered_out} out of {orig_n_jobs} conditioning jobs were removed because their genes were not present in group files."
+    if pct > 10.0:
+        print("WARNING: " + msg + f" ({pct:.1f}% removed).")
+    else:
+        print("INFO: " + msg + f" ({pct:.1f}% removed).")
+
 # Debugging: Print valid gene-trait pairs
 print(f"Filtered {len(conditioning_jobs)} conditioning jobs with available model/variance files.")
 
