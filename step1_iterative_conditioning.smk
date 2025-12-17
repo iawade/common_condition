@@ -125,6 +125,39 @@ print(f"Valid gene-trait pairs: {valid_gene_trait_pairs}")
 
 genes_in_valid_pairs = sorted({pair.split("_")[0] for pair in valid_gene_trait_pairs})
 
+# Group-file sanity check
+present_genes = set()
+
+for gf in group_files:
+    try:
+        with open(gf) as f:
+            for line in f:
+                if not line.strip():
+                    continue
+                # space-delimited: first column only
+                gene_id = line.split()[0]
+                present_genes.add(gene_id)
+    except OSError:
+        print(f"WARNING: Could not read group file {gf}")
+
+genes_expected = set(genes_in_valid_pairs)
+n_expected = len(genes_expected)
+n_present = len(genes_expected & present_genes)
+pct_present = (n_present / n_expected * 100) if n_expected else 0.0
+
+print(
+    f"Group-file presence check: "
+    f"{n_present}/{n_expected} genes ({pct_present:.1f}%) present"
+)
+
+if pct_present < 90.0:
+    missing = sorted(genes_expected - present_genes)
+    print(
+        "WARNING: More than 10% of genes are missing from group files "
+        f"({len(missing)} missing)."
+    )
+    print("Example missing genes (up to 10):", missing[:10])
+
 # Define format-specific output files for the 'all' rule
 def get_format_outputs():
     base_outputs = [
