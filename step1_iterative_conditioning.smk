@@ -58,7 +58,15 @@ annotations_to_include = config["annotations_to_include"]
 import pandas as pd
 import json
 import re
+import gzip
+from pathlib import Path
 from scripts.extract_chromosome import get_gene_chr
+
+def open_maybe_gzip(path):
+    path = Path(path)
+    if path.suffix == ".gz":
+        return gzip.open(path, "rt", encoding="utf-8", errors="replace")
+    return open(path, "rt", encoding="utf-8", errors="replace")
 
 # Extract chromosomes from appropriate file list
 pattern = r'\.(chr[0-9X]+)\.'
@@ -80,6 +88,19 @@ gene_trait_pairs_df = gene_trait_pairs_df[gene_trait_pairs_df['chr'].isin(chrs)]
 # Extract unique genes and traits
 genes = set(gene_trait_pairs_df['Region'])  # Second column is gene
 traits = set(gene_trait_pairs_df['phenotype'])  # First column is trait
+
+# Now make sure that we restrict to the available genes
+available_genes = set()
+for group_file in group_files:
+    with open_maybe_gzip(group_file) as f:
+        for line in f:
+            line = line.lstrip()
+            if not line:
+                continue
+            first_word = line.split(None, 1)[0]
+            available_genes.add(first_word)
+
+genes = [gene for gene in genes if gene in available_genes]
 
 # Convert to sorted lists for consistency
 genes = sorted(genes)
@@ -118,7 +139,12 @@ for pid in phenotype_ids:  # phenotype IDs from JSON
         available_traits.add(pid)
 
 # Store valid gene-trait pairs as a list
-valid_gene_trait_pairs = [f"{gene}_{trait}" for gene, trait in zip(gene_trait_pairs_df.iloc[:, 1], gene_trait_pairs_df.iloc[:, 0]) if trait in available_traits]
+valid_gene_trait_pairs = [
+    f"{gene}_{trait}"
+    for gene, trait in zip(
+        gene_trait_pairs_df.iloc[:, 1],
+        gene_trait_pairs_df.iloc[:, 0]
+    ) if trait in available_traits and gene in genes]
 
 print(f"Filtered {len(valid_gene_trait_pairs)} gene-trait pairs with available model/variance files.")
 print(f"Valid gene-trait pairs: {valid_gene_trait_pairs}")

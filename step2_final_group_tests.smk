@@ -54,7 +54,15 @@ annotations_to_include = config["annotations_to_include"]
 import pandas as pd
 import json
 import re
+import gzip
+from pathlib import Path
 from scripts.extract_chromosome import get_gene_chr
+
+def open_maybe_gzip(path):
+    path = Path(path)
+    if path.suffix == ".gz":
+        return gzip.open(path, "rt", encoding="utf-8", errors="replace")
+    return open(path, "rt", encoding="utf-8", errors="replace")
 
 # Extract chromosomes based on input format
 pattern = r'\.(chr[0-9X]+)\.'
@@ -104,6 +112,19 @@ for pid in phenotype_ids:  # phenotype IDs from JSON
         available_traits.add(pid)
 
 conditioning_jobs = [job for job in conditioning_jobs if job['Trait'] in available_traits]
+
+# Now make sure that we restrict to the available genes
+available_genes = set()
+for group_file in group_files:
+    with open_maybe_gzip(group_file) as f:
+        for line in f:
+            line = line.lstrip()
+            if not line:
+                continue
+            first_word = line.split(None, 1)[0]
+            available_genes.add(first_word)
+
+conditioning_jobs = [job for job in conditioning_jobs if job['Gene'] in available_genes]
 
 for job in conditioning_jobs:
     filename = f"final_run_files/{job['Gene']}_{job['Trait']}_{job['MAF_cutoff_for_conditioning_variants']}_extract.txt"
