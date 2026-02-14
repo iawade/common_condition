@@ -25,10 +25,10 @@ samples <- function(modelfile)
 }
 
 model_files <- fread(opt$modelfiles)$V1
-samples <- c()
+samples_ids <- c()
 
 for (model_file in model_files) {
-  samples <- union(samples, samples(model_file))
+  samples_ids <- union(samples_ids, samples(model_file))
 }
-fwrite(data.table(samples), file=opt$outfile, sep="\t", quote=FALSE,
+fwrite(data.table(sampleIDs=samples_ids), file=opt$outfile, sep="\t", quote=FALSE,
   col.names=FALSE)
