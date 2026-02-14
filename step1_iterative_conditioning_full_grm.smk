@@ -19,6 +19,18 @@ protein_coding_region_bed = config["protein_coding_region_bed"]
 phenotype_json = config["phenotype_json"]
 use_null_var_ratio = config["use_null_var_ratio"]
 
+# Format-specific file lists
+if input_format == "vcf":
+    list_of_input_files = config["list_of_vcf_files"]
+elif input_format == "plink":
+    list_of_input_files = config["list_of_plink_files"]
+else:
+    raise ValueError(f"Invalid input_format: {input_format}. Must be 'vcf' or 'plink'")
+
+list_of_model_files = config["list_of_model_files"]
+list_of_variance_ratio_files = config["list_of_variance_ratio_files"]
+list_of_group_files = config["list_of_group_files"]
+
 from pathlib import Path
 if use_null_var_ratio and not Path(sparse_matrix_id).exists():
     sparse_matrix_id = "sampleIDs.txt"
@@ -32,18 +44,6 @@ if use_null_var_ratio and not Path(sparse_matrix_id).exists():
         ],
         check=True
     )
-
-# Format-specific file lists
-if input_format == "vcf":
-    list_of_input_files = config["list_of_vcf_files"]
-elif input_format == "plink":
-    list_of_input_files = config["list_of_plink_files"]
-else:
-    raise ValueError(f"Invalid input_format: {input_format}. Must be 'vcf' or 'plink'")
-
-list_of_model_files = config["list_of_model_files"]
-list_of_variance_ratio_files = config["list_of_variance_ratio_files"]
-list_of_group_files = config["list_of_group_files"]
 
 # Load input files
 with open(list_of_input_files) as f:
