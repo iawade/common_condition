@@ -24,13 +24,12 @@ samples <- function(modelfile)
   return(modglmm$sampleID)
 }
 
-model_files <- fread(opt$modelfiles)$V1
-print(model_files)
+model_files <- fread(opt$modelfiles, header=FALSE)$V1
 sample_ids <- c()
 
 for (model_file in model_files) {
   cat(paste0(model_file, "..."))
   sample_ids <- union(sample_ids, samples(model_file))
 }
-fwrite(data.table(sampleIDs=samples_ids), file=opt$outfile, sep="\t", quote=FALSE,
+fwrite(data.table(sampleIDs=sample_ids), file=opt$outfile, sep="\t", quote=FALSE,
   col.names=FALSE)
