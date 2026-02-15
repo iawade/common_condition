@@ -36,7 +36,8 @@ list_of_group_files = config["list_of_group_files"]
 
 from pathlib import Path
 if use_null_var_ratio and not Path(sparse_matrix_id).exists():
-    sparse_matrix_id = "sampleIDs.txt"
+    sparse_matrix = "model.mtx"
+    sparse_matrix_id = f"{sparse_matrix}.sampleIDs.txt"
     import subprocess
     subprocess.run(
         [
@@ -47,6 +48,8 @@ if use_null_var_ratio and not Path(sparse_matrix_id).exists():
         ],
         check=True
     )
+    Path(sparse_matrix).touch()
+
 
 # Load input files
 with open(list_of_input_files) as f:
