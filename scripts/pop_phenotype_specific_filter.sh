@@ -12,7 +12,7 @@ Rscript scripts/filter_to_samples.R -m ${MODELFILE} -o ${TMPFILE}.sample
 
 # Define a bed file first
 plink2 --vcf $VCF --extract range ${CONDITION_BED} \
-  --keep ${TMPFILE}.sample --mac 10 --make-bed --out ${TMPFILE} || true
+  --keep ${TMPFILE}.sample --vcf-half-call m --mac 10 --make-bed --out ${TMPFILE} || true
 
 if [[ -f ${TMPFILE}.bim ]]; then
 
