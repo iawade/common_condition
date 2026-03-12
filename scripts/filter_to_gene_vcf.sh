@@ -26,6 +26,7 @@ fi
 bcftools view --threads "$THREADS" -R "$EXPANDED_BED" "$INPUT_VCF" |
   bcftools annotate --rename-chrs data/chr_map.tsv |
   bcftools annotate --set-id '%CHROM:%POS:%REF:%ALT' |
+  bcftools +setGT - -- -t q -n . -i 'GT~"\."' |
   bcftools view -Oz -o "${OUTPUT_VCF}" || true
 
 if [ ! -e "${OUTPUT_VCF}" ]; then

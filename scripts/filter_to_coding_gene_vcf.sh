@@ -29,6 +29,7 @@ bcftools view --threads "$THREADS" \
   bcftools filter --threads "$THREADS" -i "MAC > 40 && MAF > $MAF_COMMON" |
   bcftools annotate --rename-chrs data/chr_map.tsv |
   bcftools annotate --set-id '%CHROM:%POS:%REF:%ALT' |
+  bcftools +setGT - -- -t q -n . -i 'GT~"\."' |
   bcftools view -Oz -o "${OUTPUT_VCF}" || true
 
 if [ ! -e "${OUTPUT_VCF}" ]; then
