@@ -230,6 +230,7 @@ rule identify_gene_start_stop:
 rule filter_to_gene_vcf:
     input:
         vcf = lambda wildcards: input_files if input_format == "vcf" else [],
+        sparse_matrix_id = sparse_matrix_id,
         bed = "final_run_files/bed/expanded_regions_{gene}.bed"
     output:
         "final_run_files/{gene}_{distance}.vcf.bgz",
@@ -251,7 +252,8 @@ rule filter_to_gene_vcf:
             if [[ "$vcf" =~ \\.($chr)\\. ]]; then
                 matched_vcf=$vcf
                 bash scripts/filter_to_gene_vcf.sh $vcf {wildcards.gene} \
-                    {params.distance} {params.threads} {params.outfolder} \
+                    {params.distance} {params.threads} {input.sparse_matrix_id} \
+                    {params.outfolder} \
                     > >(tee -a {log.stdout}) 2> >(tee -a {log.stderr} >&2)
             fi
         done
