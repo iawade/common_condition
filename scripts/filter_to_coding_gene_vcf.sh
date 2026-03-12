@@ -6,6 +6,7 @@ ENSEMBL_ID="$2" # Prevents any potential issues with gene symbols
 BP_DISTANCE="$3" # TODO Error handling / kb vs just the number
 MAF_COMMON="$4"
 THREADS="$5"
+SPARSEGRMID="$6"
 
 EXPANDED_BED="run_files/bed/expanded_coding_regions_${ENSEMBL_ID}.bed"
 
@@ -26,9 +27,12 @@ fi
 
 bcftools view --threads "$THREADS" \
   -R "$EXPANDED_BED" "$INPUT_VCF" |
-  bcftools filter --threads "$THREADS" -i "MAC > 40 && MAF > $MAF_COMMON" |
+  bcftools view -S $SPARSEGRMID -c 1 |
   bcftools annotate --rename-chrs data/chr_map.tsv |
   bcftools annotate --set-id '%CHROM:%POS:%REF:%ALT' |
+  bcftools +setGT - -- -t q -n . -i 'GT~"\."' |
+  bcftools +fill-tags - -- -t AC,AN,AF,MAF,MAC |
+  bcftools filter -i "AN>0 && (MAC > 40) && MAF > $MAF_COMMON" |
   bcftools view -Oz -o "${OUTPUT_VCF}" || true
 
 if [ ! -e "${OUTPUT_VCF}" ]; then

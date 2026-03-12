@@ -1,0 +1,35 @@
+#!/usr/bin/env Rscript
+
+# Load required packages
+suppressPackageStartupMessages(library(optparse))
+suppressPackageStartupMessages(library(data.table))
+
+# Define command line options
+option_list <- list(
+  make_option(c("-m", "--modelfiles"), type = "character", default = NULL,
+              help = "modelfile to use to filter samples to", metavar = "character"),
+  make_option(c("-o", "--outfile"), type = "character", default = NULL,
+              help = "output file for column of sampleIDs", metavar = "character")
+)
+
+# Parse arguments
+opt_parser <- OptionParser(option_list = option_list)
+opt <- parse_args(opt_parser)
+
+# Define a function that does something with the condition
+samples <- function(modelfile)
+{
+  message("Determining samples IDs from modelfile: ", modelfile, "\n")
+  load(modelfile)
+  return(modglmm$sampleID)
+}
+
+model_files <- fread(opt$modelfiles, header=FALSE)$V1
+sample_ids <- c()
+
+for (model_file in model_files) {
+  cat(paste0(model_file, "..."))
+  sample_ids <- union(sample_ids, samples(model_file))
+}
+fwrite(data.table(sampleIDs=sample_ids), file=opt$outfile, sep="\t", quote=FALSE,
+  col.names=FALSE)

@@ -5,7 +5,8 @@ INPUT_VCF="$1" # QC'd, needs GT's; single ancestry-group
 ENSEMBL_ID="$2" # Prevents any potential issues with gene symbols
 BP_DISTANCE="$3" # TODO Error handling / kb vs just the number
 THREADS="$4"
-OUT_FOLDER="$5"
+SPARSEGRMID="$5"
+OUT_FOLDER="$6"
 
 EXPANDED_BED="${OUT_FOLDER}/bed/expanded_regions_${ENSEMBL_ID}.bed"
 
@@ -24,8 +25,11 @@ fi
 
 # Note that here, we ensure the correct naming when constructing the gene-specific vcf.
 bcftools view --threads "$THREADS" -R "$EXPANDED_BED" "$INPUT_VCF" |
-  bcftools annotate  --rename-chrs data/chr_map.tsv |
+  bcftools view -S $SPARSEGRMID -c 1 |
+  bcftools annotate --rename-chrs data/chr_map.tsv |
   bcftools annotate --set-id '%CHROM:%POS:%REF:%ALT' |
+  bcftools +setGT - -- -t q -n . -i 'GT~"\."' |
+  bcftools +fill-tags - -- -t AC,AN,AF |
   bcftools view -Oz -o "${OUTPUT_VCF}" || true
 
 if [ ! -e "${OUTPUT_VCF}" ]; then

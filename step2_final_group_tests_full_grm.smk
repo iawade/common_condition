@@ -34,6 +34,23 @@ list_of_model_files = config["list_of_model_files"]
 list_of_variance_ratio_files = config["list_of_variance_ratio_files"]
 list_of_group_files = config["list_of_group_files"]
 
+from pathlib import Path
+if use_null_var_ratio and not Path(sparse_matrix_id).exists():
+    sparse_matrix = "model.mtx"
+    sparse_matrix_id = f"{sparse_matrix}.sampleIDs.txt"
+    import subprocess
+    subprocess.run(
+        [
+            "Rscript",
+            "scripts/filter_to_union_of_samples.R",
+            "-m", list_of_model_files,
+            "-o", sparse_matrix_id
+        ],
+        check=True
+    )
+    Path(sparse_matrix).touch()
+
+
 # Load input files
 with open(list_of_input_files) as f:
     input_files = [line.strip() for line in f]

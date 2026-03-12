@@ -3,30 +3,12 @@
 source /opt/conda/etc/profile.d/conda.sh
 conda activate brava_hits_common_condition_check
 
-mkdir -p final_saige_outputs final_run_files/bed
+# Path to the Snakemake workflow file
+WORKFLOW_FILE="step1_iterative_conditioning_regenie.smk"
+
+mkdir -p regenie_outputs run_files/bed
 
 CORES=$(nproc)
-full_mode=false
-
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    -f|--full)
-      full_mode=true
-      shift
-      ;;
-    *)
-      shift
-      ;;
-  esac
-done
-
-if $full_mode; then
-    echo "full GRM used to create sumstats"
-    WORKFLOW_FILE="step2_final_group_tests_full_grm.smk"
-else
-    echo "sparse GRM used to create sumstats"
-    WORKFLOW_FILE="step2_final_group_tests.smk"
-fi
 
 # Generate a timestamped log file
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
